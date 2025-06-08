@@ -71,4 +71,9 @@ public class GestoreClienti
         String pwC = clientiByEmail.get(email).getPassword();
         return pwC.equals(password);
     }
+
+    public void aggiornaCliente(String idCliente, Cliente nuovo)
+    {
+
+    }
 }
