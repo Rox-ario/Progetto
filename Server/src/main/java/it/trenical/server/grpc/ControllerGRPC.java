@@ -6,7 +6,7 @@ public class ControllerGRPC
 {
     //private static MotoreRicercaViaggi mrv;
 
-    public void eseguiComandoCliente(ComandoCliente cmd) throws Exception
+    public static void eseguiComandoCliente(ComandoCliente cmd) throws Exception
     {
         cmd.esegui();
     }
