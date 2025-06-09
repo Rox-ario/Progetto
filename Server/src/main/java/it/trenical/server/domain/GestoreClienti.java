@@ -74,6 +74,18 @@ public class GestoreClienti
 
     public void aggiornaCliente(String idCliente, Cliente nuovo)
     {
+        if(!esisteClienteID(idCliente))
+            return;
+        Cliente vecchio = clientiById.get(idCliente);
+        String email = vecchio.getEmail();
 
+        clientiById.put(idCliente, nuovo);
+
+        if(!email.equals(nuovo.getEmail()))
+        {
+            clientiByEmail.remove(email);
+        }
+
+        clientiByEmail.put(nuovo.getEmail(), nuovo);
     }
 }
