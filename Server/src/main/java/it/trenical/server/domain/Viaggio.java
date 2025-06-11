@@ -14,6 +14,7 @@ public class Viaggio
     private StatoViaggio stato;
     private int postiDisponibili;
     private final Map<String, Integer> binari; //string partenza/arrivo, int binario
+    private int ritardoMinuti = 0;
 
     public Viaggio(String id, Calendar inizio, Calendar fine, Treno treno, Tratta tratta)
     {
@@ -29,14 +30,6 @@ public class Viaggio
 
     public String getId() {
         return id;
-    }
-
-    public Calendar getInizio() {
-        return inizio;
-    }
-
-    public Calendar getFine() {
-        return fine;
     }
 
     public Treno getTreno() {
@@ -77,5 +70,29 @@ public class Viaggio
 
     public int getBinario(String tipo) {
         return binari.getOrDefault(tipo, -1);
+    }
+
+    public void aggiornaRitardo(int minuti)
+    {
+        if(minuti < 0)
+        {
+            throw new IllegalArgumentException("Il valore di ritardo non può essere negativo");
+        }
+        ritardoMinuti += minuti;
+        this.stato = StatoViaggio.IN_RITARDO;
+    }
+
+    public Calendar getInizioReale()
+    {
+        Calendar clone = (Calendar) inizio.clone(); //faccio la clone dell'inizio così non lo modifico, tanto devo solo mostrare il ritardo eventuale
+        clone.add(Calendar.MINUTE, ritardoMinuti);
+        return clone;
+    }
+
+    public Calendar getFineReale()
+    {
+        Calendar clone = (Calendar) fine.clone(); //idem per inizio
+        clone.add(Calendar.MINUTE, ritardoMinuti);
+        return clone;
     }
 }

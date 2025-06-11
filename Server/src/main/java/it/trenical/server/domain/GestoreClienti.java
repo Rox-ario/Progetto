@@ -3,7 +3,7 @@ package it.trenical.server.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GestoreClienti
+public final class GestoreClienti
 {
     private static GestoreClienti instance = null;
     private final Map<String, Cliente> clientiById;
@@ -15,7 +15,7 @@ public class GestoreClienti
         clientiByEmail = new HashMap<>();
     }
 
-    public static GestoreClienti getInstance()
+    public static synchronized GestoreClienti getInstance()
     {
         if (instance == null) {
             instance = new GestoreClienti();

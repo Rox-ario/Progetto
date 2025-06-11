@@ -1,0 +1,19 @@
+package it.trenical.server.command;
+
+import it.trenical.server.domain.GestoreViaggi;
+
+public class AnnullaViaggio implements ComandoViaggio
+{
+    private final String idViaggio;
+
+    public AnnullaViaggio(String idViaggio) {
+        this.idViaggio = idViaggio;
+    }
+
+    @Override
+    public void esegui() throws Exception
+    {
+        GestoreViaggi gc = GestoreViaggi.getInstance();
+        gc.rimuoviViaggio(idViaggio);
+    }
+}

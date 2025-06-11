@@ -3,7 +3,7 @@ package it.trenical.server.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GestoreBanca {
+public final class GestoreBanca {
     private static GestoreBanca instance = null;
 
     private final Map<String, ClienteBanca> clienti;
@@ -12,7 +12,7 @@ public class GestoreBanca {
         clienti = new HashMap<>();
     }
 
-    public static GestoreBanca getInstance() {
+    public static synchronized GestoreBanca getInstance() {
         if (instance == null) {
             instance = new GestoreBanca();
         }
