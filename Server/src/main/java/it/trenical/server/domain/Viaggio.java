@@ -1,10 +1,11 @@
 package it.trenical.server.domain;
 
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import it.trenical.server.observer.ObserverViaggio;
+import it.trenical.server.observer.SoggettoViaggio;
 
-public class Viaggio
+import java.util.*;
+
+public class Viaggio extends SoggettoViaggio
 {
     private final String id;
     private final Calendar inizio;
@@ -15,6 +16,7 @@ public class Viaggio
     private int postiDisponibili;
     private final Map<String, Integer> binari; //string partenza/arrivo, int binario
     private int ritardoMinuti = 0;
+    private List<ObserverViaggio> osservatori;
 
     public Viaggio(String id, Calendar inizio, Calendar fine, Treno treno, Tratta tratta)
     {
@@ -26,6 +28,7 @@ public class Viaggio
         this.binari = new HashMap<>();
        this.stato =  StatoViaggio.PROGRAMMATO;
         this.postiDisponibili = treno.getPosti();
+        this.osservatori = new ArrayList<ObserverViaggio>();
     }
 
     public String getId() {
@@ -80,6 +83,7 @@ public class Viaggio
         }
         ritardoMinuti += minuti;
         this.stato = StatoViaggio.IN_RITARDO;
+        notifica();
     }
 
     public Calendar getInizioReale()
@@ -94,5 +98,26 @@ public class Viaggio
         Calendar clone = (Calendar) fine.clone(); //idem per inizio
         clone.add(Calendar.MINUTE, ritardoMinuti);
         return clone;
+    }
+
+    @Override
+    public void attach(ObserverViaggio ob)
+    {
+        osservatori.add(ob);
+    }
+
+    @Override
+    public void detach(ObserverViaggio ob)
+    {
+        osservatori.remove(ob);
+    }
+
+    @Override
+    public void notifica()
+    {
+        for(ObserverViaggio obs : osservatori)
+        {
+            obs.aggiorna(this);
+        }
     }
 }
