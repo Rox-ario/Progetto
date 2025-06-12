@@ -1,6 +1,6 @@
 package it.trenical.server.command.viaggio;
 
-import it.trenical.server.domain.GestoreViaggi;
+import it.trenical.server.domain.gestore.GestoreViaggi;
 
 public class AggiornaRitardoViaggio implements ComandoViaggio
 {

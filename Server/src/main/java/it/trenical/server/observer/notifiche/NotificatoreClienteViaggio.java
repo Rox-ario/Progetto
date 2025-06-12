@@ -1,4 +1,4 @@
-package it.trenical.server.notifiche;
+package it.trenical.server.observer.notifiche;
 
 import it.trenical.server.domain.Cliente;
 import it.trenical.server.domain.StatoViaggio;

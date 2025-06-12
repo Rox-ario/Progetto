@@ -1,4 +1,9 @@
-package it.trenical.server.domain;
+package it.trenical.server.domain.gestore;
+
+import it.trenical.server.domain.StatoViaggio;
+import it.trenical.server.domain.Tratta;
+import it.trenical.server.domain.Treno;
+import it.trenical.server.domain.Viaggio;
 
 import java.util.*;
 
@@ -136,8 +141,8 @@ public final class GestoreViaggi
     private boolean viaggioInCorso(String idViaggio)
     {
         Viaggio v = viaggi.get(idViaggio);
-        if (v.getStato().equals(StatoViaggio.IN_CORSO)
-                || v.getStato().equals(StatoViaggio.IN_RITARDO))
+        if (v.getStato() == (StatoViaggio.IN_CORSO)
+                || v.getStato() == (StatoViaggio.IN_RITARDO))
             return true;
         return false;
     }
@@ -157,7 +162,7 @@ public final class GestoreViaggi
         {
             Viaggio v = viaggi.get(idViaggio);
             Treno t = v.getTreno();
-            if(t.getID().equals(id) && !v.getStato().equals(StatoViaggio.TERMINATO))
+            if(t.getID().equals(id) && v.getStato() != (StatoViaggio.TERMINATO))
                 return v;
         }
         throw new IllegalArgumentException("Nessun viaggio in corso per il treno "+ id);

@@ -1,6 +1,6 @@
 package it.trenical.server.command.viaggio;
 
-import it.trenical.server.domain.GestoreViaggi;
+import it.trenical.server.domain.gestore.GestoreViaggi;
 import it.trenical.server.domain.StatoViaggio;
 
 public class AggiornaViaggio implements ComandoViaggio

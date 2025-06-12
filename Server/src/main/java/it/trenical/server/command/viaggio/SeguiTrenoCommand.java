@@ -1,10 +1,10 @@
 package it.trenical.server.command.viaggio;
 
 import it.trenical.server.domain.Cliente;
-import it.trenical.server.domain.GestoreClienti;
-import it.trenical.server.domain.GestoreViaggi;
+import it.trenical.server.domain.gestore.GestoreClienti;
+import it.trenical.server.domain.gestore.GestoreViaggi;
 import it.trenical.server.domain.Viaggio;
-import it.trenical.server.observer.NotificatoreClienteTreno;
+import it.trenical.server.observer.notifiche.NotificatoreClienteTreno;
 import it.trenical.server.observer.ObserverViaggio;
 
 public class SeguiTrenoCommand implements ComandoViaggio
