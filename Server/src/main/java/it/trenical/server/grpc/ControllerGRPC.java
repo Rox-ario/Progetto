@@ -1,7 +1,7 @@
 package it.trenical.server.grpc;
 
-import it.trenical.server.command.ComandoCliente;
-import it.trenical.server.command.ComandoViaggio;
+import it.trenical.server.command.cliente.ComandoCliente;
+import it.trenical.server.command.viaggio.ComandoViaggio;
 
 public class ControllerGRPC
 {

@@ -29,6 +29,8 @@ public class Viaggio extends SoggettoViaggio
        this.stato =  StatoViaggio.PROGRAMMATO;
         this.postiDisponibili = treno.getPosti();
         this.osservatori = new ArrayList<ObserverViaggio>();
+        binari.put("partenza", 0);
+        binari.put("arrivo", 0);
     }
 
     public String getId() {
@@ -50,6 +52,11 @@ public class Viaggio extends SoggettoViaggio
     public void setStato(StatoViaggio stato)
     {
         this.stato = stato;
+        notificaCambiamentoViaggio();
+        if(stato.equals(StatoViaggio.TERMINATO))
+        {
+            osservatori.clear();
+        }
     }
 
     public int getPostiDisponibili() {
@@ -67,7 +74,8 @@ public class Viaggio extends SoggettoViaggio
         return true;
     }
 
-    public void setBinario(String tipo, int numero) {
+    public void setBinario(String tipo, int numero)
+    {
         binari.put(tipo, numero);
     }
 
@@ -83,7 +91,7 @@ public class Viaggio extends SoggettoViaggio
         }
         ritardoMinuti += minuti;
         this.stato = StatoViaggio.IN_RITARDO;
-        notifica();
+        notificaCambiamentoViaggio();
     }
 
     public Calendar getInizioReale()
@@ -113,7 +121,7 @@ public class Viaggio extends SoggettoViaggio
     }
 
     @Override
-    public void notifica()
+    public void notificaCambiamentoViaggio()
     {
         for(ObserverViaggio obs : osservatori)
         {

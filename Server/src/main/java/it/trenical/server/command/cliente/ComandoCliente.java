@@ -1,4 +1,4 @@
-package it.trenical.server.command;
+package it.trenical.server.command.cliente;
 
 public interface ComandoCliente
 {

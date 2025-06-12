@@ -1,9 +1,7 @@
-package it.trenical.server.command;
+package it.trenical.server.command.cliente;
 
 import it.trenical.server.domain.Cliente;
 import it.trenical.server.domain.GestoreClienti;
-import it.trenical.server.dto.ClienteDTO;
-import it.trenical.server.utils.ClienteAssembler;
 
 public class AderisciAFedeltaCommand implements ComandoCliente
 {

@@ -9,14 +9,14 @@ import it.trenical.server.observer.SoggettoViaggio;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class Notificatore implements ObserverViaggio
+public class NotificatoreClienteViaggio implements ObserverViaggio
 {
     private final Cliente cliente;
 
-    public Notificatore(Cliente cliente) {
+    public NotificatoreClienteViaggio(Cliente cliente)
+    {
         this.cliente = cliente;
     }
-
 
     @Override
     public void aggiorna(SoggettoViaggio viaggioOsservato)
@@ -29,7 +29,8 @@ public class Notificatore implements ObserverViaggio
         System.out.println("Aggiornamento Viaggio "+ viaggio.getId()+
                 "\nstato: "+viaggio.getStato()+
                 ", orario di Partenza: "+ sdf.format(viaggio.getInizioReale().getTime())+
-                ", orario di Arrivo: "+ sdf.format(viaggio.getFineReale().getTime()));
-
+                ", orario di Arrivo: "+ sdf.format(viaggio.getFineReale().getTime())+
+                ", binario di Partenza: "+ viaggio.getBinario("partenza")+
+                ", binario di Arrivo: "+ viaggio.getBinario("arrivo"));
     }
 }

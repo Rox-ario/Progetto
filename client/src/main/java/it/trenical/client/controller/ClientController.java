@@ -1,8 +1,7 @@
 package it.trenical.client.controller;
 
-import it.trenical.server.command.RegistraClienteCommand;
+import it.trenical.server.command.cliente.RegistraClienteCommand;
 import it.trenical.server.dto.ClienteDTO;
-import it.trenical.server.dto.DatiBancariDTO;
 import it.trenical.server.grpc.ControllerGRPC;
 
 import java.util.UUID;

@@ -1,14 +1,11 @@
-package it.trenical.server.command;
+package it.trenical.server.command.cliente;
 
 import it.trenical.server.domain.Cliente;
-import it.trenical.server.domain.ClienteBanca;
-import it.trenical.server.domain.GestoreBanca;
 import it.trenical.server.domain.GestoreClienti;
 import it.trenical.server.dto.ClienteDTO;
-import it.trenical.server.dto.DatiBancariDTO;
 import it.trenical.server.utils.ClienteAssembler;
 
-public class RegistraClienteCommand implements ComandoCliente{
+public class RegistraClienteCommand implements ComandoCliente {
 
     private final ClienteDTO dto;
     private final String password;

@@ -150,4 +150,16 @@ public final class GestoreViaggi
             throw new IllegalStateException("Il Viaggio "+ idViaggio+" è in corso e non può essere annullato");
         viaggi.remove(idViaggio);
     }
+
+    public Viaggio getViaggioPerTreno(String id)
+    {
+        for(String idViaggio : viaggi.keySet())
+        {
+            Viaggio v = viaggi.get(idViaggio);
+            Treno t = v.getTreno();
+            if(t.getID().equals(id) && !v.getStato().equals(StatoViaggio.TERMINATO))
+                return v;
+        }
+        throw new IllegalArgumentException("Nessun viaggio in corso per il treno "+ id);
+    }
 }

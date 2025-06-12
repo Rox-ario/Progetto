@@ -1,4 +1,4 @@
-package it.trenical.server.command;
+package it.trenical.server.command.cliente;
 
 import it.trenical.server.domain.Cliente;
 import it.trenical.server.domain.GestoreClienti;

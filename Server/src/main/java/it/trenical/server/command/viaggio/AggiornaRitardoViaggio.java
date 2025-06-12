@@ -1,4 +1,4 @@
-package it.trenical.server.command;
+package it.trenical.server.command.viaggio;
 
 import it.trenical.server.domain.GestoreViaggi;
 
