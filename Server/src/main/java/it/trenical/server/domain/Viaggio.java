@@ -13,7 +13,7 @@ public class Viaggio extends SoggettoViaggio
     private final Treno treno;
     private final Tratta tratta;
     private StatoViaggio stato;
-    private int postiDisponibili;
+    private Map<ClasseServizio, Integer> postiDisponibili;
     private final Map<String, Integer> binari; //string partenza/arrivo, int binario
     private int ritardoMinuti = 0;
     private List<ObserverViaggio> osservatori;
@@ -59,8 +59,6 @@ public class Viaggio extends SoggettoViaggio
         /*
           calcolo la distanza d come
           d = 2 * R * asin(radice(sin^2((radLatA - radLatP)/2) + cos(radLatA) * cos(radLatP) * sin^2((radLongA - radLongP)/2)))
-          dove:
-
         * */
         double d = 2 * R * Math.asin(Math.sqrt(Math.pow(Math.sin((radLatA-radLatP)/2), 2) + Math.cos(radLatP)*Math.cos(radLatA)*Math.pow(Math.sin((radLongA-radLongP)/2), 2)));
         return d;
@@ -92,18 +90,24 @@ public class Viaggio extends SoggettoViaggio
         }
     }
 
-    public int getPostiDisponibili() {
-        return postiDisponibili;
+    public int getPostiDisponibiliPerClasse(ClasseServizio classeServizio)
+    {
+        if(!postiDisponibili.containsKey(classeServizio))
+            throw new IllegalArgumentException("Errore: classe di servizio "+ classeServizio+" non registrata");
+        return postiDisponibili.get(classeServizio);
     }
 
-    public boolean riduciPostiDisponibili(int n)
+    public boolean riduciPostiDisponibiliPerClasse(ClasseServizio classeServizio, int n)
     {
-        if(postiDisponibili - n < 0)
+        if(postiDisponibili.get(classeServizio) == 0 || postiDisponibili.get(classeServizio) - n < 0)
         {
-            return false;
+            throw new IllegalArgumentException("Errore: I posti per la classe "+ classeServizio+" sono esauriti");
         }
         else
-            postiDisponibili -= n;
+        {
+            int posti = postiDisponibili.get(classeServizio);
+            postiDisponibili.put(classeServizio, posti - n);
+        }
         return true;
     }
 

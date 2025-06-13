@@ -50,12 +50,9 @@ public class Treno
         return postiPerClasse.get(classeServizio);
     }
 
-    public int getPosti()
+    public Map<ClasseServizio, Integer> getPosti()
     {
-        int nPosti = 0;
-        for(ClasseServizio classeServizio : postiPerClasse.keySet())
-            nPosti += postiPerClasse.get(classeServizio);
-        return nPosti;
+        return postiPerClasse;
     }
 
     public TipoTreno getTipo()
