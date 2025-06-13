@@ -1,5 +1,7 @@
 package it.trenical.server.domain;
 
+import it.trenical.server.domain.enumerations.ClasseServizio;
+import it.trenical.server.domain.enumerations.StatoViaggio;
 import it.trenical.server.observer.ObserverViaggio;
 import it.trenical.server.observer.SoggettoViaggio;
 
@@ -164,5 +166,9 @@ public class Viaggio extends SoggettoViaggio
         {
             obs.aggiorna(this);
         }
+    }
+
+    public double getKilometri() {
+        return kilometri;
     }
 }

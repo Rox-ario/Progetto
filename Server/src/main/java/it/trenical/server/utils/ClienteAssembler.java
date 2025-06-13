@@ -1,7 +1,7 @@
 package it.trenical.server.utils;
 
-import it.trenical.server.domain.Cliente;
-import it.trenical.server.domain.ClienteBanca;
+import it.trenical.server.domain.cliente.Cliente;
+import it.trenical.server.domain.cliente.ClienteBanca;
 import it.trenical.server.dto.ClienteDTO;
 import it.trenical.server.dto.DatiBancariDTO;
 import it.trenical.server.dto.ModificaClienteDTO;

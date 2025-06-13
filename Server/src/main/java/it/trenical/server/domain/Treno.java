@@ -1,6 +1,8 @@
 package it.trenical.server.domain;
 
-import java.util.EnumMap;
+import it.trenical.server.domain.enumerations.ClasseServizio;
+import it.trenical.server.domain.enumerations.TipoTreno;
+
 import java.util.HashMap;
 import java.util.Map;
 

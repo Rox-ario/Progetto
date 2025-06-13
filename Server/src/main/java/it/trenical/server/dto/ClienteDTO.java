@@ -1,7 +1,5 @@
 package it.trenical.server.dto;
 
-import it.trenical.server.domain.Cliente;
-
 public class ClienteDTO
 {
     private String id;

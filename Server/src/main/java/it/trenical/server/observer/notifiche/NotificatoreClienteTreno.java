@@ -1,6 +1,6 @@
 package it.trenical.server.observer.notifiche;
 
-import it.trenical.server.domain.Cliente;
+import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.Treno;
 import it.trenical.server.domain.Viaggio;
 import it.trenical.server.observer.ObserverViaggio;

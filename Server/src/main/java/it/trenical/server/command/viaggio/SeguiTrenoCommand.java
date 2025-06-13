@@ -1,6 +1,6 @@
 package it.trenical.server.command.viaggio;
 
-import it.trenical.server.domain.Cliente;
+import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.gestore.GestoreClienti;
 import it.trenical.server.domain.gestore.GestoreViaggi;
 import it.trenical.server.domain.Viaggio;

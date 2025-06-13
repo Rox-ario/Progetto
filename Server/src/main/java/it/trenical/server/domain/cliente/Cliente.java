@@ -1,4 +1,4 @@
-package it.trenical.server.domain;
+package it.trenical.server.domain.cliente;
 
 import java.util.Objects;
 

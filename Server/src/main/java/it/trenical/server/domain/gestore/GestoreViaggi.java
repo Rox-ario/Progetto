@@ -1,6 +1,8 @@
 package it.trenical.server.domain.gestore;
 
 import it.trenical.server.domain.*;
+import it.trenical.server.domain.enumerations.StatoViaggio;
+import it.trenical.server.domain.enumerations.TipoTreno;
 
 import java.util.*;
 

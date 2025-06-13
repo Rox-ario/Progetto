@@ -1,6 +1,6 @@
 package it.trenical.server.domain.gestore;
 
-import it.trenical.server.domain.ClienteBanca;
+import it.trenical.server.domain.cliente.ClienteBanca;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package it.trenical.server.domain;
+package it.trenical.server.domain.cliente;
 
 public class ClienteBanca
 {

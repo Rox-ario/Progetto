@@ -1,5 +1,8 @@
 package it.trenical.server.domain;
 
+import it.trenical.server.domain.enumerations.ClasseServizio;
+import it.trenical.server.domain.enumerations.StatoBiglietto;
+
 public class Biglietto
 {
     private final String ID;
@@ -51,5 +54,9 @@ public class Biglietto
     public void modificaClasseServizio(ClasseServizio classe)
     {
 
+    }
+
+    public ClasseServizio getClasseServizio() {
+        return classeServizio;
     }
 }
