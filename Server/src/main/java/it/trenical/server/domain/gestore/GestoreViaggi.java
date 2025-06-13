@@ -1,9 +1,6 @@
 package it.trenical.server.domain.gestore;
 
-import it.trenical.server.domain.StatoViaggio;
-import it.trenical.server.domain.Tratta;
-import it.trenical.server.domain.Treno;
-import it.trenical.server.domain.Viaggio;
+import it.trenical.server.domain.*;
 
 import java.util.*;
 
@@ -28,9 +25,9 @@ public final class GestoreViaggi
         return instance;
     }
 
-    public void aggiungiTreno(String id, String tipo, int posti) {
+    public void aggiungiTreno(String id, TipoTreno tipo) {
         if (!treni.containsKey(id)) {
-            Treno t = new Treno(id, tipo, posti);
+            Treno t = new Treno(id, tipo);
             treni.put(id, t);
         }
         else

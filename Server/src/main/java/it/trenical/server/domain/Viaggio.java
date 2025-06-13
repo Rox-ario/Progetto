@@ -17,6 +17,7 @@ public class Viaggio extends SoggettoViaggio
     private final Map<String, Integer> binari; //string partenza/arrivo, int binario
     private int ritardoMinuti = 0;
     private List<ObserverViaggio> osservatori;
+    private double kilometri = 0;
 
     public Viaggio(String id, Calendar inizio, Calendar fine, Treno treno, Tratta tratta)
     {
@@ -31,6 +32,38 @@ public class Viaggio extends SoggettoViaggio
         this.osservatori = new ArrayList<ObserverViaggio>();
         binari.put("partenza", 0);
         binari.put("arrivo", 0);
+        this.kilometri = calcolaKilometri(); //calcola la distanza in chilometri
+    }
+
+    private double calcolaKilometri()
+    {
+        //Uso Heaverside per calcolare la distanza tra due punti in linea retta,
+        //purtroppo non posso tenere in considerazione le varie strade che si possono intrapprendere per arrivare da punto A a punto B
+        Stazione partenza = tratta.getStazionePartenza();
+        Stazione arrivo = tratta.getStazioneArrivo();
+
+        double longP = partenza.getLongitudine();
+        double longA = arrivo.getLongitudine();
+        double latP = partenza.getLatitudine();
+        double latA = arrivo.getLatitudine();
+
+        //Trasformo la longitudine e la latitudine in radianti
+        double radLongP = Math.toRadians(longP);
+        double radLongA = Math.toRadians(longA);
+        double radLatP = Math.toRadians(latP);
+        double radLatA = Math.toRadians(latA);
+
+        //Definisco R il raggio della terra
+        int R = 6371;
+
+        /*
+          calcolo la distanza d come
+          d = 2 * R * asin(radice(sin^2((radLatA - radLatP)/2) + cos(radLatA) * cos(radLatP) * sin^2((radLongA - radLongP)/2)))
+          dove:
+
+        * */
+        double d = 2 * R * Math.asin(Math.sqrt(Math.pow(Math.sin((radLatA-radLatP)/2), 2) + Math.cos(radLatP)*Math.cos(radLatA)*Math.pow(Math.sin((radLongA-radLongP)/2), 2)));
+        return d;
     }
 
     public String getId() {
