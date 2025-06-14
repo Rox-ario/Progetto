@@ -1,5 +1,6 @@
 package it.trenical.server.domain;
 
+import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.StatoPromozione;
 
 import java.util.ArrayList;
@@ -12,5 +13,12 @@ public interface Promozione
     StatoPromozione getStatoPromozione();
     String getID();
     Calendar getDataInizio();
-
+    Calendar getDataFine();
+    void setStatoPromozioneATTIVA();
+    void setStatoPromozionePROGRAMMATA();
+    double applicaSconto(double prezzo);
+    boolean isAttiva();
+    boolean isProgrammata();
+    double getPercentualeSconto();
+    void setPercentualeSconto(double p);
 }

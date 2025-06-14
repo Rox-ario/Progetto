@@ -1,45 +1,52 @@
 package it.trenical.server.domain;
 
-import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.StatoPromozione;
 
 import java.util.Calendar;
 import java.util.UUID;
 
-public class PromozioneFedelta implements Promozione
+public class PromozioneTratta implements Promozione
 {
+    private final Tratta tratta;
     StatoPromozione statoPromozione;
     String ID;
     private final Calendar dataInizio;
     private final Calendar dataFine;
-    private double percentualeSconto;//non la facciamo final così se voglio cambiare la percentuale posso ancora farlo
+    private double percentualeSconto;
 
-    public PromozioneFedelta(Calendar dataInizio, Calendar dataFine, double percentualeSconto, boolean perFedelta)
+
+    public PromozioneTratta(Tratta tratta, Calendar dataInizio, Calendar dataFine, double percentualeSconto)
     {
         if(dataInizio.before(Calendar.getInstance()))
             throw new IllegalArgumentException("Errore: La promozione non può avere data di inizio PRIMA di oggi");
         if(dataInizio.after(dataFine))
             throw new IllegalArgumentException("Errore: La fine della promozione non può precedere l'inizio.");
+        if(tratta == null)
+            throw new IllegalArgumentException("Errore: la tratta non esiste");
+        this.tratta = tratta;
         this.dataInizio = dataInizio;
         this.dataFine = dataFine;
+        this.statoPromozione = StatoPromozione.PROGRAMMATA;
         this.percentualeSconto = percentualeSconto;
         this.ID = UUID.randomUUID().toString();
-        this.statoPromozione = StatoPromozione.PROGRAMMATA;
     }
 
-    public StatoPromozione getStatoPromozione()
-    {
+    @Override
+    public StatoPromozione getStatoPromozione() {
         return statoPromozione;
     }
 
+    @Override
     public String getID() {
         return ID;
     }
 
+    @Override
     public Calendar getDataInizio() {
         return dataInizio;
     }
 
+    @Override
     public Calendar getDataFine() {
         return dataFine;
     }
@@ -69,31 +76,35 @@ public class PromozioneFedelta implements Promozione
         return prezzo - differenza;
     }
 
-    public double getPercentualeSconto()
-    {
-        return percentualeSconto;
-    }
-
+    @Override
     public boolean isAttiva()
     {
         return statoPromozione == StatoPromozione.ATTIVA;
     }
 
+    @Override
     public boolean isProgrammata()
     {
         return statoPromozione == StatoPromozione.PROGRAMMATA;
     }
 
-    public boolean isApplicabile(Cliente c)
+    @Override
+    public double getPercentualeSconto()
     {
-        return c.haAdesioneFedelta();
+        return percentualeSconto;
     }
 
+    @Override
     public void setPercentualeSconto(double NEWpercentualeSconto)
     {
         if(isAttiva())
             throw new IllegalStateException("La promozione "+ ID+" è ATTIVA, non si può modificare la percentuale di sconto");
         else
             this.percentualeSconto = NEWpercentualeSconto;
+    }
+
+    public boolean isApplicabile(Viaggio viaggio)
+    {
+        return viaggio.getTratta().equals(tratta);
     }
 }

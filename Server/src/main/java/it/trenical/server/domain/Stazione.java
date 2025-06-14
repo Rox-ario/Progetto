@@ -2,6 +2,7 @@ package it.trenical.server.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Stazione
 {
@@ -51,5 +52,26 @@ public class Stazione
     public double getLongitudine()
     {
         return longitudine;
+    }
+
+    public void addBinario(int a)
+    {
+        binari.add(a);
+    }
+
+    public void addBinari(List<Integer> binariNuovi)
+    {
+        binari.addAll(binariNuovi);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Stazione stazione)) return false;
+        return Double.compare(latitudine, stazione.latitudine) == 0 && Double.compare(longitudine, stazione.longitudine) == 0 && Objects.equals(id, stazione.id) && Objects.equals(citta, stazione.citta) && Objects.equals(nome, stazione.nome) && Objects.equals(binari, stazione.binari);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, citta, nome, binari, latitudine, longitudine);
     }
 }

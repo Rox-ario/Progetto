@@ -6,7 +6,7 @@ import it.trenical.server.domain.enumerations.StatoPromozione;
 import java.util.Calendar;
 import java.util.UUID;
 
-public class PromozioneFedelta implements Promozione
+public class PromozionePeriodo implements Promozione
 {
     StatoPromozione statoPromozione;
     String ID;
@@ -14,7 +14,8 @@ public class PromozioneFedelta implements Promozione
     private final Calendar dataFine;
     private double percentualeSconto;//non la facciamo final così se voglio cambiare la percentuale posso ancora farlo
 
-    public PromozioneFedelta(Calendar dataInizio, Calendar dataFine, double percentualeSconto, boolean perFedelta)
+
+    public PromozionePeriodo(Calendar dataInizio, Calendar dataFine, double percentualeSconto)
     {
         if(dataInizio.before(Calendar.getInstance()))
             throw new IllegalArgumentException("Errore: La promozione non può avere data di inizio PRIMA di oggi");
@@ -27,19 +28,22 @@ public class PromozioneFedelta implements Promozione
         this.statoPromozione = StatoPromozione.PROGRAMMATA;
     }
 
-    public StatoPromozione getStatoPromozione()
-    {
+    @Override
+    public StatoPromozione getStatoPromozione() {
         return statoPromozione;
     }
 
+    @Override
     public String getID() {
         return ID;
     }
 
+    @Override
     public Calendar getDataInizio() {
         return dataInizio;
     }
 
+    @Override
     public Calendar getDataFine() {
         return dataFine;
     }
@@ -69,26 +73,30 @@ public class PromozioneFedelta implements Promozione
         return prezzo - differenza;
     }
 
-    public double getPercentualeSconto()
-    {
-        return percentualeSconto;
-    }
-
+    @Override
     public boolean isAttiva()
     {
         return statoPromozione == StatoPromozione.ATTIVA;
     }
 
+    @Override
     public boolean isProgrammata()
     {
         return statoPromozione == StatoPromozione.PROGRAMMATA;
     }
 
-    public boolean isApplicabile(Cliente c)
+    public boolean isApplicabile(Viaggio v)
     {
-        return c.haAdesioneFedelta();
+        return v.getInizioReale().after(dataInizio) && v.getFineReale().before(dataFine);
     }
 
+    @Override
+    public double getPercentualeSconto()
+    {
+        return percentualeSconto;
+    }
+
+    @Override
     public void setPercentualeSconto(double NEWpercentualeSconto)
     {
         if(isAttiva())

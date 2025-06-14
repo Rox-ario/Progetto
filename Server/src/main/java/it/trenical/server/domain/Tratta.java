@@ -1,6 +1,7 @@
 package it.trenical.server.domain;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Tratta
 {
@@ -28,4 +29,14 @@ public class Tratta
         return id;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Tratta tratta)) return false;
+        return Objects.equals(id, tratta.id) && Objects.equals(StazionePartenza, tratta.StazionePartenza) && Objects.equals(StazioneArrivo, tratta.StazioneArrivo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, StazionePartenza, StazioneArrivo);
+    }
 }
