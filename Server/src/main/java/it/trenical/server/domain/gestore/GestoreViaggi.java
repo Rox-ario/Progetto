@@ -76,6 +76,9 @@ public final class GestoreViaggi
         Viaggio v = new Viaggio(idViaggio, inizio, fine, treno, tratta);
         viaggi.put(idViaggio, v);
         System.out.println("Viaggio programmato correttamente");
+
+        GestoreBiglietti gb = GestoreBiglietti.getInstance();
+        gb.aggiungiViaggio(v.getId());
         return true;
     }
 
@@ -94,7 +97,7 @@ public final class GestoreViaggi
     public Viaggio getViaggio(String id)
     {
         if(!viaggi.containsKey(id))
-            throw new IllegalArgumentException("Viaggio "+ id+ " non presente");
+            return null;
         return viaggi.get(id);
     }
 

@@ -3,6 +3,8 @@ package it.trenical.server.domain;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.StatoBiglietto;
 
+import java.util.UUID;
+
 public class Biglietto
 {
     private final String ID;
@@ -11,14 +13,12 @@ public class Biglietto
     private ClasseServizio classeServizio;
     private final String IDCliente;
     private StatoBiglietto statoBiglietto;
-    private final String posto;
 
-    public Biglietto(String ID, String IDViaggio, String IDCliente, String posto, ClasseServizio classeServizio)
+    public Biglietto(String IDViaggio, String IDCliente, ClasseServizio classeServizio)
     {
-        this.ID = ID;
+        this.ID = UUID.randomUUID().toString();
         this.IDViaggio = IDViaggio;
         this.IDCliente = IDCliente;
-        this.posto = posto;
         this.classeServizio = classeServizio;
         this.statoBiglietto = StatoBiglietto.VALIDO;
     }
@@ -31,32 +31,41 @@ public class Biglietto
                 ", prezzo=" + prezzo +
                 ", classeServizio=" + classeServizio +
                 ", IDCliente='" + IDCliente + '\'' +
-                ", posto='" + posto + '\'' +
                 '}';
     }
-
-    //public void modificaStato();
-
-    //public void elimina() non sembra avere senso
-
-    //public Biglietto copia()
 
     public StatoBiglietto getStato()
     {
         return statoBiglietto;
     }
 
-    public void modificaPosto()
-    {
-
-    }
-
     public void modificaClasseServizio(ClasseServizio classe)
     {
-
+        classeServizio = classe;
     }
 
-    public ClasseServizio getClasseServizio() {
+    public ClasseServizio getClasseServizio()
+    {
         return classeServizio;
+    }
+
+    public String getID() {
+        return ID;
+    }
+
+    public String getIDViaggio() {
+        return IDViaggio;
+    }
+
+    public PrezzoBiglietto getPrezzo() {
+        return prezzo;
+    }
+
+    public String getIDCliente() {
+        return IDCliente;
+    }
+
+    public StatoBiglietto getStatoBiglietto() {
+        return statoBiglietto;
     }
 }

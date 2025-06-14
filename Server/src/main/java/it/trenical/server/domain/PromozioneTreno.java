@@ -2,20 +2,22 @@ package it.trenical.server.domain;
 
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.StatoPromozione;
+import it.trenical.server.domain.enumerations.TipoTreno;
 
 import java.util.Calendar;
 import java.util.UUID;
 
-public class PromozionePeriodo implements Promozione
+public class PromozioneTreno implements Promozione
 {
     StatoPromozione statoPromozione;
     String ID;
     private final Calendar dataInizio;
     private final Calendar dataFine;
     private double percentualeSconto;//non la facciamo final così se voglio cambiare la percentuale posso ancora farlo
+    private TipoTreno tipoTreno;
 
 
-    public PromozionePeriodo(Calendar dataInizio, Calendar dataFine, double percentualeSconto)
+    public PromozioneTreno(Calendar dataInizio, Calendar dataFine, double percentualeSconto, TipoTreno tipoTreno)
     {
         if(dataInizio.before(Calendar.getInstance()))
             throw new IllegalArgumentException("Errore: La promozione non può avere data di inizio PRIMA di oggi");
@@ -26,6 +28,7 @@ public class PromozionePeriodo implements Promozione
         this.percentualeSconto = percentualeSconto;
         this.ID = UUID.randomUUID().toString();
         this.statoPromozione = StatoPromozione.PROGRAMMATA;
+        this.tipoTreno = tipoTreno;
     }
 
     @Override
@@ -103,5 +106,10 @@ public class PromozionePeriodo implements Promozione
             throw new IllegalStateException("La promozione "+ ID+" è ATTIVA, non si può modificare la percentuale di sconto");
         else
             this.percentualeSconto = NEWpercentualeSconto;
+    }
+
+    public TipoTreno getTipoTreno()
+    {
+        return tipoTreno;
     }
 }

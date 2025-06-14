@@ -14,7 +14,7 @@ public class PromozioneFedelta implements Promozione
     private final Calendar dataFine;
     private double percentualeSconto;//non la facciamo final così se voglio cambiare la percentuale posso ancora farlo
 
-    public PromozioneFedelta(Calendar dataInizio, Calendar dataFine, double percentualeSconto, boolean perFedelta)
+    public PromozioneFedelta(Calendar dataInizio, Calendar dataFine, double percentualeSconto)
     {
         if(dataInizio.before(Calendar.getInstance()))
             throw new IllegalArgumentException("Errore: La promozione non può avere data di inizio PRIMA di oggi");

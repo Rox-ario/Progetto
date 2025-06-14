@@ -107,4 +107,8 @@ public class PromozioneTratta implements Promozione
     {
         return viaggio.getTratta().equals(tratta);
     }
+
+    public Tratta getTratta() {
+        return tratta;
+    }
 }
