@@ -1,6 +1,7 @@
 package it.trenical.server.domain.gestore;
 
 import it.trenical.server.domain.cliente.ClienteBanca;
+import it.trenical.server.dto.RimborsoDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,10 +39,18 @@ public final class GestoreBanca {
         return false;
     }
 
-    public void rimborsa(String id, double importo) {
-        ClienteBanca cb = clienti.get(id);
-        if (cb != null) {
-            cb.accredita(importo);
+    public void rimborsa(RimborsoDTO dto) {
+        //estraggo i dati
+        String idBiglietto = dto.getIdBiglietto();
+        String idCliente = dto.getIdClienteRimborsato();
+        double saldo = dto.getImportoRimborsato();
+
+        if(!clienti.containsKey(idCliente))
+            throw new IllegalArgumentException("Errore: Il cliente "+ idCliente+" non esiste nella banca");
+        else
+        {
+            ClienteBanca cb = clienti.get(idCliente);
+            cb.accredita(saldo);
         }
     }
 }

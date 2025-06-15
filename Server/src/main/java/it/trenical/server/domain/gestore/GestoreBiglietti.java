@@ -2,6 +2,7 @@ package it.trenical.server.domain.gestore;
 
 import it.trenical.server.domain.Biglietto;
 import it.trenical.server.domain.enumerations.ClasseServizio;
+import it.trenical.server.dto.RimborsoDTO;
 
 import java.util.*;
 
@@ -61,11 +62,17 @@ public class GestoreBiglietti
         bigliettiPerViaggio.put(IDViaggio, new ArrayList<>());
     }
 
-    public void cancellaBiglietto(Biglietto b)
+    public RimborsoDTO cancellaBiglietto(Biglietto b)
     {
         bigliettiPerID.remove(b.getID());
         bigliettiPerViaggio.get(b.getIDViaggio()).remove(b);
         bigliettiPerUtente.get(b.getIDCliente()).remove(b);
+
+        //prendo i dati per il rimborso e li restituisco in un DTO
+        String idbiglietto = b.getID();
+        String idUtente = b.getIDCliente();
+        double saldo = b.getPrezzo().getPrezzo();
+        return new RimborsoDTO(idbiglietto, idUtente, saldo);
     }
 
     public List<Biglietto> getBigliettiUtente(String IDUtente)
@@ -85,5 +92,10 @@ public class GestoreBiglietti
         if(!bigliettiPerViaggio.containsKey(IDViaggio))
             throw new IllegalArgumentException("Errore: il viaggio "+ IDViaggio+" non esiste");
         return bigliettiPerViaggio.get(IDViaggio);
+    }
+
+    public Biglietto getBigliettoPerID(String ID)
+    {
+        return bigliettiPerID.get(ID);
     }
 }
