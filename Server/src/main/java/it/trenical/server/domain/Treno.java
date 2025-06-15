@@ -61,4 +61,13 @@ public class Treno
     {
         return tipo;
     }
+
+    @Override
+    public String toString() {
+        return "Treno{" +
+                "ID='" + ID + '\'' +
+                ", tipo=" + tipo +
+                ", postiPerClasse=" + postiPerClasse +
+                '}';
+    }
 }

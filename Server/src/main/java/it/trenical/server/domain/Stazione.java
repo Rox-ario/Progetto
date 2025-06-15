@@ -74,4 +74,16 @@ public class Stazione
     public int hashCode() {
         return Objects.hash(id, citta, nome, binari, latitudine, longitudine);
     }
+
+    @Override
+    public String toString() {
+        return "Stazione{" +
+                "id='" + id + '\'' +
+                ", citta='" + citta + '\'' +
+                ", nome='" + nome + '\'' +
+                ", binari=" + binari +
+                ", latitudine=" + latitudine +
+                ", longitudine=" + longitudine +
+                '}';
+    }
 }

@@ -20,7 +20,7 @@ public class Biglietto
         this.IDViaggio = IDViaggio;
         this.IDCliente = IDCliente;
         this.classeServizio = classeServizio;
-        this.statoBiglietto = StatoBiglietto.VALIDO;
+        this.statoBiglietto = StatoBiglietto.NON_PAGATO;
     }
 
     @Override
@@ -65,7 +65,11 @@ public class Biglietto
         return IDCliente;
     }
 
-    public StatoBiglietto getStatoBiglietto() {
-        return statoBiglietto;
+    public void SetStatoBigliettoPAGATO()
+    {
+        if(getStato() == StatoBiglietto.PAGATO)
+            throw new IllegalArgumentException("Errore: il biglietto "+ getID()+" è già stato pagato");
+        if(getStato() == StatoBiglietto.NON_PAGATO)
+            this.statoBiglietto = StatoBiglietto.PAGATO;
     }
 }

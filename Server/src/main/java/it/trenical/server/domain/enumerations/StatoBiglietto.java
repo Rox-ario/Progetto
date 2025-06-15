@@ -2,5 +2,5 @@ package it.trenical.server.domain.enumerations;
 
 public enum StatoBiglietto
 {
-    VALIDO, ANNULLATO, USATO;
+    ANNULLATO, PAGATO, NON_PAGATO;
 }

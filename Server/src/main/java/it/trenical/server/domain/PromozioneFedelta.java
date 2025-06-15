@@ -2,12 +2,18 @@ package it.trenical.server.domain;
 
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.StatoPromozione;
+import it.trenical.server.dto.NotificaDTO;
+import it.trenical.server.observer.Promozione.ObserverPromozione;
+import it.trenical.server.observer.Promozione.SoggettoPromozione;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.UUID;
 
-public class PromozioneFedelta implements Promozione
+public class PromozioneFedelta extends SoggettoPromozione implements Promozione
 {
+    private List<ObserverPromozione> osservatori;
     StatoPromozione statoPromozione;
     String ID;
     private final Calendar dataInizio;
@@ -25,6 +31,7 @@ public class PromozioneFedelta implements Promozione
         this.percentualeSconto = percentualeSconto;
         this.ID = UUID.randomUUID().toString();
         this.statoPromozione = StatoPromozione.PROGRAMMATA;
+        osservatori = new ArrayList<ObserverPromozione>();
     }
 
     public StatoPromozione getStatoPromozione()
@@ -95,5 +102,42 @@ public class PromozioneFedelta implements Promozione
             throw new IllegalStateException("La promozione "+ ID+" è ATTIVA, non si può modificare la percentuale di sconto");
         else
             this.percentualeSconto = NEWpercentualeSconto;
+    }
+
+    @Override
+    public void attach(ObserverPromozione observerPromozione)
+    {
+        osservatori.add(observerPromozione);
+    }
+
+    @Override
+    public void detach(ObserverPromozione observerPromozione)
+    {
+        osservatori.remove(observerPromozione);
+    }
+
+    @Override
+    public void notifica()
+    {
+        for(ObserverPromozione observerPromozione : osservatori)
+            observerPromozione.aggiorna(this);
+    }
+
+    public NotificaDTO getNotifica()
+    {
+        String messaggio = "Nuova promozione Fedelà!!: "+toString();
+        NotificaDTO dto = new NotificaDTO(messaggio);
+        return dto;
+    }
+
+    @Override
+    public String toString() {
+        return "PromozioneFedelta{" +
+                ", statoPromozione=" + statoPromozione +
+                ", ID='" + ID + '\'' +
+                ", dataInizio=" + dataInizio +
+                ", dataFine=" + dataFine +
+                ", percentualeSconto=" + percentualeSconto +
+                '}';
     }
 }

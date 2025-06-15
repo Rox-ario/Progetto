@@ -98,4 +98,29 @@ public class GestoreBiglietti
     {
         return bigliettiPerID.get(ID);
     }
+
+    private void modificaBigliettoUtente(String IDBiglietto, String IDUtente, ClasseServizio classeServizio)
+    {
+        for(Biglietto b : getBigliettiUtente(IDUtente))
+        {
+            if (b.getID().equals(IDBiglietto))
+                b.modificaClasseServizio(classeServizio);
+        }
+    }
+
+    private void modificaBigliettoViaggio(String IDBiglietto, String IDViaggio, ClasseServizio classeServizio)
+    {
+        for(Biglietto b : getBigliettiPerViaggio(IDViaggio))
+        {
+            if (b.getID().equals(IDBiglietto))
+                b.modificaClasseServizio(classeServizio);
+        }
+    }
+
+    public void modificaClasseServizio(String IDBiglietto, String IDUtente, String IDViaggio, ClasseServizio classeServizio)
+    {
+        bigliettiPerID.get(IDBiglietto).modificaClasseServizio(classeServizio);
+        modificaBigliettoUtente(IDBiglietto, IDUtente, classeServizio);
+        modificaBigliettoViaggio(IDBiglietto, IDViaggio, classeServizio);
+    }
 }

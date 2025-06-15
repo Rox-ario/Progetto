@@ -39,4 +39,13 @@ public class Tratta
     public int hashCode() {
         return Objects.hash(id, StazionePartenza, StazioneArrivo);
     }
+
+    @Override
+    public String toString() {
+        return "Tratta{" +
+                "id='" + id + '\'' +
+                ", StazionePartenza=" + StazionePartenza +
+                ", StazioneArrivo=" + StazioneArrivo +
+                '}';
+    }
 }

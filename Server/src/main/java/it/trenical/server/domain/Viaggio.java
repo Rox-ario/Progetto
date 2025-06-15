@@ -2,8 +2,10 @@ package it.trenical.server.domain;
 
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.StatoViaggio;
-import it.trenical.server.observer.ObserverViaggio;
-import it.trenical.server.observer.SoggettoViaggio;
+import it.trenical.server.domain.enumerations.TipoBinario;
+import it.trenical.server.dto.NotificaDTO;
+import it.trenical.server.observer.ViaggioETreno.ObserverViaggio;
+import it.trenical.server.observer.ViaggioETreno.SoggettoViaggio;
 
 import java.util.*;
 
@@ -16,10 +18,11 @@ public class Viaggio extends SoggettoViaggio
     private final Tratta tratta;
     private StatoViaggio stato;
     private Map<ClasseServizio, Integer> postiDisponibili;
-    private final Map<String, Integer> binari; //string partenza/arrivo, int binario
+    private final Map<TipoBinario, Integer> binari; //string partenza/arrivo, int binario
     private int ritardoMinuti = 0;
     private List<ObserverViaggio> osservatori;
     private double kilometri = 0;
+    private final double velocitaMedia;
 
     public Viaggio(String id, Calendar inizio, Calendar fine, Treno treno, Tratta tratta)
     {
@@ -32,9 +35,26 @@ public class Viaggio extends SoggettoViaggio
        this.stato =  StatoViaggio.PROGRAMMATO;
         this.postiDisponibili = treno.getPosti();
         this.osservatori = new ArrayList<ObserverViaggio>();
-        binari.put("partenza", 0);
-        binari.put("arrivo", 0);
+        binari.put(TipoBinario.ARRIVO, 0);
+        binari.put(TipoBinario.PARTENZA, 0);
         this.kilometri = calcolaKilometri(); //calcola la distanza in chilometri
+        velocitaMedia = treno.getTipo().getVelocitaMedia();
+    }
+
+    private double getOrePassate() {
+        Calendar now = Calendar.getInstance();
+        long diffMillis = now.getTimeInMillis() - getInizioReale().getTimeInMillis(); // differenza in millisecondi
+        return diffMillis / (1000.0 * 60 * 60); // conversione in ore
+    }
+
+    public double getPercentualeViaggio()
+    {
+        //Calcolo la distanza percorsa
+        double orePassate = getOrePassate();
+        // Calcolo la distanza percorsa nel tempo trascorso
+        double distanzaPercorsa = velocitaMedia * orePassate;
+        // Restituisce la percentuale: (distanza percorsa / distanza totale) * 100
+        return (distanzaPercorsa / kilometri) * 100;
     }
 
     private double calcolaKilometri()
@@ -113,12 +133,13 @@ public class Viaggio extends SoggettoViaggio
         return true;
     }
 
-    public void setBinario(String tipo, int numero)
+    public void setBinario(TipoBinario tipo, int numero)
     {
         binari.put(tipo, numero);
     }
 
-    public int getBinario(String tipo) {
+    public int getBinario(TipoBinario tipo)
+    {
         return binari.getOrDefault(tipo, -1);
     }
 
@@ -168,7 +189,40 @@ public class Viaggio extends SoggettoViaggio
         }
     }
 
+    public NotificaDTO getNotificaViaggio()
+    {
+        String messaggio = toString();
+        NotificaDTO notificaDTO = new NotificaDTO(messaggio);
+        return notificaDTO;
+    }
+
     public double getKilometri() {
         return kilometri;
+    }
+
+    public void incrementaPostiDisponibiliPerClasse(ClasseServizio classeServizio, int i)
+    {
+        int posti = postiDisponibili.get(classeServizio);
+        postiDisponibili.put(classeServizio, posti + i);
+    }
+
+    public NotificaDTO getNotificaTreno()
+    {
+        String messaggio = "Il treno "+treno.getID()+" ha percorso il "+getPercentualeViaggio()+"% della tratta";
+        NotificaDTO dto = new NotificaDTO(messaggio);
+        return dto;
+    }
+
+    @Override
+    public String toString() {
+        return "Viaggio{" +
+                "id='" + id + '\'' +
+                ", inizio=" + getInizioReale() +
+                ", fine=" + getFineReale() +
+                ", stato=" + stato +
+                ", binario di Partenza=" + getBinario(TipoBinario.PARTENZA) +
+                ", binario di Arrivo=" + getBinario(TipoBinario.ARRIVO)+
+                ", ritardoMinuti=" + ritardoMinuti +
+                '}';
     }
 }
