@@ -1,9 +1,13 @@
 package it.trenical.server.domain.gestore;
 
 import it.trenical.server.domain.Biglietto;
+import it.trenical.server.domain.Viaggio;
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.ClasseServizio;
+import it.trenical.server.dto.NotificaDTO;
 import it.trenical.server.dto.RimborsoDTO;
+import it.trenical.server.observer.ViaggioETreno.NotificatoreClienteViaggio;
+import it.trenical.server.observer.ViaggioETreno.ObserverViaggio;
 
 import java.util.*;
 
@@ -62,6 +66,33 @@ public class GestoreBiglietti
         }
         //il controllo per il viaggio non lo faccio perché quando creo un viaggio aggiorno la mappa qui
         bigliettiPerViaggio.get(IDViaggio).add(b);
+
+        registraClientePerNotificheViaggio(IDUtente, IDViaggio);
+    }
+
+    private void registraClientePerNotificheViaggio(String idCliente, String idViaggio)
+    {
+        GestoreViaggi gv = GestoreViaggi.getInstance();
+        GestoreClienti gc = GestoreClienti.getInstance();
+
+        Viaggio viaggio = gv.getViaggio(idViaggio);
+        Cliente cliente = gc.getClienteById(idCliente);
+
+        if (viaggio != null && cliente != null && cliente.isRiceviNotifiche())
+        {
+            ObserverViaggio notificatore = new NotificatoreClienteViaggio(cliente);
+            viaggio.attach(notificatore);
+
+            //invio una notifica per la conferma dell'acquisto
+            NotificaDTO conferma = new NotificaDTO(
+                    "Biglietto acquistato con successo!\n" +
+                            "Viaggio: " + viaggio.getId() + "\n" +
+                            "Da: " + viaggio.getTratta().getStazionePartenza().getCitta() + "\n" +
+                            "A: " + viaggio.getTratta().getStazioneArrivo().getCitta() + "\n" +
+                            "Riceverai aggiornamenti su questo viaggio."
+            );
+            GestoreNotifiche.getInstance().inviaNotifica(idCliente, conferma);
+        }
     }
 
     public void aggiungiViaggio(String IDViaggio)
@@ -78,7 +109,7 @@ public class GestoreBiglietti
         //prendo i dati per il rimborso e li restituisco in un DTO
         String idbiglietto = b.getID();
         String idUtente = b.getIDCliente();
-        double saldo = b.getPrezzo().getPrezzo();
+        double saldo = b.getPrezzo();
         return new RimborsoDTO(idbiglietto, idUtente, saldo);
     }
 

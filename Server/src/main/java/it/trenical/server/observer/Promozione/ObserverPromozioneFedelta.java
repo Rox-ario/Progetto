@@ -2,6 +2,8 @@ package it.trenical.server.observer.Promozione;
 
 import it.trenical.server.domain.PromozioneFedelta;
 import it.trenical.server.domain.cliente.Cliente;
+import it.trenical.server.domain.gestore.GestoreNotifiche;
+import it.trenical.server.dto.NotificaDTO;
 
 public class ObserverPromozioneFedelta implements ObserverPromozione
 {
@@ -14,6 +16,8 @@ public class ObserverPromozioneFedelta implements ObserverPromozione
     public void aggiorna(SoggettoPromozione soggettoPromozione)
     {
         PromozioneFedelta promozioneFedelta = (PromozioneFedelta) soggettoPromozione;
-        System.out.println("Notifica: "+ promozioneFedelta.getNotifica());
+        NotificaDTO notifica = promozioneFedelta.getNotifica();
+
+        GestoreNotifiche.getInstance().inviaNotificaPromozionale(cliente.getId(), notifica);
     }
 }

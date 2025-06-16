@@ -15,8 +15,10 @@ public class ClienteAssembler
                 cliente.getNome(),
                 cliente.getCognome(),
                 cliente.getEmail(),
-                cliente.haAdesioneFedelta()
-        );
+                cliente.getPassword(),
+                cliente.haAdesioneFedelta(),
+                cliente.isRiceviNotifiche(),
+                cliente.isRiceviPromozioni());
     }
 
     public static Cliente fromDTO(ClienteDTO dto, String password)

@@ -8,17 +8,18 @@ public class ClienteDTO
     private String email;
     private String password;
     private boolean isFedelta;
-    private boolean riceviNotifiche;    // NUOVO
-    private boolean riceviPromozioni;   // NUOVO
+    private boolean riceviNotifiche;
+    private boolean riceviPromozioni;
 
     public ClienteDTO() {}
 
-    public ClienteDTO(String id, String nome, String cognome, String email,
+    public ClienteDTO(String id, String nome, String cognome, String email, String password,
                       boolean isFedelta, boolean riceviNotifiche, boolean riceviPromozioni) {
         this.id = id;
         this.nome = nome;
         this.cognome = cognome;
         this.email = email;
+        this.password = password;
         this.isFedelta = isFedelta;
         this.riceviNotifiche = riceviNotifiche;
         this.riceviPromozioni = riceviPromozioni;

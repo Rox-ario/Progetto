@@ -2,6 +2,8 @@ package it.trenical.server.observer.ViaggioETreno;
 
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.Viaggio;
+import it.trenical.server.domain.gestore.GestoreNotifiche;
+import it.trenical.server.dto.NotificaDTO;
 
 public class NotificatoreClienteTreno implements ObserverViaggio
 {
@@ -16,7 +18,8 @@ public class NotificatoreClienteTreno implements ObserverViaggio
     public void aggiorna(SoggettoViaggio viaggioDelTreno)
     {
         Viaggio viaggio = (Viaggio) viaggioDelTreno;
+        NotificaDTO notifica = viaggio.getNotificaTreno();
 
-        System.out.println(viaggio.getNotificaTreno());
+        GestoreNotifiche.getInstance().inviaNotifica(cliente.getId(), notifica);
     }
 }
