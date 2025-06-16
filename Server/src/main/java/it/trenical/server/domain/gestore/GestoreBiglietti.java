@@ -109,7 +109,7 @@ public class GestoreBiglietti
         //prendo i dati per il rimborso e li restituisco in un DTO
         String idbiglietto = b.getID();
         String idUtente = b.getIDCliente();
-        double saldo = b.getPrezzo();
+        double saldo = b.getPrezzoBiglietto();
         return new RimborsoDTO(idbiglietto, idUtente, saldo);
     }
 
@@ -157,8 +157,30 @@ public class GestoreBiglietti
 
     public void modificaClasseServizio(String IDBiglietto, String IDUtente, String IDViaggio, ClasseServizio classeServizio)
     {
-        bigliettiPerID.get(IDBiglietto).modificaClasseServizio(classeServizio);
+        Biglietto biglietto = bigliettiPerID.get(IDBiglietto);
+        if (biglietto == null)
+        {
+            throw new IllegalArgumentException("Biglietto non trovato: " + IDBiglietto);
+        }
+
+        //Modifico la classe di servizio (questo avvia automaticamente il ricalcolo del prezzo base)
+        biglietto.modificaClasseServizio(classeServizio);
+
+        //Aggiorno anche nelle altre mappe
         modificaBigliettoUtente(IDBiglietto, IDUtente, classeServizio);
         modificaBigliettoViaggio(IDBiglietto, IDViaggio, classeServizio);
+
+        //Invio una notifica al cliente sulla modifica
+        GestoreClienti gc = GestoreClienti.getInstance();
+        Cliente cliente = gc.getClienteById(IDUtente);
+        if (cliente != null && cliente.isRiceviNotifiche())
+        {
+            String messaggio = "Il tuo biglietto "+ IDBiglietto+" è stato modificato.\n" +
+                            "Nuova classe di servizio: " +classeServizio+"\n"+
+                            "Nuovo prezzo: "+ biglietto.getPrezzo();
+
+            NotificaDTO notifica = new NotificaDTO(messaggio);
+            GestoreNotifiche.getInstance().inviaNotifica(IDUtente, notifica);
+        }
     }
 }

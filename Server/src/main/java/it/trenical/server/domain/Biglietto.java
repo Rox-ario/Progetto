@@ -3,18 +3,20 @@ package it.trenical.server.domain;
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.StatoBiglietto;
-import it.trenical.server.domain.gestore.GestoreViaggi;
 
+import java.util.Calendar;
 import java.util.UUID;
 
 public class Biglietto
 {
     private final String ID;
     private final String IDViaggio;
-    private PrezzoBiglietto prezzo; //lo calcola da sè
+    private PrezzoBiglietto prezzoBiglietto; //lo calcola da sè
     private ClasseServizio classeServizio;
     private final String IDCliente;
+    private final Calendar dataAcquisto;
     private StatoBiglietto statoBiglietto;
+    private double prezzoOriginale;
 
     public Biglietto(String IDViaggio, String IDCliente, ClasseServizio classeServizio)
     {
@@ -23,6 +25,12 @@ public class Biglietto
         this.IDCliente = IDCliente;
         this.classeServizio = classeServizio;
         this.statoBiglietto = StatoBiglietto.NON_PAGATO;
+        this.dataAcquisto = Calendar.getInstance();
+    }
+
+    public double getPrezzo()
+    {
+        return prezzoOriginale;
     }
 
     @Override
@@ -30,7 +38,7 @@ public class Biglietto
         return "Biglietto{" +
                 "ID='" + ID + '\'' +
                 ", IDViaggio='" + IDViaggio + '\'' +
-                ", prezzo=" + prezzo +
+                ", prezzo=" + prezzoBiglietto +
                 ", classeServizio=" + classeServizio +
                 ", IDCliente='" + IDCliente + '\'' +
                 '}';
@@ -44,6 +52,11 @@ public class Biglietto
     public void modificaClasseServizio(ClasseServizio classe)
     {
         classeServizio = classe;
+        //Ricalcolo il prezzo dopo la modifica
+        if (prezzoBiglietto != null)
+        {
+            prezzoBiglietto.ricalcolaPrezzo();
+        }
     }
 
     public ClasseServizio getClasseServizio()
@@ -59,8 +72,8 @@ public class Biglietto
         return IDViaggio;
     }
 
-    public double getPrezzo() {
-        return prezzo.getPrezzo();
+    public double getPrezzoBiglietto() {
+        return prezzoBiglietto.getPrezzo();
     }
 
     public String getIDCliente() {
@@ -72,16 +85,24 @@ public class Biglietto
         if(getStato() == StatoBiglietto.PAGATO)
             throw new IllegalArgumentException("Errore: il biglietto "+ getID()+" è già stato pagato");
         if(getStato() == StatoBiglietto.NON_PAGATO)
+        {
             this.statoBiglietto = StatoBiglietto.PAGATO;
+            this.prezzoOriginale = getPrezzoBiglietto();
+        }
     }
 
     public void inizializzaPrezzoBiglietto(Viaggio v)
     {
-        prezzo = new PrezzoBiglietto(this, v);
+        prezzoBiglietto = new PrezzoBiglietto(this, v);
     }
 
     public void applicaPromozione(Cliente c)
     {
-        prezzo.applicaPromozione(c);
+        prezzoBiglietto.applicaPromozione(c);
+    }
+
+    public PrezzoBiglietto getOggettoPrezzoBiglietto()
+    {
+        return prezzoBiglietto;
     }
 }

@@ -13,7 +13,7 @@ public class Cliente
     private final boolean riceviNotificheFedelta; //per le notifiche di fedelta
     private final boolean riceviPromozioni; //per le notifiche sulle promozioni
 
-    private static class Builder
+    public static class Builder
     {
         private String id = null;
         private String nome = null;
