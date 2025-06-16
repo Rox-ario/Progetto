@@ -2,6 +2,7 @@ package it.trenical.server.domain;
 
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.StatoPromozione;
+import it.trenical.server.domain.enumerations.TipoPromozione;
 import it.trenical.server.domain.enumerations.TipoTreno;
 
 import java.util.Calendar;
@@ -15,6 +16,7 @@ public class PromozioneTreno implements Promozione
     private final Calendar dataFine;
     private double percentualeSconto;//non la facciamo final così se voglio cambiare la percentuale posso ancora farlo
     private TipoTreno tipoTreno;
+    private final TipoPromozione tipo = TipoPromozione.TRENO;
 
 
     public PromozioneTreno(Calendar dataInizio, Calendar dataFine, double percentualeSconto, TipoTreno tipoTreno)
@@ -29,6 +31,10 @@ public class PromozioneTreno implements Promozione
         this.ID = UUID.randomUUID().toString();
         this.statoPromozione = StatoPromozione.PROGRAMMATA;
         this.tipoTreno = tipoTreno;
+    }
+
+    public TipoPromozione getTipo() {
+        return tipo;
     }
 
     @Override

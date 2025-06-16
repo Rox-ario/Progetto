@@ -1,5 +1,10 @@
 package it.trenical.server.domain;
 
+import it.trenical.server.domain.cliente.Cliente;
+import it.trenical.server.domain.gestore.CatalogoPromozione;
+
+import java.util.List;
+
 public class PrezzoBiglietto
 {
     private final Biglietto biglietto;
@@ -10,15 +15,35 @@ public class PrezzoBiglietto
     {
         this.biglietto = b;
         this.viaggio = v;
+        calcolaPrezzo();
     }
 
-    public void calcolaPrezzo()
+    public void applicaPromozione(Cliente c)
+    {
+        CatalogoPromozione cp = CatalogoPromozione.getInstance();
+        if(c.haAdesioneFedelta()) //controllo se la promozione è di tipo Fedelta
+        {
+            PromozioneFedelta promozioneFedelta = cp.getPromozioneAttivaFedelta();
+            if(promozioneFedelta != null)
+                promozioneFedelta.applicaSconto(prezzo);
+        }
+        Tratta t = viaggio.getTratta();
+        PromozioneTratta promozioneTratta = cp.getPromozioneAttivaTratta(t);
+        if(promozioneTratta != null)
+            promozioneTratta.applicaSconto(prezzo);
+        PromozioneTreno promozioneTreno = cp.getPromozioneAttivaPerTipoTreno(viaggio.getTreno().getTipo());
+        if(promozioneTreno != null)
+            promozioneTreno.applicaSconto(prezzo);
+    }
+
+    private void calcolaPrezzo()
     {
         double kilometri = viaggio.getKilometri();
         double aggiuntaTipo = viaggio.getTreno().getTipo().getAumentoPrezzo();
         double aggiuntaServizio = biglietto.getClasseServizio().getCoefficienteAumentoPrezzo();
 
         prezzo = kilometri*aggiuntaServizio*aggiuntaTipo;
+        //questo però è solo il prezzo iniziale
     }
 
     public double getPrezzo()

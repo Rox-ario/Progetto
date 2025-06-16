@@ -1,7 +1,9 @@
 package it.trenical.server.domain;
 
+import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.StatoBiglietto;
+import it.trenical.server.domain.gestore.GestoreViaggi;
 
 import java.util.UUID;
 
@@ -57,8 +59,8 @@ public class Biglietto
         return IDViaggio;
     }
 
-    public PrezzoBiglietto getPrezzo() {
-        return prezzo;
+    public double getPrezzo() {
+        return prezzo.getPrezzo();
     }
 
     public String getIDCliente() {
@@ -71,5 +73,15 @@ public class Biglietto
             throw new IllegalArgumentException("Errore: il biglietto "+ getID()+" è già stato pagato");
         if(getStato() == StatoBiglietto.NON_PAGATO)
             this.statoBiglietto = StatoBiglietto.PAGATO;
+    }
+
+    public void inizializzaPrezzoBiglietto(Viaggio v)
+    {
+        prezzo = new PrezzoBiglietto(this, v);
+    }
+
+    public void applicaPromozione(Cliente c)
+    {
+        prezzo.applicaPromozione(c);
     }
 }

@@ -2,6 +2,7 @@ package it.trenical.server.domain;
 
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.StatoPromozione;
+import it.trenical.server.domain.enumerations.TipoPromozione;
 import it.trenical.server.dto.NotificaDTO;
 import it.trenical.server.observer.Promozione.ObserverPromozione;
 import it.trenical.server.observer.Promozione.SoggettoPromozione;
@@ -19,6 +20,7 @@ public class PromozioneFedelta extends SoggettoPromozione implements Promozione
     private final Calendar dataInizio;
     private final Calendar dataFine;
     private double percentualeSconto;//non la facciamo final così se voglio cambiare la percentuale posso ancora farlo
+    private final TipoPromozione tipo = TipoPromozione.FEDELTA;
 
     public PromozioneFedelta(Calendar dataInizio, Calendar dataFine, double percentualeSconto)
     {
@@ -32,6 +34,10 @@ public class PromozioneFedelta extends SoggettoPromozione implements Promozione
         this.ID = UUID.randomUUID().toString();
         this.statoPromozione = StatoPromozione.PROGRAMMATA;
         osservatori = new ArrayList<ObserverPromozione>();
+    }
+
+    public TipoPromozione getTipo() {
+        return tipo;
     }
 
     public StatoPromozione getStatoPromozione()

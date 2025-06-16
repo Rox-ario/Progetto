@@ -1,6 +1,7 @@
 package it.trenical.server.domain.gestore;
 
 import it.trenical.server.domain.Biglietto;
+import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.dto.RimborsoDTO;
 
@@ -42,6 +43,12 @@ public class GestoreBiglietti
             throw new IllegalArgumentException("ERRORE: IMPOSSIBILE CREARE IL BIGLIETTO, l'utente "+ IDUtente+" non esiste");
         }
         Biglietto b = new Biglietto(IDViaggio, IDUtente, classeServizio);
+        b.inizializzaPrezzoBiglietto(gv.getViaggio(IDViaggio)); //inizializzo il prezzo
+
+        //applico eventuali promozioni
+        Cliente clienteBiglietto = gc.getClienteById(IDUtente);
+        b.applicaPromozione(clienteBiglietto);
+
         aggiungiBiglietto(b, IDViaggio, IDUtente);
     }
 

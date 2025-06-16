@@ -2,7 +2,10 @@ package it.trenical.server.domain.gestore;
 
 import it.trenical.server.domain.cliente.Cliente;
 
+import java.sql.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class GestoreClienti
@@ -89,5 +92,29 @@ public final class GestoreClienti
         }
 
         clientiByEmail.put(nuovo.getEmail(), nuovo);
+    }
+
+    public List<Cliente> getClientiFedelta()
+    {
+        List<Cliente> clientiFedelta = new ArrayList<>();
+        for(Cliente c : clientiById.values())
+        {
+            if(c.haAdesioneFedelta())
+                clientiFedelta.add(c);
+        }
+        return clientiFedelta;
+    }
+
+    public boolean validaPreferenzeNotifiche(String idCliente, boolean riceviPromozioni)
+    {
+        Cliente cliente = getClienteById(idCliente);
+        if (cliente == null)
+            return false;
+        //Se vuole ricevere promozioni, deve essere fedeltà
+        if (riceviPromozioni && !cliente.haAdesioneFedelta())
+        {
+            return false;
+        }
+        return true;
     }
 }
