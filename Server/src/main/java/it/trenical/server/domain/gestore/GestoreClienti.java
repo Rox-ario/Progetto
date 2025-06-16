@@ -94,27 +94,19 @@ public final class GestoreClienti
         clientiByEmail.put(nuovo.getEmail(), nuovo);
     }
 
-    public List<Cliente> getClientiFedelta()
+    public List<Cliente> getClientiFedeltaConNotifiche()
     {
         List<Cliente> clientiFedelta = new ArrayList<>();
-        for(Cliente c : clientiById.values())
-        {
-            if(c.haAdesioneFedelta())
-                clientiFedelta.add(c);
-        }
-        return clientiFedelta;
-    }
 
-    public boolean validaPreferenzeNotifiche(String idCliente, boolean riceviPromozioni)
-    {
-        Cliente cliente = getClienteById(idCliente);
-        if (cliente == null)
-            return false;
-        //Se vuole ricevere promozioni, deve essere fedeltà
-        if (riceviPromozioni && !cliente.haAdesioneFedelta())
-        {
-            return false;
+        for (Cliente cliente : clientiById.values()) {
+            if (cliente.haAdesioneFedelta() &&
+                    cliente.isRiceviNotifiche() &&
+                    cliente.isRiceviPromozioni())
+            {
+                clientiFedelta.add(cliente);
+            }
         }
-        return true;
+
+        return clientiFedelta;
     }
 }

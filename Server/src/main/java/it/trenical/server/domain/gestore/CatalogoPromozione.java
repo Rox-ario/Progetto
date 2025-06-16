@@ -162,15 +162,18 @@ public class CatalogoPromozione
     {
         GestoreClienti gc = GestoreClienti.getInstance();
 
-        //Ho bisogno dei clienti che siano fedelta e abbiano accettato di ricevere notifiche
-        List<Cliente> clientiFedelta = gc.getClientiFedelta();
+        //Ottiengo solo i clienti fedeltà che VOGLIONO ricevere promozioni
+        List<Cliente> clientiFedelta = gc.getClientiFedeltaConNotifiche();
 
-        for (Cliente cliente : clientiFedelta) {
+        for (Cliente cliente : clientiFedelta)
+        {
             ObserverPromozione observer = new ObserverPromozioneFedelta(cliente);
             promozione.attach(observer);
         }
 
-        // Notifica immediatamente tutti i clienti registrati
-        promozione.notifica();
+        //Notifico immediatamente tutti i clienti registrati
+        if (!clientiFedelta.isEmpty()) {
+            promozione.notifica();
+        }
     }
 }

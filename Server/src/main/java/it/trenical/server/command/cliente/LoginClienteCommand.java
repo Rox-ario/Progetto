@@ -20,13 +20,8 @@ public class LoginClienteCommand implements ComandoCliente
     public void esegui() throws Exception
     {
         GestoreClienti gc = GestoreClienti.getInstance();
-        if (!gc.esisteClienteEmail(email))
-            throw new IllegalArgumentException("Non esiste il cliente "+ email);
-
-        Cliente c = gc.getClienteByEmail(email);
-        if(!c.getPassword().equals(password))
-            throw new IllegalArgumentException("Password errata");
-
+        if(!gc.autenticaCliente(email, password))
+            throw new IllegalArgumentException("E' stato impossibile autenticare il cliente: "+ email);
         this.dto = ClienteAssembler.toDTO(gc.getClienteByEmail(email));
     }
 
