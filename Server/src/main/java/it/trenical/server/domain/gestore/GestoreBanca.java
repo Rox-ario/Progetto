@@ -1,8 +1,10 @@
 package it.trenical.server.domain.gestore;
 
+import it.trenical.server.database.ConnessioneADB;
 import it.trenical.server.domain.cliente.ClienteBanca;
 import it.trenical.server.dto.RimborsoDTO;
 
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,8 +13,44 @@ public final class GestoreBanca {
 
     private final Map<String, ClienteBanca> clienti;
 
-    private GestoreBanca() {
+    private GestoreBanca()
+    {
         clienti = new HashMap<>();
+        caricaClientiDaDB();
+    }
+
+    private void caricaClientiDaDB()
+    {
+        String sql = "SELECT * FROM clienti_banca";
+        Connection conn = null;
+
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            Statement stm = conn.createStatement();
+            ResultSet res = stm.executeQuery(sql);
+
+            while(res.next())
+            {
+                ClienteBanca clienteBanca = new ClienteBanca
+                        (res.getString("cliente_id"),
+                        res.getString("cliente_nome"),
+                        res.getString("cliente_cognome"),
+                        res.getString("banca_cliente"),
+                        res.getString("cliente_numeroCarta"),
+                        res.getDouble("saldo"));
+
+                clienti.put(clienteBanca.getIdCliente(), clienteBanca);
+            }
+        }
+        catch(SQLException e)
+        {
+            System.err.println(e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
     }
 
     public static synchronized GestoreBanca getInstance() {
@@ -22,19 +60,76 @@ public final class GestoreBanca {
         return instance;
     }
 
-    public void registraClienteBanca(ClienteBanca cb) {
+    public void registraClienteBanca(ClienteBanca cb)
+    {
+        if(cb == null)
+            throw new IllegalArgumentException("Errore: Il cliente non può essere null");
         clienti.put(cb.getIdCliente(), cb);
+        salvaClienteInDB(cb);
     }
 
-    public ClienteBanca getClienteBanca(String id) {
+    private void salvaClienteInDB(ClienteBanca cb)
+    {
+        String sql = "INSERT INTO clienti_banca (cliente_id, cliente_nome, cliente_cognome, banca_cliente, cliente_numeroCarta, saldo)" +
+                "VALUES (?, ?, ?, ?, ?, ?)";
+        Connection conn = null;
+
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, cb.getIdCliente());
+            pstmt.setString(2, cb.getNome());
+            pstmt.setString(3, cb.getCognome());
+            pstmt.setString(4, cb.getBanca());
+            pstmt.setString(5, cb.getNumeroCarta());
+            pstmt.setDouble(6, cb.getSaldo());
+
+            pstmt.executeUpdate();
+        }
+        catch(SQLException e)
+        {
+            System.err.println(e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
+    public ClienteBanca getClienteBanca(String id)
+    {
         return clienti.get(id);
     }
 
-    public boolean eseguiPagamento(String id, double importo) {
+    public boolean eseguiPagamento(String id, double importo)
+    {
         ClienteBanca cb = clienti.get(id);
-        if (cb != null && cb.getSaldo() >= importo) {
-            cb.addebita(importo);
-            return true;
+        if (cb != null && cb.getSaldo() >= importo)
+        {
+            String sql = "UPDATE clienti_banca SET saldo = saldo + ? WHERE cliente_id = ?";
+            Connection conn = null;
+            try//addebito il prezzo
+            {
+                conn = ConnessioneADB.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+
+                pstmt.setDouble(6, cb.getSaldo()-importo);
+                pstmt.setString(1, cb.getIdCliente()); //con questo prendo l'id del cliente
+
+                pstmt.executeUpdate();
+                cb.addebita(importo);
+                return true;
+            }
+            catch (SQLException e)
+            {
+                System.err.println(e.getMessage());
+            }
+            finally
+            {
+                ConnessioneADB.closeConnection(conn);
+            }
         }
         return false;
     }
@@ -50,7 +145,28 @@ public final class GestoreBanca {
         else
         {
             ClienteBanca cb = clienti.get(idCliente);
-            cb.accredita(saldo);
+
+            String sql = "UPDATE clienti_banca SET saldo = saldo + ? WHERE cliente_id = ?";
+            Connection conn = null;
+            try
+            {
+                conn = ConnessioneADB.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+
+                pstmt.setDouble(6, cb.getSaldo()+saldo);
+                pstmt.setString(1, cb.getIdCliente());
+
+                pstmt.executeUpdate();
+                cb.accredita(saldo);
+            }
+            catch(SQLException e)
+            {
+                System.err.println(e.getMessage());
+            }
+            finally
+            {
+                ConnessioneADB.closeConnection(conn);
+            }
         }
     }
 }

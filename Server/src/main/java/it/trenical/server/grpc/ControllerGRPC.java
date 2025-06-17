@@ -4,10 +4,11 @@ import it.trenical.server.command.biglietto.ComandoBiglietto;
 import it.trenical.server.command.cliente.ComandoCliente;
 import it.trenical.server.command.promozione.PromozioneCommand;
 import it.trenical.server.command.viaggio.ComandoViaggio;
+import it.trenical.server.domain.gestore.MotoreRicercaViaggi;
 
 public class ControllerGRPC
 {
-    //private static MotoreRicercaViaggi mrv;
+    private static MotoreRicercaViaggi mrv;
 
     public static void eseguiComandoCliente(ComandoCliente cmd)
     {

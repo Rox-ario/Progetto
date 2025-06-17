@@ -4,13 +4,15 @@ public class ClienteBanca
 {
     private final String idCliente;
     private final String nome;
+    private final String cognome;
     private final String banca;
     private final String numeroCarta;
     private double saldo;
 
-    public ClienteBanca(String idCliente, String nome, String banca, String numeroCarta, double saldo) {
+    public ClienteBanca(String idCliente, String nome, String cognome, String banca, String numeroCarta, double saldo) {
         this.idCliente = idCliente;
         this.nome = nome;
+        this.cognome = cognome;
         this.banca = banca;
         this.numeroCarta = numeroCarta;
         this.saldo = saldo;
@@ -22,6 +24,7 @@ public class ClienteBanca
     public String getBanca() { return banca; }
     public String getNumeroCarta() { return numeroCarta; }
     public double getSaldo() { return saldo; }
+    public String getCognome() {return cognome;}
 
     public void addebita(double importo) {
         this.saldo -= importo;

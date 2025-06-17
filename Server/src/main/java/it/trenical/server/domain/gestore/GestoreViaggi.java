@@ -1,10 +1,12 @@
 package it.trenical.server.domain.gestore;
 
+import it.trenical.server.database.ConnessioneADB;
 import it.trenical.server.domain.*;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.StatoViaggio;
 import it.trenical.server.domain.enumerations.TipoTreno;
 
+import java.sql.*;
 import java.util.*;
 
 public final class GestoreViaggi {
@@ -13,31 +15,361 @@ public final class GestoreViaggi {
     private final Map<String, Treno> treni;
     private final Map<String, Tratta> tratte;
     private final Map<String, Viaggio> viaggi;
+    private Map<String, Stazione> stazioniTemp = new HashMap<>(); //per quando sto caricando le stazioni ma non ho nè viaggi nè treni
 
-    private GestoreViaggi() {
+    private GestoreViaggi()
+    {
         this.treni = new HashMap<>();
         this.tratte = new HashMap<>();
         this.viaggi = new HashMap<>();
+
+        caricaDatiDaDB();
     }
 
-    public static synchronized GestoreViaggi getInstance() {
+    private void caricaDatiDaDB()
+    {
+        caricaStazioni(); //prima le stazioni (necessarie per le tratte)
+        caricaTreni();
+        caricaTratte();
+        caricaViaggi();
+
+        System.out.println("GestoreViaggi: caricati " + treni.size() + " treni, " +
+                tratte.size() + " tratte, " + viaggi.size() + " viaggi dal database");
+    }
+
+    private void caricaStazioni()
+    {
+        String sql = "SELECT * FROM stazioni";
+        Connection conn = null;
+
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            while (rs.next())
+            {
+                String id = rs.getString("id");
+                String citta = rs.getString("citta");
+                String nome = rs.getString("nome");
+                double lat = rs.getDouble("latitudine");
+                double lon = rs.getDouble("longitudine");
+                ArrayList<Integer> binari = parseBinari(rs.getString("binari"));
+
+                Stazione s = new Stazione(id, citta, nome, binari, lat, lon);
+                stazioniTemp.put(id, s);
+            }
+
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore caricamento stazioni: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
+    private ArrayList<Integer> parseBinari(String binariStr)
+    {
+        ArrayList<Integer> binari = new ArrayList<>();
+        if (binariStr != null && !binariStr.isEmpty())
+        {
+            StringTokenizer sb = new StringTokenizer(binariStr, ",");
+            while(sb.hasMoreTokens())
+            {
+                try
+                {
+                    binari.add(Integer.parseInt(sb.nextToken()));
+                }
+                catch (NumberFormatException e)
+                {
+                    // Ignora valori non validi
+                }
+            }
+        }
+        return binari;
+    }
+
+    private void caricaTreni()
+    {
+        String sql = "SELECT * FROM treni";
+        Connection conn = null;
+
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            while (rs.next())
+            {
+                String id = rs.getString("id");
+                TipoTreno tipo = TipoTreno.valueOf(rs.getString("tipo"));
+
+                Treno t = new Treno(id, tipo);
+                treni.put(id, t);
+            }
+
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore caricamento treni: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
+    private void caricaTratte()
+    {
+        String sql = "SELECT * FROM tratte";
+        Connection conn = null;
+
+        try {
+            conn = ConnessioneADB.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            while (rs.next())
+            {
+                String id = rs.getString("id");
+                String partenzaId = rs.getString("stazione_partenza_id");
+                String arrivoId = rs.getString("stazione_arrivo_id");
+
+                Stazione partenza = stazioniTemp.get(partenzaId);
+                Stazione arrivo = stazioniTemp.get(arrivoId);
+
+                if (partenza != null && arrivo != null)
+                {
+                    Tratta t = new Tratta(id, partenza, arrivo);
+                    tratte.put(id, t);
+                }
+            }
+
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore caricamento tratte: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
+    private void caricaViaggi()
+    {
+        String sql = "SELECT * FROM viaggi";
+        Connection conn = null;
+
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            while (rs.next()) {
+                String id = rs.getString("id");
+                String trenoId = rs.getString("treno_id");
+                String trattaId = rs.getString("tratta_id");
+                Timestamp partenza = rs.getTimestamp("orario_partenza");
+                Timestamp arrivo = rs.getTimestamp("orario_arrivo");
+                String stato = rs.getString("stato");
+                int ritardo = rs.getInt("ritardo_minuti");
+
+                Calendar calPartenza = Calendar.getInstance();
+                calPartenza.setTimeInMillis(partenza.getTime());
+                Calendar calArrivo = Calendar.getInstance();
+                calArrivo.setTimeInMillis(arrivo.getTime());
+
+                Treno treno = treni.get(trenoId);
+                Tratta tratta = tratte.get(trattaId);
+
+                if (treno != null && tratta != null)
+                {
+                    Viaggio v = new Viaggio(id, calPartenza, calArrivo, treno, tratta);
+
+                    //imposto il maledetto stato e il ritardo
+                    if (stato != null)
+                    {
+                        v.setStato(StatoViaggio.valueOf(stato));
+                    }
+                    if (ritardo > 0)
+                    {
+                        v.aggiornaRitardo(ritardo);
+                    }
+
+                    viaggi.put(id, v);
+
+                    //registro il viaggio nel GestoreBiglietti
+                    GestoreBiglietti.getInstance().aggiungiViaggio(id);
+                }
+            }
+
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore caricamento viaggi: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
+    public static synchronized GestoreViaggi getInstance()
+    {
         if (instance == null) {
             instance = new GestoreViaggi();
         }
         return instance;
     }
 
-    public void aggiungiTreno(String id, TipoTreno tipo) {
-        if (!treni.containsKey(id)) {
+    public void aggiungiTreno(String id, TipoTreno tipo)
+    {
+        if (!treni.containsKey(id))
+        {
             Treno t = new Treno(id, tipo);
+            salvaTrenoInDB(t);
             treni.put(id, t);
-        } else
+        }
+        else
             System.out.println("Treno " + id + " già esistente");
     }
 
-    public void aggiungiTratta(Tratta tratta) {
-        tratte.putIfAbsent(tratta.getId(), tratta);
+    private void salvaTrenoInDB(Treno t)
+    {
+        String sql = "INSERT INTO treni (id, tipo) VALUES (?, ?)";
+        Connection conn = null;
+
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, t.getID());
+            pstmt.setString(2, t.getTipo().name());
+
+            pstmt.executeUpdate();
+
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore salvataggio treno: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
     }
+
+    public void aggiungiTratta(Tratta tratta)
+    {
+        if (!tratte.containsKey(tratta.getId()))
+        {
+            //prima mi salvo le stazioni se non esistono
+            salvaStazioneSeNonEsiste(tratta.getStazionePartenza());
+            salvaStazioneSeNonEsiste(tratta.getStazioneArrivo());
+
+            //Poi salvo la trarra
+            salvaTrattaInDB(tratta);
+
+            tratte.put(tratta.getId(), tratta);
+        }
+    }
+
+    private void salvaStazioneSeNonEsiste(Stazione s)
+    {
+        String sqlCheck = "SELECT COUNT(*) FROM stazioni WHERE id = ?";
+        String sqlInsert = "INSERT INTO stazioni (id, citta, nome, latitudine, longitudine, binari) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
+        Connection conn = null;
+
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+
+            //ovviamente prima si controlla se esiste
+            PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck);
+            pstmtCheck.setString(1, s.getId());
+            ResultSet rs = pstmtCheck.executeQuery();
+
+            if (rs.next() && rs.getInt(1) == 0)
+            {
+                //caso 1: non esiste, la inserisco
+                PreparedStatement pstmtInsert = conn.prepareStatement(sqlInsert);
+                pstmtInsert.setString(1, s.getId());
+                pstmtInsert.setString(2, s.getCitta());
+                pstmtInsert.setString(3, s.getNome());
+                pstmtInsert.setDouble(4, s.getLatitudine());
+                pstmtInsert.setDouble(5, s.getLongitudine());
+                pstmtInsert.setString(6, binariToString(s.getBinari()));
+
+                pstmtInsert.executeUpdate();
+            }
+
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore salvataggio stazione: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
+
+    private String binariToString(List<Integer> binari)
+    {
+        if (binari == null || binari.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+        for(Integer binario : binari)
+        {
+            if(i == binari.size()-1)
+                sb.append(binario);
+            else
+                sb.append(binario+",");
+            i += 1;
+        }
+        return sb.toString();
+    }
+
+    private void salvaTrattaInDB(Tratta t)
+    {
+        String sql = "INSERT INTO tratte (id, stazione_partenza_id, stazione_arrivo_id) VALUES (?, ?, ?)";
+        Connection conn = null;
+
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, t.getId());
+            pstmt.setString(2, t.getStazionePartenza().getId());
+            pstmt.setString(3, t.getStazioneArrivo().getId());
+
+            pstmt.executeUpdate();
+
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore salvataggio tratta: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
+
 
     private boolean trenoUsato(Treno t, Calendar inizio, Calendar fine) {
         for (String id : viaggi.keySet()) {
@@ -67,7 +399,10 @@ public final class GestoreViaggi {
         }
         String idViaggio = UUID.randomUUID().toString();
         Viaggio v = new Viaggio(idViaggio, inizio, fine, treno, tratta);
+
+        salvaViaggioInDB(v);
         viaggi.put(idViaggio, v);
+        
         System.out.println("Viaggio programmato correttamente");
 
         GestoreBiglietti gb = GestoreBiglietti.getInstance();
@@ -75,7 +410,41 @@ public final class GestoreViaggi {
         return true;
     }
 
-    public void cambiaStatoViaggio(String idViaggio, StatoViaggio nuovoStato) {
+    private void salvaViaggioInDB(Viaggio v) 
+    {
+        String sql = "INSERT INTO viaggi (id, treno_id, tratta_id, orario_partenza, orario_arrivo, " +
+                "stato, ritardo_minuti) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        Connection conn = null;
+
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, v.getId());
+            pstmt.setString(2, v.getTreno().getID());
+            pstmt.setString(3, v.getTratta().getId());
+            pstmt.setTimestamp(4, new Timestamp(v.getInizioReale().getTimeInMillis()));
+            pstmt.setTimestamp(5, new Timestamp(v.getFineReale().getTimeInMillis()));
+            pstmt.setString(6, v.getStato().name());
+            pstmt.setInt(7, 0); //ritardo iniziale ovviamene 0
+
+            pstmt.executeUpdate();
+
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore salvataggio viaggio: " + e.getMessage());
+            throw new RuntimeException("Impossibile salvare il viaggio", e);
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
+    public void cambiaStatoViaggio(String idViaggio, StatoViaggio nuovoStato)
+    {
         if (!viaggi.containsKey(idViaggio))
             throw new IllegalArgumentException("Viaggio " + idViaggio + " non presente");
         Viaggio v = viaggi.get(idViaggio);
@@ -83,7 +452,35 @@ public final class GestoreViaggi {
         StatoViaggio vecchioStato = v.getStato(); //giusto per capire se va o meno
 
         v.setStato(nuovoStato);
+
+        aggiornaStatoViaggioInDB(idViaggio, nuovoStato);
+
         System.out.println("Il viaggio " + idViaggio + " è stato aggiornato da " + vecchioStato + " a " + nuovoStato);
+    }
+
+    private void aggiornaStatoViaggioInDB(String idViaggio, StatoViaggio stato)
+    {
+        String sql = "UPDATE viaggi SET stato = ? WHERE id = ?";
+        Connection conn = null;
+
+        try {
+            conn = ConnessioneADB.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, stato.name());
+            pstmt.setString(2, idViaggio);
+
+            pstmt.executeUpdate();
+
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore aggiornamento stato viaggio: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
     }
 
     public Viaggio getViaggio(String id) {
@@ -121,12 +518,42 @@ public final class GestoreViaggi {
         return res;
     }
 
-    public void aggiornaRitardoViaggio(String idViaggio, int ritardoInMinuti) {
+    public void aggiornaRitardoViaggio(String idViaggio, int ritardoInMinuti)
+    {
         if (!viaggi.containsKey(idViaggio))
             throw new IllegalArgumentException("Viaggio " + idViaggio + " non presente");
         Viaggio v = viaggi.get(idViaggio);
+
+        aggiornaRitardoViaggioInDB(idViaggio, ritardoInMinuti);
         v.aggiornaRitardo(ritardoInMinuti);
+
         System.out.println("Ritardo del Viaggio " + idViaggio + " aggiornato");
+    }
+
+    private void aggiornaRitardoViaggioInDB(String idViaggio, int ritardo)
+    {
+        String sql = "UPDATE viaggi SET ritardo_minuti = ritardo_minuti + ? WHERE id = ?";
+        Connection conn = null;
+
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            pstmt.setInt(1, ritardo);
+            pstmt.setString(2, idViaggio);
+
+            pstmt.executeUpdate();
+
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore aggiornamento ritardo viaggio: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
     }
 
     private boolean viaggioInCorso(String idViaggio) {
@@ -142,7 +569,33 @@ public final class GestoreViaggi {
             throw new IllegalArgumentException("Viaggio " + idViaggio + " non presente");
         if (viaggioInCorso(idViaggio))
             throw new IllegalStateException("Il Viaggio " + idViaggio + " è in corso e non può essere annullato");
+
+        rimuoviViaggioDaDB(idViaggio);
         viaggi.remove(idViaggio);
+    }
+
+    private void rimuoviViaggioDaDB(String idViaggio)
+    {
+        String sql = "DELETE FROM viaggi WHERE id = ?";
+        Connection conn = null;
+
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, idViaggio);
+            pstmt.executeUpdate();
+
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore rimozione viaggio: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
     }
 
     public Viaggio getViaggioPerTreno(String id) {
