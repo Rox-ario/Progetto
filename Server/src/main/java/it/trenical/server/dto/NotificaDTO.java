@@ -4,15 +4,27 @@ import java.util.Calendar;
 
 public class NotificaDTO {
     private final String messaggio;
-    private final Calendar timestamp;
+    private Calendar timestamp;
 
-    public NotificaDTO(String messaggio) {
+    public NotificaDTO(String messaggio)
+    {
         this.messaggio = messaggio;
         this.timestamp = Calendar.getInstance();
     }
 
-    public String getMessaggio() { return messaggio; }
-    public Calendar getTimestamp() { return timestamp; }
+    public String getMessaggio()
+    {
+        return messaggio;
+    }
+    public Calendar getTimestamp()
+    {
+        return timestamp;
+    }
+
+    public void setTimestamp(Calendar timestamp)
+    {
+        this.timestamp = timestamp;
+    }
 
     @Override
     public String toString() {

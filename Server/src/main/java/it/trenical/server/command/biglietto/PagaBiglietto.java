@@ -26,7 +26,7 @@ public class PagaBiglietto implements ComandoBiglietto
             double costo = biglietto.getPrezzo();
             if(GestoreBanca.getInstance().eseguiPagamento(biglietto.getIDCliente(), costo))
             {
-                biglietto.SetStatoBigliettoPAGATO();
+                gb.pagaBiglietto(IDBiglietto);
             }
         }
     }

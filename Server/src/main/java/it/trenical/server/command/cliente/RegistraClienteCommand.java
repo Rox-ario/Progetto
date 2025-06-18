@@ -3,7 +3,7 @@ package it.trenical.server.command.cliente;
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.gestore.GestoreClienti;
 import it.trenical.server.dto.ClienteDTO;
-import it.trenical.server.utils.ClienteAssembler;
+import it.trenical.server.utils.Assembler;
 
 public class RegistraClienteCommand implements ComandoCliente
 {
@@ -29,7 +29,7 @@ public class RegistraClienteCommand implements ComandoCliente
             throw new IllegalArgumentException("Email già registrata");
         }
 
-        Cliente cliente = ClienteAssembler.fromDTO(dto, password);
+        Cliente cliente = Assembler.fromDTO(dto, password);
         clienti.aggiungiCliente(cliente);
     }
 }

@@ -9,14 +9,14 @@ import java.util.UUID;
 
 public class Biglietto
 {
-    private final String ID;
-    private final String IDViaggio;
+    private String ID;
+    private String IDViaggio;
     private PrezzoBiglietto prezzoBiglietto; //lo calcola da sè
     private ClasseServizio classeServizio;
-    private final String IDCliente;
-    private final Calendar dataAcquisto;
+    private String IDCliente;
+    private Calendar dataAcquisto;
     private StatoBiglietto statoBiglietto;
-    private double prezzoOriginale;
+    private double prezzo;
 
     public Biglietto(String IDViaggio, String IDCliente, ClasseServizio classeServizio)
     {
@@ -28,9 +28,22 @@ public class Biglietto
         this.dataAcquisto = Calendar.getInstance();
     }
 
+    //per quando riprendo tutto dal DB
+    public Biglietto(String ID, String IDViaggio, String IDCliente, ClasseServizio classeServizio,
+                     StatoBiglietto stato, Calendar dataAcquisto, double prezzoOriginale)
+    {
+        this.ID = ID;
+        this.IDViaggio = IDViaggio;
+        this.IDCliente = IDCliente;
+        this.classeServizio = classeServizio;
+        this.statoBiglietto = stato;
+        this.dataAcquisto = dataAcquisto;
+        this.prezzo = prezzoOriginale;
+    }
+
     public double getPrezzo()
     {
-        return prezzoOriginale;
+        return prezzo;
     }
 
     @Override
@@ -38,7 +51,7 @@ public class Biglietto
         return "Biglietto{" +
                 "ID='" + ID + '\'' +
                 ", IDViaggio='" + IDViaggio + '\'' +
-                ", prezzo=" + prezzoBiglietto +
+                ", prezzo=" + prezzoBiglietto.getPrezzo() +
                 ", classeServizio=" + classeServizio +
                 ", IDCliente='" + IDCliente + '\'' +
                 '}';
@@ -87,7 +100,10 @@ public class Biglietto
         if(getStato() == StatoBiglietto.NON_PAGATO)
         {
             this.statoBiglietto = StatoBiglietto.PAGATO;
-            this.prezzoOriginale = getPrezzoBiglietto();
+            if(this.prezzo == 0)//quindi non è stato impostato
+            {
+                this.prezzo = getPrezzoBiglietto();
+            }
         }
     }
 
@@ -104,5 +120,20 @@ public class Biglietto
     public PrezzoBiglietto getOggettoPrezzoBiglietto()
     {
         return prezzoBiglietto;
+    }
+
+    public void setPrezzo(double prezzo)
+    {
+        this.prezzo = prezzo;
+    }
+
+    public void setStatoBiglietto(StatoBiglietto stato)
+    {
+        this.statoBiglietto = stato;
+    }
+
+    public Calendar getDataAcquisto()
+    {
+        return dataAcquisto;
     }
 }

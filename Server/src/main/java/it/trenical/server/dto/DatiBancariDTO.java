@@ -2,14 +2,20 @@ package it.trenical.server.dto;
 
 public class DatiBancariDTO
 {
+    private String idCliente;
+    private String nomeCliente;
+    private String cognome;
     private String nomeBanca;
     private String numeroCarta;
     private double saldo;
 
     public DatiBancariDTO(){}
 
-    public DatiBancariDTO(String nomeBanca, String numeroCarta, double saldo)
+    public DatiBancariDTO(String id, String nome, String cognome, String nomeBanca, String numeroCarta, double saldo)
     {
+        idCliente = id;
+        nomeCliente = nome;
+        this.cognome = cognome;
         this.nomeBanca = nomeBanca;
         this.numeroCarta = numeroCarta;
         this.saldo = saldo;
@@ -37,5 +43,29 @@ public class DatiBancariDTO
 
     public void setSaldo(double saldo) {
         this.saldo = saldo;
+    }
+
+    public String getIdCliente() {
+        return idCliente;
+    }
+
+    public void setIdCliente(String idCliente) {
+        this.idCliente = idCliente;
+    }
+
+    public String getNomeCliente() {
+        return nomeCliente;
+    }
+
+    public void setNomeCliente(String nomeCliente) {
+        this.nomeCliente = nomeCliente;
+    }
+
+    public String getCognome() {
+        return cognome;
+    }
+
+    public void setCognome(String cognome) {
+        this.cognome = cognome;
     }
 }

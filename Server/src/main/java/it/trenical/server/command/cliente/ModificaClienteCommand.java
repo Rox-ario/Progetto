@@ -3,7 +3,6 @@ package it.trenical.server.command.cliente;
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.gestore.GestoreClienti;
 import it.trenical.server.dto.ModificaClienteDTO;
-import it.trenical.server.utils.ClienteAssembler;
 
 public class ModificaClienteCommand implements ComandoCliente
 {

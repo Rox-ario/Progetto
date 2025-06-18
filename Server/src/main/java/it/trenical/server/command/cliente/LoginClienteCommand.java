@@ -1,9 +1,8 @@
 package it.trenical.server.command.cliente;
 
-import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.gestore.GestoreClienti;
 import it.trenical.server.dto.ClienteDTO;
-import it.trenical.server.utils.ClienteAssembler;
+import it.trenical.server.utils.Assembler;
 
 public class LoginClienteCommand implements ComandoCliente
 {
@@ -22,7 +21,7 @@ public class LoginClienteCommand implements ComandoCliente
         GestoreClienti gc = GestoreClienti.getInstance();
         if(!gc.autenticaCliente(email, password))
             throw new IllegalArgumentException("E' stato impossibile autenticare il cliente: "+ email);
-        this.dto = ClienteAssembler.toDTO(gc.getClienteByEmail(email));
+        this.dto = Assembler.toDTO(gc.getClienteByEmail(email));
     }
 
     public ClienteDTO getClienteDTO()

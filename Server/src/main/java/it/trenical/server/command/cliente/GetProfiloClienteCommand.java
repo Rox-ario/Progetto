@@ -1,9 +1,8 @@
 package it.trenical.server.command.cliente;
-import it.trenical.server.command.cliente.ComandoCliente;
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.gestore.GestoreClienti;
 import it.trenical.server.dto.ClienteDTO;
-import it.trenical.server.utils.ClienteAssembler;
+import it.trenical.server.utils.Assembler;
 
 public class GetProfiloClienteCommand implements ComandoCliente
 {
@@ -24,7 +23,7 @@ public class GetProfiloClienteCommand implements ComandoCliente
                 throw new IllegalArgumentException("Cliente non trovato");
             }
 
-            this.profilo = ClienteAssembler.toDTO(cliente);
+            this.profilo = Assembler.toDTO(cliente);
         }
 
         public ClienteDTO getProfilo()

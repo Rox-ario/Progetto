@@ -97,3 +97,12 @@ CREATE TABLE promozioni
 
     FOREIGN KEY (tratta_id) REFERENCES tratte(id)
 );
+
+CREATE TABLE notifiche
+(
+    id VARCHAR(36) PRIMARY KEY,
+    cliente_id VARCHAR(36) NOT NULL,
+    messaggio TEXT NOT NULL,
+    timestamp DATETIME NOT NULL,
+    FOREIGN KEY (cliente_id) REFERENCES clienti(id)
+);
