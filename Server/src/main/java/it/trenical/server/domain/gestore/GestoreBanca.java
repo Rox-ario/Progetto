@@ -115,8 +115,8 @@ public final class GestoreBanca {
                 conn = ConnessioneADB.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql);
 
-                pstmt.setDouble(6, cb.getSaldo()-importo);
-                pstmt.setString(1, cb.getIdCliente()); //con questo prendo l'id del cliente
+                pstmt.setDouble(1, -importo);
+                pstmt.setString(2, cb.getIdCliente()); //con questo ci metto l'id del cliente
 
                 pstmt.executeUpdate();
                 cb.addebita(importo);
@@ -153,8 +153,8 @@ public final class GestoreBanca {
                 conn = ConnessioneADB.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql);
 
-                pstmt.setDouble(6, cb.getSaldo()+saldo);
-                pstmt.setString(1, cb.getIdCliente());
+                pstmt.setDouble(1, cb.getSaldo()+saldo);
+                pstmt.setString(2, cb.getIdCliente());
 
                 pstmt.executeUpdate();
                 cb.accredita(saldo);

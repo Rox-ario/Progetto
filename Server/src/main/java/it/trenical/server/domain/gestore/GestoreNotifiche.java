@@ -16,11 +16,12 @@ public class GestoreNotifiche
     private final Map<String, List<NotificaDTO>> notifichePerCliente;
     //Coda di notifiche per ogni cliente (mi servirà per lo storico delle notifiche)
     private final Map<String, NotificheListener> listenerPerCliente;
-    //Listener per notifiche real-time di sessione
+    //Listener per notifiche real-time per la sessione in cui il cliente è attivo
     private final List<NotificheListener> listenersGlobali;
     //Mi servono se eventualmente voglio osservare tutte le notifiche inviate nel sistema (indipendetnemente dal tipo)
 
-    private GestoreNotifiche() {
+    private GestoreNotifiche()
+    {
         notifichePerCliente = new ConcurrentHashMap<>();
         listenerPerCliente = new ConcurrentHashMap<>();
         listenersGlobali = new ArrayList<NotificheListener>();

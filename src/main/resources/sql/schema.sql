@@ -21,7 +21,7 @@ CREATE TABLE stazioni
     citta VARCHAR(100) NOT NULL,
     nome VARCHAR(100) NOT NULL,
     latitudine DOUBLE NOT NULL,
-    longitudine DOUBLE NOT NULL
+    longitudine DOUBLE NOT NULL,
     binari VARCHAR(255) NOT NULL
  );
 
