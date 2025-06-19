@@ -9,7 +9,7 @@ public class ClienteDTO
     private String password;
     private boolean isFedelta;
     private boolean riceviNotifiche;
-    private boolean riceviPromozioni;
+    private boolean riceviPromozioni; //per fedeltà
 
     public ClienteDTO() {}
 
@@ -79,4 +79,6 @@ public class ClienteDTO
     public void setFedelta(boolean fedelta) {
         isFedelta = fedelta;
     }
+
+
 }

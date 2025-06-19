@@ -1,6 +1,8 @@
 package it.trenical.server.dto;
 
-public class ModificaClienteDTO {
+public class ModificaClienteDTO
+{
+    private String id;
     private String nome;
     private String cognome;
     private String password;
@@ -8,11 +10,21 @@ public class ModificaClienteDTO {
 
     public ModificaClienteDTO() {}
 
-    public ModificaClienteDTO(String nome, String cognome, String password, boolean isFedelta) {
+    public ModificaClienteDTO(String id, String nome, String cognome, String password, boolean isFedelta)
+    {
+        this.id = id;
         this.nome = nome;
         this.cognome = cognome;
         this.password = password;
         this.isFedelta = isFedelta;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getNome() {
