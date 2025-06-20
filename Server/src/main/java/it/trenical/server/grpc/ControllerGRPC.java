@@ -4,6 +4,7 @@ import it.trenical.server.command.biglietto.ComandoBiglietto;
 import it.trenical.server.command.cliente.*;
 import it.trenical.server.command.promozione.PromozioneCommand;
 import it.trenical.server.command.viaggio.ComandoViaggio;
+import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.gestore.MotoreRicercaViaggi;
 import it.trenical.server.dto.ClienteDTO;
 import it.trenical.server.dto.ModificaClienteDTO;
@@ -185,5 +186,7 @@ public class ControllerGRPC
             throw new Exception("Impossibile recuperare le notifiche: " + e.getMessage());
         }
     }
+
+
 }
 
