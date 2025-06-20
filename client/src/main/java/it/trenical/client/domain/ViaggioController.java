@@ -84,9 +84,8 @@ public class ViaggioController
 
             String idCliente = SessioneCliente.getInstance().getIdClienteLoggato();
 
-            // Per ora gestiamo un biglietto alla volta
-            // (Se serve gestire multipli, modificare il ControllerGRPC)
-            for (int i = 0; i < numeroBiglietti; i++) {
+            for (int i = 0; i < numeroBiglietti; i++)
+            {
                 ControllerGRPC.acquistaBiglietto(idViaggio, idCliente, classeScelta);
             }
 
@@ -111,99 +110,97 @@ public class ViaggioController
     }
 
 
-    public void mostraDettagliViaggio(ViaggioDTO viaggio) {
-        if (viaggio == null) {
-            System.err.println("❌ Viaggio non valido");
+    public void mostraDettagliViaggio(ViaggioDTO viaggio)
+    {
+        if (viaggio == null)
+        {
+            System.err.println("Viaggio non valido");
             return;
         }
 
-        System.out.println("\n📋 DETTAGLI VIAGGIO");
-        System.out.println("════════════════════");
-        System.out.println("🆔 ID: " + viaggio.getID());
-        System.out.println("🚂 Treno: " + viaggio.getTreno().getTipo() + " (" + viaggio.getTreno().getID() + ")");
-        System.out.println("📍 Da: " + viaggio.getCittaPartenza());
-        System.out.println("📍 A: " + viaggio.getCittaArrivo());
-        System.out.println("🕐 Partenza: " + formatCalendar(viaggio.getInizio()));
-        System.out.println("🕕 Arrivo: " + formatCalendar(viaggio.getFine()));
-        System.out.println("📊 Stato: " + viaggio.getStato());
-        System.out.println("💺 Posti disponibili: " + viaggio.getPostiDisponibili());
+        System.out.println("DETTAGLI VIAGGIO");
+        System.out.println("-------------------");
+        System.out.println("ID: " + viaggio.getID());
+        System.out.println("Treno: " + viaggio.getTreno().getTipo() + " (" + viaggio.getTreno().getID() + ")");
+        System.out.println("Da: " + viaggio.getCittaPartenza());
+        System.out.println("A: " + viaggio.getCittaArrivo());
+        System.out.println("Partenza: " + formatCalendar(viaggio.getInizio()));
+        System.out.println("Arrivo: " + formatCalendar(viaggio.getFine()));
+        System.out.println("Stato: " + viaggio.getStato());
+        System.out.println("Posti disponibili: " + viaggio.getPostiDisponibili());
 
-        // Mostra info fedeltà se cliente loggato
+        //mostro le info fedeltà se cliente è loggato
         if (SessioneCliente.getInstance().isLoggato() &&
                 SessioneCliente.getInstance().getClienteCorrente().isFedelta()) {
-            System.out.println("⭐ Come cliente FedeltàTreno potresti avere sconti speciali!");
+            System.out.println("Come cliente FedeltàTreno potresti avere sconti speciali!");
         }
 
-        System.out.println("════════════════════\n");
+        System.out.println("---------------------\n");
     }
 
-    // ================================================================
-    // METODI PRIVATI DI UTILITÀ
-    // ================================================================
-
-    /**
-     * Verifica se l'utente è loggato
-     */
-    private boolean verificaAccesso() {
-        if (!SessioneCliente.getInstance().isLoggato()) {
-            System.err.println("❌ Devi effettuare il login per acquistare biglietti!");
-            System.out.println("💡 Usa il menu 'Accedi' per autenticarti");
+    private boolean verificaAccesso()
+    {
+        if (!SessioneCliente.getInstance().isLoggato())
+        {
+            System.err.println("Devi effettuare il login per acquistare biglietti!");
+            System.out.println("Usa il menu 'Accedi' per autenticarti");
             return false;
         }
         return true;
     }
 
-    /**
-     * Valida i parametri di ricerca base
-     */
     private boolean validaParametriRicerca(String cittaPartenza, String cittaArrivo,
-                                           Calendar dataAndata, int numeroPasseggeri) {
-        if (cittaPartenza == null || cittaPartenza.trim().isEmpty()) {
-            System.err.println("❌ Città di partenza non può essere vuota");
+                                           Calendar dataAndata, int numeroPasseggeri)
+    {
+        if (cittaPartenza == null || cittaPartenza.trim().isEmpty())
+        {
+            System.err.println("Città di partenza non può essere vuota");
             return false;
         }
 
-        if (cittaArrivo == null || cittaArrivo.trim().isEmpty()) {
-            System.err.println("❌ Città di arrivo non può essere vuota");
+        if (cittaArrivo == null || cittaArrivo.trim().isEmpty())
+        {
+            System.err.println("Città di arrivo non può essere vuota");
             return false;
         }
 
-        if (cittaPartenza.trim().equalsIgnoreCase(cittaArrivo.trim())) {
-            System.err.println("❌ Città di partenza e arrivo devono essere diverse");
+        if (cittaPartenza.trim().equalsIgnoreCase(cittaArrivo.trim()))
+        {
+            System.err.println("Città di partenza e arrivo devono essere diverse");
             return false;
         }
 
-        if (dataAndata == null) {
-            System.err.println("❌ Data di andata non può essere vuota");
+        if (dataAndata == null)
+        {
+            System.err.println("Data di andata non può essere vuota");
             return false;
         }
 
-        // Controlla che la data non sia nel passato
+        //Controllo che la data non sia nel passato
         Calendar oggi = Calendar.getInstance();
-        if (dataAndata.before(oggi)) {
-            System.err.println("❌ Non puoi cercare viaggi nel passato");
+        if (dataAndata.before(oggi))
+        {
+            System.err.println("Non puoi cercare viaggi nel passato");
             return false;
         }
 
-        if (numeroPasseggeri <= 0) {
-            System.err.println("❌ Numero passeggeri deve essere maggiore di 0");
+        if (numeroPasseggeri <= 0)
+        {
+            System.err.println("Numero passeggeri deve essere maggiore di 0");
             return false;
         }
 
         return true;
     }
 
-    /**
-     * Mostra un riepilogo dei risultati di ricerca
-     */
-    private void mostraRiepilogoRisultati(List<ViaggioDTO> viaggi) {
-        System.out.println("┌─────────────────────────────────────────────────────────┐");
-        System.out.println("│                    RISULTATI RICERCA                   │");
-        System.out.println("└─────────────────────────────────────────────────────────┘");
+    private void mostraRiepilogoRisultati(List<ViaggioDTO> viaggi)
+    {
+        System.out.println("Risultati ricerca viaggio:\n");
 
-        for (int i = 0; i < Math.min(viaggi.size(), 5); i++) { // Mostra max 5
+        for (int i = 0; i < viaggi.size() - 1; i++)
+        {
             ViaggioDTO v = viaggi.get(i);
-            System.out.printf("🚂 %s → %s | %s | Posti: %d%n",
+            System.out.printf("%s → %s | %s | Posti: %d%n",
                     v.getCittaPartenza(),
                     v.getCittaArrivo(),
                     formatCalendar(v.getInizio()),
@@ -211,25 +208,14 @@ public class ViaggioController
             );
         }
 
-        if (viaggi.size() > 5) {
-            System.out.println("... e altri " + (viaggi.size() - 5) + " viaggi");
-        }
-
-        System.out.println("💡 Seleziona un viaggio per vedere i dettagli completi");
+        System.out.println("Seleziona un viaggio per vedere i dettagli completi");
     }
 
-    /**
-     * Formatta una data/ora per la visualizzazione
-     */
-    private String formatCalendar(Calendar cal) {
+    private String formatCalendar(Calendar cal)
+    {
         if (cal == null) return "N/A";
 
-        return String.format("%02d/%02d/%d %02d:%02d",
-                cal.get(Calendar.DAY_OF_MONTH),
-                cal.get(Calendar.MONTH) + 1,
-                cal.get(Calendar.YEAR),
-                cal.get(Calendar.HOUR_OF_DAY),
-                cal.get(Calendar.MINUTE)
-        );
+        return ""+cal.get(Calendar.DAY_OF_MONTH)+"/"+cal.get(Calendar.MONTH) + 1+"/"+ cal.get(Calendar.YEAR)+
+                " "+ cal.get(Calendar.HOUR_OF_DAY) + ":"+cal.get(Calendar.MINUTE);
     }
 }

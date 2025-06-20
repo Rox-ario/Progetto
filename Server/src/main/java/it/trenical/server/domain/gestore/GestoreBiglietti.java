@@ -206,7 +206,7 @@ public class GestoreBiglietti
         return instance;
     }
 
-    public void creaBiglietto(String IDViaggio, String IDUtente, ClasseServizio classeServizio)
+    public Biglietto creaBiglietto(String IDViaggio, String IDUtente, ClasseServizio classeServizio)
     {
         GestoreViaggi gv = GestoreViaggi.getInstance();
         GestoreClienti gc = GestoreClienti.getInstance();
@@ -227,6 +227,7 @@ public class GestoreBiglietti
         b.applicaPromozione(clienteBiglietto);
 
         aggiungiBiglietto(b, IDViaggio, IDUtente);
+        return b;
     }
 
     private void aggiungiBiglietto(Biglietto b, String IDViaggio, String IDUtente)

@@ -1,17 +1,23 @@
 package it.trenical.server.grpc;
 
+import it.trenical.server.command.biglietto.AssegnaBiglietto;
+import it.trenical.server.command.biglietto.CancellaBiglietto;
 import it.trenical.server.command.biglietto.ComandoBiglietto;
+import it.trenical.server.command.biglietto.PagaBiglietto;
 import it.trenical.server.command.cliente.*;
 import it.trenical.server.command.promozione.PromozioneCommand;
 import it.trenical.server.command.viaggio.ComandoViaggio;
+import it.trenical.server.domain.Biglietto;
+import it.trenical.server.domain.FiltroPasseggeri;
+import it.trenical.server.domain.Viaggio;
 import it.trenical.server.domain.enumerations.ClasseServizio;
+import it.trenical.server.domain.gestore.GestoreBiglietti;
 import it.trenical.server.domain.gestore.MotoreRicercaViaggi;
-import it.trenical.server.dto.ClienteDTO;
-import it.trenical.server.dto.ModificaClienteDTO;
-import it.trenical.server.dto.NotificaDTO;
-import it.trenical.server.dto.NotificheClienteDTO;
+import it.trenical.server.dto.*;
+import it.trenical.server.utils.Assembler;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ControllerGRPC
 {
@@ -187,6 +193,145 @@ public class ControllerGRPC
         }
     }
 
+    public static String acquistaBiglietto(String idViaggio, String idCliente, ClasseServizio classeServizio) throws Exception
+    {
+        try
+        {
+            if (idViaggio == null || idViaggio.trim().isEmpty())
+            {
+                throw new IllegalArgumentException("ID viaggio non può essere vuoto");
+            }
+            if (idCliente == null || idCliente.trim().isEmpty())
+            {
+                throw new IllegalArgumentException("ID cliente non può essere vuoto");
+            }
+            if (classeServizio == null)
+            {
+                throw new IllegalArgumentException("Classe di servizio non può essere nulla");
+            }
 
+            System.out.println("Inizio acquisto biglietto per viaggio: " + idViaggio);
+            System.out.println("Cliente: " + idCliente + " | Classe: " + classeServizio);
+
+
+            AssegnaBiglietto commandAssegna = new AssegnaBiglietto(idViaggio, idCliente, classeServizio);
+            eseguiComandoBiglietto(commandAssegna);
+
+            // recuper il biglietto
+            Biglietto bigliettoCreato = commandAssegna.getBiglietto();
+
+            if (bigliettoCreato == null)
+            {
+                throw new RuntimeException("Errore interno: nessun biglietto restituito dal command di assegnazione");
+            }
+
+            String idBiglietto = bigliettoCreato.getID();
+
+            try
+            {
+                PagaBiglietto commandPaga = new PagaBiglietto(idBiglietto);
+                eseguiComandoBiglietto(commandPaga);
+
+                System.out.println("ACQUISTO COMPLETATO CON SUCCESSO!");
+                System.out.println("ID Biglietto: " + idBiglietto);
+                System.out.println("Importo addebitato: €" + String.format("%.2f", bigliettoCreato.getPrezzo()));
+                System.out.println("Classe: " + classeServizio);
+
+                return idBiglietto;
+
+            }
+            catch (Exception pagamentoError)
+            {
+                //se il pagamento fallisce
+                System.err.println("Pagamento fallito: " + pagamentoError.getMessage());
+                System.out.println("Annullamento biglietto in corso...");
+
+                try
+                {
+                    CancellaBiglietto commandCancella = new CancellaBiglietto(idBiglietto);
+                    eseguiComandoBiglietto(commandCancella);
+                    System.out.println("✅ Rollback biglietto completato");
+                }
+                catch (Exception rollbackError)
+                {
+                    System.err.println("ERRORE CRITICO: Impossibile cancellare il biglietto dopo pagamento fallito!");
+                    System.err.println("ID Biglietto rimasto orfano: " + idBiglietto);
+                }
+
+                throw new Exception("Acquisto fallito durante il pagamento: " + pagamentoError.getMessage());
+            }
+
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore durante l'acquisto biglietto: " + e.getMessage());
+            throw new Exception("Acquisto biglietto fallito: " + e.getMessage());
+        }
+    }
+
+    public static List<ViaggioDTO> cercaViaggio(FiltroPasseggeri filtro) throws Exception
+    {
+        try
+        {
+            if (filtro == null)
+            {
+                throw new IllegalArgumentException("Filtro di ricerca non può essere nullo");
+            }
+
+            if (mrv == null)
+            {
+                mrv = MotoreRicercaViaggi.getInstance();
+            }
+
+            System.out.println("Ricerca viaggi da " + filtro.getCittaDiAndata() +
+                    " a " + filtro.getCittaDiArrivo() +
+                    " per " + filtro.getNumero() + " passeggeri");
+
+            List<Viaggio> viaggiTrovati = mrv.cercaViaggio(filtro);
+
+            //converto in DTO per il client
+            List<ViaggioDTO> viaggiDTO = viaggiTrovati.stream()
+                    .map(Assembler::viaggioToDTO)
+                    .collect(Collectors.toList());
+
+            System.out.println("Ricerca completata: trovati " + viaggiDTO.size() + " viaggi");
+
+            if (viaggiDTO.isEmpty())
+            {
+                System.out.println("Suggerimento: prova a modificare le date o le preferenze di viaggio");
+            }
+
+            return viaggiDTO;
+
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore nella ricerca viaggi: " + e.getMessage());
+            throw new Exception("Ricerca viaggi fallita: " + e.getMessage());
+        }
+    }
+
+    public static String getStatoSistema()
+    {
+        try
+        {
+            StringBuilder stato = new StringBuilder();
+            stato.append("SISTEMA TRENICAL - STATO OPERATIVO\n");
+            stato.append("=======================================\n");
+
+            //info sui gestori
+            GestoreBiglietti gb = GestoreBiglietti.getInstance();
+            stato.append("Biglietti attivi: ").append(gb.getBigliettiAttivi().size()).append("\n");
+
+            stato.append("Sistema operativo e pronto per le richieste\n");
+
+            return stato.toString();
+
+        }
+        catch (Exception e)
+        {
+            return "Errore nel recupero stato sistema: " + e.getMessage();
+        }
+    }
 }
 
