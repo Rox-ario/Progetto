@@ -90,14 +90,12 @@ public class BigliettoDTO
 
     @Override
     public String toString() {
-        return "BigliettoDTO{" +
-                "ID='" + ID + '\'' +
+        return "ID='" + ID + '\'' +
                 ", IDViaggio='" + IDViaggio + '\'' +
                 ", classeServizio=" + classeServizio +
                 ", IDCliente='" + IDCliente + '\'' +
                 ", dataAcquisto=" + dataAcquisto +
                 ", statoBiglietto=" + statoBiglietto +
-                ", prezzo=" + prezzo +
-                '}';
+                ", prezzo=" + prezzo;
     }
 }
