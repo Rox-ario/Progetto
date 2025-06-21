@@ -4,14 +4,11 @@ import it.trenical.server.command.biglietto.*;
 import it.trenical.server.command.cliente.*;
 import it.trenical.server.command.promozione.PromozioneCommand;
 import it.trenical.server.command.viaggio.ComandoViaggio;
-import it.trenical.server.domain.Biglietto;
-import it.trenical.server.domain.FiltroPasseggeri;
-import it.trenical.server.domain.Viaggio;
+import it.trenical.server.domain.*;
+import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.StatoBiglietto;
-import it.trenical.server.domain.gestore.GestoreBiglietti;
-import it.trenical.server.domain.gestore.GestoreViaggi;
-import it.trenical.server.domain.gestore.MotoreRicercaViaggi;
+import it.trenical.server.domain.gestore.*;
 import it.trenical.server.dto.*;
 import it.trenical.server.utils.Assembler;
 
@@ -442,7 +439,7 @@ public class ControllerGRPC
         }
     }
 
-    private String formatCalendar(Calendar cal)
+    private static String formatCalendar(Calendar cal)
     {
         if (cal == null) return "N/A";
 
@@ -474,5 +471,75 @@ public class ControllerGRPC
             throw new Exception("Impossibile filtrare i biglietti: " + e.getMessage());
         }
     }
+
+    public static List<String> getPromozioniAttive(String idCliente) throws Exception
+    {
+        try
+        {
+            if (idCliente == null || idCliente.trim().isEmpty())
+            {
+                throw new IllegalArgumentException("ID cliente non può essere vuoto");
+            }
+
+            GestoreClienti gc = GestoreClienti.getInstance();
+            Cliente cliente = gc.getClienteById(idCliente);
+
+            if (cliente == null)
+            {
+                throw new IllegalArgumentException("Cliente non trovato: " + idCliente);
+            }
+
+            CatalogoPromozione cp = CatalogoPromozione.getInstance();
+            List<Promozione> promozioniAttive = cp.getPromozioniAttive();
+
+            List<String> descrizioni = new ArrayList<>();
+
+            for (Promozione promo : promozioniAttive)
+            {
+                StringBuilder desc = new StringBuilder();
+
+                desc.append("🎯 ").append(promo.getTipo());
+                desc.append(" - Sconto: ").append(String.format("%.0f%%", promo.getPercentualeSconto() * 100));
+
+                if (promo.getTipo().name().equals("FEDELTA"))
+                {
+                    if (cliente.haAdesioneFedelta())
+                    {
+                        desc.append(" ⭐ (Applicabile - sei cliente fedeltà!)");
+                    }
+                    else
+                    {
+                        desc.append(" (Non applicabile - richiede fedeltà)");
+                    }
+                }
+                else if (promo.getTipo().name().equals("TRATTA"))
+                {
+                    PromozioneTratta pt = (PromozioneTratta) promo;
+                    desc.append(" su ").append(pt.getTratta().getStazionePartenza().getCitta())
+                            .append(" -> ").append(pt.getTratta().getStazioneArrivo().getCitta());
+                }
+                else if (promo.getTipo().name().equals("TRENO"))
+                {
+                    PromozioneTreno pt = (PromozioneTreno) promo;
+                    desc.append(" per treni ").append(pt.getTipoTreno());
+                }
+
+                desc.append(" (fino al ").append(formatCalendar(promo.getDataFine())).append(")");
+
+                descrizioni.add(desc.toString());
+            }
+
+            System.out.println("Recuperate " + descrizioni.size() + " promozioni attive");
+            return descrizioni;
+
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore nel recupero promozioni: " + e.getMessage());
+            throw new Exception("Impossibile recuperare le promozioni: " + e.getMessage());
+        }
+    }
+
+
 }
 
