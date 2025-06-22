@@ -539,7 +539,5 @@ public class ControllerGRPC
             throw new Exception("Impossibile recuperare le promozioni: " + e.getMessage());
         }
     }
-
-
 }
 

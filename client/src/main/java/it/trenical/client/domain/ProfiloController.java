@@ -9,9 +9,9 @@ import it.trenical.server.grpc.ControllerGRPC;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Controller per la gestione del profilo utente.
- * Permette di visualizzare e modificare i dati del profilo, gestire notifiche e promozioni.
+/*
+ Controller per la gestione del profilo utente.
+ Permette di visualizzare e modificare i dati del profilo, gestire notifiche e promozioni.
  */
 public class ProfiloController
 {

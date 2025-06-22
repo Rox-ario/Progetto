@@ -11,9 +11,9 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Controller per la gestione dei biglietti dell'utente.
- * Permette di visualizzare, modificare e cancellare i biglietti esistenti.
+/*
+ Controller per la gestione dei biglietti dell'utente.
+ Permette di visualizzare, modificare e cancellare i biglietti esistenti.
  */
 public class BigliettoController
 {
