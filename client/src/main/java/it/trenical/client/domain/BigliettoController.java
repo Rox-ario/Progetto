@@ -264,13 +264,13 @@ public class BigliettoController
 
         for(BigliettoDTO bigliettoDTO : biglietti)
         {
-            switch (bigliettoDTO.getStatoBiglietto())
+            switch (bigliettoDTO.getStatoBiglietto().name())
             {
-                case StatoBiglietto.PAGATO : pagati+=1;
+                case "PAGATO" : pagati+=1;
                 break;
-                case StatoBiglietto.ANNULLATO: annullati += 1;
+                case "ANNULLATO": annullati += 1;
                 break;
-                case StatoBiglietto.NON_PAGATO: nonPagati += 1;
+                case "NON_PAGATO": nonPagati += 1;
                 break;
             }
         }

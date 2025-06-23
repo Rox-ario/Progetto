@@ -644,8 +644,7 @@ public class ClientCLI
     private void mostraBenvenuto()
     {
         System.out.println("\n" + "===================================================================================");
-        System.out.println("BENVENUTO IN TRENICAL! 🚂");
-        System.out.println("Sistema di prenotazione biglietti ferroviari");
+        System.out.println("BENVENUTO IN TRENICAL!");
         System.out.println("===================================================================================");
     }
 
