@@ -1,0 +1,166 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "it.trenical.grpc";
+option java_outer_classname = "TrenicalProto";
+
+package treniCal;
+
+service AuthService
+{
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Registra(RegistraRequest) returns (RegistraResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+}
+
+service ViaggioService
+{
+  rpc CercaViaggi(CercaViaggiRequest) returns (CercaViaggiResponse);
+  rpc GetDettagliViaggio(GetViaggioRequest) returns (ViaggioInfo);
+}
+
+service BigliettoService
+{
+  rpc AcquistaBiglietto(AcquistaBigliettoRequest) returns (AcquistaBigliettoResponse);
+  rpc GetBigliettiCliente(GetBigliettiRequest) returns (GetBigliettiResponse);
+  rpc ModificaBiglietto(ModificaBigliettoRequest) returns (ModificaBigliettoResponse);
+  rpc CancellaBiglietto(CancellaBigliettoRequest) returns (CancellaBigliettoResponse);
+}
+
+
+message LoginRequest
+{
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse
+{
+  bool success = 1;
+  string message = 2;
+  ClienteInfo cliente = 3;
+}
+
+message RegistraRequest
+{
+  string nome = 1;
+  string cognome = 2;
+  string email = 3;
+  string password = 4;
+  bool is_fedelta = 5;
+  bool ricevi_notifiche = 6;
+  bool ricevi_promozioni = 7;
+}
+
+message RegistraResponse
+{
+  bool success = 1;
+  string message = 2;
+}
+
+message LogoutRequest
+{
+  string cliente_id = 1;
+}
+
+message LogoutResponse
+{
+  bool success = 1;
+}
+
+message CercaViaggiRequest
+{
+  string citta_partenza = 1;
+  string citta_arrivo = 2;
+  int64 data_viaggio = 3;
+  int32 numero_passeggeri = 4;
+  string classe_servizio = 5;
+  string tipo_treno = 6;
+}
+
+message CercaViaggiResponse
+{
+  repeated ViaggioInfo viaggi = 1;
+}
+
+message GetViaggioRequest
+{
+  string viaggio_id = 1;
+}
+
+message ViaggioInfo
+{
+  string id = 1;
+  string citta_partenza = 2;
+  string citta_arrivo = 3;
+  int64 orario_partenza = 4;
+  int64 orario_arrivo = 5;
+  string stato = 6;
+  int32 posti_disponibili = 7;
+  string tipo_treno = 8;
+}
+
+message AcquistaBigliettoRequest
+{
+  string viaggio_id = 1;
+  string cliente_id = 2;
+  string classe_servizio = 3;
+}
+
+message AcquistaBigliettoResponse
+{
+  bool success = 1;
+  string message = 2;
+  string biglietto_id = 3;
+}
+
+message GetBigliettiRequest
+{
+  string cliente_id = 1;
+}
+
+message GetBigliettiResponse
+{
+  repeated BigliettoInfo biglietti = 1;
+}
+
+message ModificaBigliettoRequest
+{
+  string biglietto_id = 1;
+  string nuova_classe = 2;
+}
+
+message ModificaBigliettoResponse
+{
+  bool success = 1;
+  string message = 2;
+}
+
+message CancellaBigliettoRequest
+{
+  string biglietto_id = 1;
+}
+
+message CancellaBigliettoResponse
+{
+  bool success = 1;
+  string message = 2;
+}
+
+message ClienteInfo
+{
+  string id = 1;
+  string nome = 2;
+  string cognome = 3;
+  string email = 4;
+  bool is_fedelta = 5;
+}
+
+message BigliettoInfo
+{
+  string id = 1;
+  string viaggio_id = 2;
+  string classe_servizio = 3;
+  double prezzo = 4;
+  string stato = 5;
+  int64 data_acquisto = 6;
+}
