@@ -2,12 +2,15 @@ package it.trenical.server.grpc;
 
 import it.trenical.server.command.biglietto.*;
 import it.trenical.server.command.cliente.*;
+import it.trenical.server.command.promozione.CreaPromozioneCommand;
 import it.trenical.server.command.promozione.PromozioneCommand;
 import it.trenical.server.command.viaggio.ComandoViaggio;
 import it.trenical.server.domain.*;
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.StatoBiglietto;
+import it.trenical.server.domain.enumerations.TipoPromozione;
+import it.trenical.server.domain.enumerations.TipoTreno;
 import it.trenical.server.domain.gestore.*;
 import it.trenical.server.dto.*;
 import it.trenical.server.utils.Assembler;
@@ -17,11 +20,23 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
+//facade + singleton
 public class ControllerGRPC
 {
-    private static MotoreRicercaViaggi mrv;
+    private static ControllerGRPC instance;
+    private MotoreRicercaViaggi mrv;
 
-    private static void eseguiComandoCliente(ComandoCliente cmd)
+    private ControllerGRPC(){this.mrv = MotoreRicercaViaggi.getInstance();}
+
+    public static synchronized ControllerGRPC getInstance() {
+        if (instance == null)
+        {
+            instance = new ControllerGRPC();
+        }
+        return instance;
+    }
+
+    private void eseguiComandoCliente(ComandoCliente cmd)
     {
         try
         {
@@ -32,7 +47,7 @@ public class ControllerGRPC
         }
     }
 
-    private static void eseguiComandoViaggio(ComandoViaggio cmd)
+    private void eseguiComandoViaggio(ComandoViaggio cmd)
     {
         try
         {
@@ -43,7 +58,7 @@ public class ControllerGRPC
         }
     }
 
-    private static void eseguiComandoPromozione(PromozioneCommand cmd)
+    private void eseguiComandoPromozione(PromozioneCommand cmd)
     {
         try
         {
@@ -54,7 +69,7 @@ public class ControllerGRPC
         }
     }
 
-    private static void eseguiComandoBiglietto(ComandoBiglietto cmd)
+    private void eseguiComandoBiglietto(ComandoBiglietto cmd)
     {
         try
         {
@@ -65,7 +80,7 @@ public class ControllerGRPC
         }
     }
 
-    public static void registraCliente(ClienteDTO clienteDTO) throws Exception
+    public void registraCliente(ClienteDTO clienteDTO) throws Exception
     {
         try
         {
@@ -81,7 +96,7 @@ public class ControllerGRPC
         }
     }
 
-    public static ClienteDTO login(String email, String password) throws Exception
+    public ClienteDTO login(String email, String password) throws Exception
     {
         try
         {
@@ -101,7 +116,7 @@ public class ControllerGRPC
         }
     }
 
-    public static ClienteDTO getProfiloCliente(String idCliente) throws Exception
+    public ClienteDTO getProfiloCliente(String idCliente) throws Exception
     {
         try
         {
@@ -121,7 +136,7 @@ public class ControllerGRPC
         }
     }
 
-    public static void modificaProfiloCliente(ModificaClienteDTO modificaDTO) throws Exception
+    public void modificaProfiloCliente(ModificaClienteDTO modificaDTO) throws Exception
     {
         try
         {
@@ -138,7 +153,7 @@ public class ControllerGRPC
         }
     }
 
-    public static void aderisciAFedelta(String idCliente, boolean attivaNotifichePromozioni) throws Exception
+    public void aderisciAFedelta(String idCliente, boolean attivaNotifichePromozioni) throws Exception
     {
         try
         {
@@ -155,7 +170,7 @@ public class ControllerGRPC
     }
 
 
-    public static void rimuoviFedelta(String idCliente) throws Exception
+    public void rimuoviFedelta(String idCliente) throws Exception
     {
         try
         {
@@ -171,7 +186,7 @@ public class ControllerGRPC
         }
     }
 
-    public static List<NotificaDTO> getNotifiche(String idCliente, boolean soloNonLette) throws Exception
+    public List<NotificaDTO> getNotifiche(String idCliente, boolean soloNonLette) throws Exception
     {
         try
         {
@@ -191,7 +206,7 @@ public class ControllerGRPC
         }
     }
 
-    public static List<ViaggioDTO> cercaViaggio(FiltroPasseggeri filtro) throws Exception
+    public List<ViaggioDTO> cercaViaggio(FiltroPasseggeri filtro) throws Exception
     {
         try
         {
@@ -235,31 +250,8 @@ public class ControllerGRPC
         }
     }
 
-    public static String getStatoSistema()
-    {
-        try
-        {
-            StringBuilder stato = new StringBuilder();
-            stato.append("SISTEMA TRENICAL - STATO OPERATIVO\n");
-            stato.append("=======================================\n");
 
-            //info sui gestori
-            GestoreBiglietti gb = GestoreBiglietti.getInstance();
-            stato.append("Biglietti attivi: ").append(gb.getBigliettiAttivi().size()).append("\n");
-
-            stato.append("Sistema operativo e pronto per le richieste\n");
-
-            return stato.toString();
-
-        }
-        catch (Exception e)
-        {
-            return "Errore nel recupero stato sistema: " + e.getMessage();
-        }
-    }
-
-
-    public static void acquistaBiglietto(String idViaggio, String idCliente, ClasseServizio classeServizio) throws Exception
+    public void acquistaBiglietto(String idViaggio, String idCliente, ClasseServizio classeServizio) throws Exception
     {
         try
         {
@@ -331,7 +323,7 @@ public class ControllerGRPC
     }
 
 
-    public static void modificaBiglietto(String idBiglietto, ClasseServizio nuovaClasse) throws Exception
+    public void modificaBiglietto(String idBiglietto, ClasseServizio nuovaClasse) throws Exception
     {
         try
         {
@@ -360,7 +352,7 @@ public class ControllerGRPC
         }
     }
 
-    public static void cancellaBiglietto(String idBiglietto) throws Exception
+    public void cancellaBiglietto(String idBiglietto) throws Exception
     {
         try
         {
@@ -383,7 +375,7 @@ public class ControllerGRPC
         }
     }
 
-    public static List<BigliettoDTO> getBigliettiCliente(String idCliente) throws Exception
+    public List<BigliettoDTO> getBigliettiCliente(String idCliente) throws Exception
     {
         try {
             if (idCliente == null || idCliente.trim().isEmpty())
@@ -411,7 +403,7 @@ public class ControllerGRPC
     }
 
 
-    public static BigliettoDTO getBiglietto(String idBiglietto) throws Exception
+    public BigliettoDTO getBiglietto(String idBiglietto) throws Exception
     {
         try
         {
@@ -439,7 +431,7 @@ public class ControllerGRPC
         }
     }
 
-    private static String formatCalendar(Calendar cal)
+    private String formatCalendar(Calendar cal)
     {
         if (cal == null) return "N/A";
 
@@ -448,7 +440,7 @@ public class ControllerGRPC
     }
 
 
-    public static List<BigliettoDTO> getBigliettiPerStato(String idCliente, String stato) throws Exception
+    public List<BigliettoDTO> getBigliettiPerStato(String idCliente, String stato) throws Exception
     {
         try
         {
@@ -472,7 +464,7 @@ public class ControllerGRPC
         }
     }
 
-    public static List<String> getPromozioniAttive(String idCliente) throws Exception
+    public List<String> getPromozioniAttive(String idCliente) throws Exception
     {
         try
         {
@@ -497,15 +489,13 @@ public class ControllerGRPC
             for (Promozione promo : promozioniAttive)
             {
                 StringBuilder desc = new StringBuilder();
-
-                desc.append("🎯 ").append(promo.getTipo());
-                desc.append(" - Sconto: ").append(String.format("%.0f%%", promo.getPercentualeSconto() * 100));
+                desc.append("Sconto: ").append(String.format("%.0f%%", promo.getPercentualeSconto() * 100));
 
                 if (promo.getTipo().name().equals("FEDELTA"))
                 {
                     if (cliente.haAdesioneFedelta())
                     {
-                        desc.append(" ⭐ (Applicabile - sei cliente fedeltà!)");
+                        desc.append(" (Applicabile - sei cliente fedeltà!)");
                     }
                     else
                     {
@@ -539,5 +529,39 @@ public class ControllerGRPC
             throw new Exception("Impossibile recuperare le promozioni: " + e.getMessage());
         }
     }
+
+
+    public void aggiungiTreno(String id, TipoTreno tipo) throws Exception
+    {
+        GestoreViaggi gv = GestoreViaggi.getInstance();
+        gv.aggiungiTreno(id, tipo);
+        System.out.println("Treno aggiunto: " + id + " (" + tipo + ")");
+    }
+
+    public void aggiungiTratta(Tratta tratta) throws Exception
+    {
+        GestoreViaggi gv = GestoreViaggi.getInstance();
+        gv.aggiungiTratta(tratta);
+        System.out.println("Tratta aggiunta: " + tratta.getId());
+    }
+
+    public void creaPromozione(TipoPromozione tipo, Calendar dataInizio,
+                               Calendar dataFine, double sconto,
+                               Tratta tratta, Treno treno) throws Exception
+    {
+        try
+        {
+            CreaPromozioneCommand command = new CreaPromozioneCommand(
+                    tipo, dataInizio, dataFine, sconto, tratta, treno
+            );
+            eseguiComandoPromozione(command);
+
+            System.out.println("Promozione creata: " + tipo);
+
+        } catch (Exception e) {
+            throw new Exception("Impossibile creare promozione: " + e.getMessage());
+        }
+    }
+
 }
 
