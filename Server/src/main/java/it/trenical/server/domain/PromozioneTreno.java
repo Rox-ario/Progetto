@@ -118,4 +118,18 @@ public class PromozioneTreno implements Promozione
     {
         return tipoTreno;
     }
+
+    @Override
+    public String toString() {
+        return "PromozioneTreno{" +
+                ", tipo=" + tipo +
+                "statoPromozione=" + statoPromozione +
+                ", ID='" + ID  +
+                ", dataInizio=" + dataInizio +
+                ", dataFine=" + dataFine +
+                ", percentualeSconto=" + percentualeSconto +
+                ", tipoTreno=" + tipoTreno +
+                '}';
+    }
 }
+

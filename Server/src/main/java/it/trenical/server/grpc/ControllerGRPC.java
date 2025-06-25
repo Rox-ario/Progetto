@@ -617,7 +617,17 @@ public class ControllerGRPC
 
     public List<Viaggio> getViaggiPerData(Calendar dataDa, Calendar dataA)
     {
-        return GestoreViaggi.getInstance().getViaggiPerData();
+        return GestoreViaggi.getInstance().getViaggiPerData(dataDa, dataA);
+    }
+
+    public List<Promozione> getPromoPerTipo(TipoPromozione tipo)
+    {
+        return CatalogoPromozione.getInstance().getPromoPerTipo(tipo);
+    }
+
+    public List<Promozione> getPromo()
+    {
+        return CatalogoPromozione.getInstance().getTutteLePromozioni();
     }
 }
 

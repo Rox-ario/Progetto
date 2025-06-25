@@ -1,10 +1,8 @@
 package it.trenical.server.admin;
 
-import it.trenical.server.domain.Stazione;
-import it.trenical.server.domain.Tratta;
-import it.trenical.server.domain.Treno;
-import it.trenical.server.domain.Viaggio;
+import it.trenical.server.domain.*;
 import it.trenical.server.domain.enumerations.StatoViaggio;
+import it.trenical.server.domain.enumerations.TipoPromozione;
 import it.trenical.server.domain.enumerations.TipoTreno;
 import it.trenical.server.domain.gestore.GestoreViaggi;
 import it.trenical.server.grpc.ControllerGRPC;
@@ -87,11 +85,10 @@ public class AdminCLI
         System.out.println("1.Gestione Treni");
         System.out.println("2.Gestione Tratte");
         System.out.println("3.Gestione Viaggi");
-        System.out.println("4.Gestione Biglietti");
-        System.out.println("5.Gestione Promozioni");
-        System.out.println("6.Gestione Clienti");
-        System.out.println("7.Gestione Stazioni");
-        System.out.println("8.Utilità Database");
+        System.out.println("4.Gestione Promozioni");
+        System.out.println("5.Gestione Clienti");
+        System.out.println("6.Gestione Stazioni");
+        System.out.println("7.Utilità Database");
         System.out.println("0.Esci");
         System.out.print("\nScelta: ");
     }
@@ -103,11 +100,10 @@ public class AdminCLI
             case 1: menuTreni(); break;
             case 2: menuTratte(); break;
             case 3: menuViaggi(); break;
-            case 4: menuBiglietti(); break;
-            case 5: menuPromozioni(); break;
-            case 6: menuClienti(); break;
-            case 7 : menuStazioni(); break;
-            case 8: menuDatabase(); break;
+            case 4: menuPromozioni(); break;
+            case 5: menuClienti(); break;
+            case 6 : menuStazioni(); break;
+            case 7: menuDatabase(); break;
             case 0: running = false; break;
             default: System.out.println("Scelta non valida");
         }
@@ -238,7 +234,7 @@ public class AdminCLI
         while(partenza == null)
         {
             System.out.println("Spiacente, stazione "+ idStazionePartenza+" non trovata.\nPer riprovare prema 1");
-            int scelta = Integer.parseInt(scanner.nextLine());
+            int scelta = leggiScelta();
             if(scelta == 1)
             {
                 idStazionePartenza = scanner.nextLine();
@@ -259,7 +255,7 @@ public class AdminCLI
         while(arrivo == null)
         {
             System.out.println("Spiacente, stazione "+ idStazioneArrivo+" non trovata.\nPer riprovare prema 1");
-            int scelta = Integer.parseInt(scanner.nextLine());
+            int scelta = leggiScelta();
             if(scelta == 1)
             {
                 idStazioneArrivo = scanner.nextLine();
@@ -339,7 +335,7 @@ public class AdminCLI
         while(città == null || nome == null)
         {
             System.out.println("Dati inseriti in un formato non applicabile.\nPer riprovare prema 1");
-            int scelta = Integer.parseInt(scanner.nextLine());
+            int scelta = leggiScelta();
             if(scelta == 1)
             {
                 System.out.println("Nome della citta': ");
@@ -359,7 +355,7 @@ public class AdminCLI
         while(binari == null || binari.isEmpty())
         {
             System.out.println("La lista di binari non può essere vuota, se desidera annullare l'intera operazione, prema 0");
-            int scelta = Integer.parseInt(scanner.nextLine());
+            int scelta = leggiScelta();
             if(scelta == 1)
             {
                 System.out.println("Tornando indietro...");
@@ -560,7 +556,7 @@ public class AdminCLI
         System.out.println("5. Viaggi per data");
         System.out.println("0. Torna indietro");
 
-        int scelta = Integer.parseInt(scanner.nextLine());
+        int scelta = leggiScelta();
         switch (scelta)
         {
             case 1: cercaViaggi(StatoViaggio.PROGRAMMATO); break;
@@ -605,7 +601,7 @@ public class AdminCLI
         while(da == null || a == null)
         {
             System.out.println("Le date inserite non sono corrette. Premere 1 per riprovare (0 per tornare indietro)");
-            int scelta = Integer.parseInt(scanner.nextLine());
+            int scelta = leggiScelta();
             if(scelta == 1)
             {
                 System.out.println("Da: ");
@@ -640,19 +636,75 @@ public class AdminCLI
         }
     }
 
+    private void menuPromozioni()
+    {
+        System.out.println("\nGESTIONE PROMOZIONI");
+        System.out.println("1. Crea Promozione");
+        System.out.println("2. Visualizza tutte le promozioni");
+        System.out.println("3. Visualizza promo per categoria");
+        System.out.println("0. torna indietro");
 
-    // ==================== ALTRI MENU (PLACEHOLDER) ====================
-
-    private void menuBiglietti() {
-        System.out.println("\n🎫 GESTIONE BIGLIETTI");
-        System.out.println("In sviluppo...");
+        int scelta = leggiScelta();
+        switch (scelta)
+        {
+            case 1: creaPromozione(); break;
+            case 2: visualizzaPromozioni(); break;
+            case 3: visualizzaPromoPerCategoria(); break;
+            case 0: System.out.println("Tornando indietro..."); return;
+            default: System.out.println("Scelta non valida"); return;
+        }
         pausa();
     }
 
-    private void menuPromozioni() {
-        System.out.println("\n🎯 GESTIONE PROMOZIONI");
-        System.out.println("In sviluppo...");
-        pausa();
+    private void visualizzaPromoPerCategoria()
+    {
+        System.out.println("\nELENCO PROMOZIONI PER CATEGORIA");
+        try
+        {
+            System.out.println("Inserisci Categoria: ");
+            TipoPromozione tipo = TipoPromozione.valueOf(scanner.nextLine());
+
+            List<Promozione> promozioni = controllerGRPC.getPromoPerTipo(tipo);
+            StringBuilder sb = new StringBuilder();
+            sb.append("[\n");
+            for(Promozione p : promozioni)
+            {
+                sb.append(p);
+            }
+            sb.append("\n]");
+            System.out.println(sb.toString());
+
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore: "+e.getMessage());
+        }
+    }
+
+    private void visualizzaPromozioni()
+    {
+        System.out.println("\nELENCO PROMOZIONI");
+        try
+        {
+            List<Promozione> promozioni = controllerGRPC.getPromo();
+            StringBuilder sb = new StringBuilder();
+            sb.append("[\n");
+            for(Promozione p : promozioni)
+            {
+                sb.append(p);
+            }
+            sb.append("\n]");
+            System.out.println(sb.toString());
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore: "+e.getMessage());
+        }
+    }
+
+    private void creaPromozione()
+    {
+
     }
 
     private void menuClienti() {
@@ -685,14 +737,6 @@ public class AdminCLI
             return Integer.parseInt(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
             return 0;
-        }
-    }
-
-    private double leggiDouble() {
-        try {
-            return Double.parseDouble(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
-            return 0.0;
         }
     }
 

@@ -363,8 +363,6 @@ public class CatalogoPromozione
         }
     }
 
-
-
     public PromozioneTratta getPromozioneAttivaTratta(Tratta t)
     {
         List<Promozione> promoTratte = promozioniPerTipo.get(TipoPromozione.TRATTA);
@@ -437,5 +435,21 @@ public class CatalogoPromozione
         if (!clientiFedelta.isEmpty()) {
             promozione.notifica();
         }
+    }
+
+    public List<Promozione> getPromoPerTipo(TipoPromozione tipoPromozione)
+    {
+        List<Promozione> res = new ArrayList<>(promozioniPerTipo.get(tipoPromozione));
+        return res;
+    }
+
+    public List<Promozione> getTutteLePromozioni()
+    {
+        List<Promozione> promo = new ArrayList<>();
+        for(TipoPromozione tipo : promozioniPerTipo.keySet())
+        {
+            promo.addAll(promozioniPerTipo.get(tipo));
+        }
+        return promo;
     }
 }

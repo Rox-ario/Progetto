@@ -138,12 +138,13 @@ public class PromozioneFedelta extends SoggettoPromozione implements Promozione
 
     @Override
     public String toString() {
-        return "PromozioneFedelta{" +
+        return "[" +
+                ", tipo=" + tipo +
                 ", statoPromozione=" + statoPromozione +
-                ", ID='" + ID + '\'' +
+                ", ID='" + ID +
                 ", dataInizio=" + dataInizio +
                 ", dataFine=" + dataFine +
                 ", percentualeSconto=" + percentualeSconto +
-                '}';
+                ']';
     }
 }

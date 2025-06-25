@@ -703,7 +703,7 @@ public final class GestoreViaggi {
         return res;
     }
 
-    public List<Viaggio> getViaggioPerData(Calendar da, Calendar a)
+    public List<Viaggio> getViaggiPerData(Calendar da, Calendar a)
     {
         List<Viaggio> res = new ArrayList<>();
         for(Viaggio v : viaggi.values())

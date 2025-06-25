@@ -117,4 +117,17 @@ public class PromozioneTratta implements Promozione
     public Tratta getTratta() {
         return tratta;
     }
+
+    @Override
+    public String toString() {
+        return "[" +
+                ", tipo=" + tipo +
+                ", statoPromozione=" + statoPromozione +
+                ", ID='" + ID +
+                ", dataInizio=" + dataInizio +
+                ", dataFine=" + dataFine +
+                ", percentualeSconto=" + percentualeSconto +
+                ", tratta=" + tratta +
+                ']';
+    }
 }
