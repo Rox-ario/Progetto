@@ -29,18 +29,21 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
     public void esegui()
     {
         GestoreBiglietti gb = GestoreBiglietti.getInstance();
-        Biglietto b = gb.getBigliettoPerID(modificaBigliettoDTO.getIDBiglietto());
+        String idBiglietto = modificaBigliettoDTO.getIDBiglietto();
+
+        Biglietto b = gb.getBigliettoPerID(idBiglietto);
 
         if(b == null)
-            throw new IllegalArgumentException("Errore: il biglietto "+ modificaBigliettoDTO.getIDBiglietto() + " non esiste");
+            throw new IllegalArgumentException("Errore: il biglietto "+ idBiglietto + " non esiste");
         if(b.getStato() != StatoBiglietto.PAGATO)
-            throw new IllegalArgumentException("Errore: il biglietto "+ modificaBigliettoDTO.getIDBiglietto()+" non è stato ancora pagato");
+            throw new IllegalArgumentException("Errore: il biglietto "+ idBiglietto+" non è stato ancora pagato");
 
         ClasseServizio vecchiaClasse = b.getClasseServizio();
         ClasseServizio nuovaClasse = modificaBigliettoDTO.getClasseServizio();
         String idCliente = b.getIDCliente();
         String IDViaggio = b.getIDViaggio();
 
+        //ora controllo le cose relative al viaggio
         GestoreViaggi gv = GestoreViaggi.getInstance();
         Viaggio v = gv.getViaggio(IDViaggio);
         if(v == null)
@@ -48,11 +51,13 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
 
         //Controllo che il viaggio non sia già iniziato e ci siano posti disponibili
         Calendar now = Calendar.getInstance();
-        if(now.after(v.getInizioReale())) {
+        if(now.after(v.getInizioReale()))
+        {
             throw new IllegalArgumentException("Errore: il treno è già partito, impossibile modificare il biglietto");
         }
 
-        if(v.getPostiDisponibiliPerClasse(nuovaClasse) <= 0) {
+        if(v.getPostiDisponibiliPerClasse(nuovaClasse) <= 0)
+        {
             throw new IllegalArgumentException("Errore: non ci sono posti disponibili nella classe " + nuovaClasse);
         }
 
@@ -77,8 +82,8 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
         //Calcolo eventuali penali
         double penale = CalcolatorePenali.calcolaPenale(now, v.getInizioReale(), differenzaTariffaria);
 
-        //Applico il moltiplicatore per downgrade di classe se posso (sono stanco non ci capisco più molto)
-        if (differenzaTariffaria < 0)
+        //Applico il moltiplicatore per downgrade di classe se posso
+        if (differenzaTariffaria < 0)  //il prezzo originale è maggiore del prezzo nuovo, quindi passo da una classe superiore a una inferiore il prezzo deve diminuire
         {
             double moltiplicatorePenale = CalcolatorePenali.calcolaPenaleDowngrade(vecchiaClasse, nuovaClasse);
             penale *= moltiplicatorePenale;

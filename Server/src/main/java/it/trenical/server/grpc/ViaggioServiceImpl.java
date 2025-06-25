@@ -18,8 +18,7 @@ import java.util.List;
  */
 public class ViaggioServiceImpl extends ViaggioServiceGrpc.ViaggioServiceImplBase
 {
-    private final MotoreRicercaViaggi motoreRicerca = MotoreRicercaViaggi.getInstance();
-    private final GestoreViaggi gestoreViaggi = GestoreViaggi.getInstance();
+    private final ControllerGRPC controllerGRPC = ControllerGRPC.getInstance();
 
     @Override
     public void cercaViaggi(CercaViaggiRequest request,
@@ -48,7 +47,7 @@ public class ViaggioServiceImpl extends ViaggioServiceGrpc.ViaggioServiceImplBas
                     request.getCittaArrivo()
             );
 
-            List<Viaggio> viaggiTrovati = motoreRicerca.cercaViaggio(filtro);
+            List<Viaggio> viaggiTrovati = controllerGRPC.cercaViaggio(filtro);
 
             CercaViaggiResponse.Builder responseBuilder = CercaViaggiResponse.newBuilder();
 
@@ -79,7 +78,7 @@ public class ViaggioServiceImpl extends ViaggioServiceGrpc.ViaggioServiceImplBas
 
         try
         {
-            Viaggio viaggio = gestoreViaggi.getViaggio(request.getViaggioId());
+            Viaggio viaggio = controllerGRPC.getViaggio(request.getViaggioId());
 
             if (viaggio == null)
             {
@@ -87,7 +86,7 @@ public class ViaggioServiceImpl extends ViaggioServiceGrpc.ViaggioServiceImplBas
             }
 
             //Assumiamo classe LowCost per i dettagli generici
-            ViaggioInfo viaggioInfo = convertiViaggioToProto(viaggio, ClasseServizio.LOW_COST);
+            ViaggioInfo viaggioInfo = convertiViaggioGenericoToProto(viaggio);
 
             responseObserver.onNext(viaggioInfo);
             responseObserver.onCompleted();
@@ -101,9 +100,28 @@ public class ViaggioServiceImpl extends ViaggioServiceGrpc.ViaggioServiceImplBas
         }
     }
 
-    private ViaggioInfo convertiViaggioToProto(Viaggio viaggio, ClasseServizio classe)
+    private ViaggioInfo convertiViaggioGenericoToProto(Viaggio viaggio)
     {
-        int postiDisponibili = viaggio.getPostiDisponibiliPerClasse(classe);
+        int postiDisponibili = viaggio.getPostiDisponibiliPerClasse(ClasseServizio.LOW_COST) +
+                viaggio.getPostiDisponibiliPerClasse(ClasseServizio.ECONOMY) +
+                viaggio.getPostiDisponibiliPerClasse(ClasseServizio.BUSINESS) +
+                viaggio.getPostiDisponibiliPerClasse(ClasseServizio.FEDELTA);
+
+        return ViaggioInfo.newBuilder()
+                .setId(viaggio.getId())
+                .setCittaPartenza(viaggio.getTratta().getStazionePartenza().getCitta())
+                .setCittaArrivo(viaggio.getTratta().getStazioneArrivo().getCitta())
+                .setOrarioPartenza(viaggio.getInizioReale().getTimeInMillis())
+                .setOrarioArrivo(viaggio.getFineReale().getTimeInMillis())
+                .setStato(viaggio.getStato().toString())
+                .setPostiDisponibili(postiDisponibili)
+                .setTipoTreno(viaggio.getTreno().getTipo().toString())
+                .build();
+    }
+
+    private ViaggioInfo convertiViaggioToProto(Viaggio viaggio, ClasseServizio classeServizio)
+    {
+        int postiDisponibili = viaggio.getPostiDisponibiliPerClasse(classeServizio);
 
         return ViaggioInfo.newBuilder()
                 .setId(viaggio.getId())

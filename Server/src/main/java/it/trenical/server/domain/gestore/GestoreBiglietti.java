@@ -346,10 +346,6 @@ public class GestoreBiglietti
 
         aggiornaBigliettoInDB(biglietto);
 
-        //Aggiorno anche nelle altre mappe
-        modificaBigliettoUtente(IDBiglietto, IDUtente, classeServizio);
-        modificaBigliettoClasseServizio(IDBiglietto, IDViaggio, classeServizio);
-
         //Invio una notifica al cliente sulla modifica
         GestoreClienti gc = GestoreClienti.getInstance();
         Cliente cliente = gc.getClienteById(IDUtente);

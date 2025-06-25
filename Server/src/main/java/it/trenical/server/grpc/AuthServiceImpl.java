@@ -11,6 +11,7 @@ import it.trenical.server.dto.ClienteDTO;
  */
 public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase
 {
+    private final ControllerGRPC controllerGRPC = ControllerGRPC.getInstance();
     @Override
     public void login(LoginRequest request, StreamObserver<LoginResponse> responseObserver)
     {
@@ -18,13 +19,7 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase
 
         try
         {
-            LoginClienteCommand command = new LoginClienteCommand(
-                    request.getEmail(),
-                    request.getPassword()
-            );
-            command.esegui();
-
-            ClienteDTO clienteDTO = command.getClienteDTO();
+            ClienteDTO clienteDTO = controllerGRPC.login(request.getEmail(), request.getPassword());
 
             ClienteInfo clienteInfo = ClienteInfo.newBuilder()
                     .setId(clienteDTO.getId())
@@ -40,6 +35,7 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase
                     .setCliente(clienteInfo)
                     .build();
 
+            //invio la risposta e completo
             responseObserver.onNext(response);
             responseObserver.onCompleted();
 
@@ -77,14 +73,10 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase
             clienteDTO.setRiceviNotifiche(request.getRiceviNotifiche());
             clienteDTO.setRiceviPromozioni(request.getRiceviPromozioni());
 
-            //il command per la registrazione
-            RegistraClienteCommand command = new RegistraClienteCommand(
-                    clienteDTO,
-                    request.getPassword()
-            );
-            command.esegui();
+            //uso il facade
+            controllerGRPC.registraCliente(clienteDTO);
 
-            //mi serve la risposta di successoo
+            //invio la risposta di successo
             RegistraResponse response = RegistraResponse.newBuilder()
                     .setSuccess(true)
                     .setMessage("Registrazione completata con successo")

@@ -64,10 +64,9 @@ public class Treno
 
     @Override
     public String toString() {
-        return "Treno{" +
-                "ID='" + ID + '\'' +
+        return "[ ID='" + ID + '\'' +
                 ", tipo=" + tipo +
                 ", postiPerClasse=" + postiPerClasse +
-                '}';
+                ']';
     }
 }

@@ -206,7 +206,7 @@ public class ControllerGRPC
         }
     }
 
-    public List<ViaggioDTO> cercaViaggio(FiltroPasseggeri filtro) throws Exception
+    public List<Viaggio> cercaViaggio(FiltroPasseggeri filtro) throws Exception
     {
         try
         {
@@ -226,21 +226,14 @@ public class ControllerGRPC
 
             List<Viaggio> viaggiTrovati = mrv.cercaViaggio(filtro);
 
-            //converto in DTO per il client
-            List<ViaggioDTO> viaggiDTO = new ArrayList<>();
-            for(Viaggio v : viaggiTrovati)
-            {
-                viaggiDTO.add(Assembler.viaggioToDTO(v));
-            }
+            System.out.println("Ricerca completata: trovati " + viaggiTrovati.size() + " viaggi");
 
-            System.out.println("Ricerca completata: trovati " + viaggiDTO.size() + " viaggi");
-
-            if (viaggiDTO.isEmpty())
+            if (viaggiTrovati.isEmpty())
             {
                 System.out.println("Suggerimento: prova a modificare le date o le preferenze di viaggio");
             }
 
-            return viaggiDTO;
+            return viaggiTrovati;
 
         }
         catch (Exception e)
@@ -251,7 +244,7 @@ public class ControllerGRPC
     }
 
 
-    public void acquistaBiglietto(String idViaggio, String idCliente, ClasseServizio classeServizio) throws Exception
+    public String acquistaBiglietto(String idViaggio, String idCliente, ClasseServizio classeServizio) throws Exception
     {
         try
         {
@@ -314,6 +307,8 @@ public class ControllerGRPC
                 throw new Exception("Acquisto fallito durante il pagamento: " + pagamentoError.getMessage());
             }
 
+            return idBiglietto;
+
         }
         catch (Exception e)
         {
@@ -375,7 +370,7 @@ public class ControllerGRPC
         }
     }
 
-    public List<BigliettoDTO> getBigliettiCliente(String idCliente) throws Exception
+    public List<Biglietto> getBigliettiCliente(String idCliente) throws Exception
     {
         try {
             if (idCliente == null || idCliente.trim().isEmpty())
@@ -388,12 +383,8 @@ public class ControllerGRPC
             GestoreBiglietti gb = GestoreBiglietti.getInstance();
             List<Biglietto> biglietti = gb.getBigliettiUtente(idCliente);
 
-            List<BigliettoDTO> bigliettiDTO = biglietti.stream()
-                    .map(Assembler::bigliettoToDTO)
-                    .collect(Collectors.toList());
-
-            System.out.println("Recuperati " + bigliettiDTO.size() + " biglietti per cliente: " + idCliente);
-            return bigliettiDTO;
+            System.out.println("Recuperati " + biglietti.size() + " biglietti per cliente: " + idCliente);
+            return biglietti;
 
         } catch (Exception e)
         {
@@ -428,6 +419,20 @@ public class ControllerGRPC
         {
             System.err.println("Errore nel recupero biglietto: " + e.getMessage());
             throw new Exception("Impossibile recuperare il biglietto: " + e.getMessage());
+        }
+    }
+
+    public Viaggio getViaggio(String idViaggio)
+    {
+        if(idViaggio == null)
+            throw new IllegalArgumentException("L'id del viaggio non può essere null");
+        try
+        {
+           return GestoreViaggi.getInstance().getViaggio(idViaggio);
+        }catch(Exception e)
+        {
+            System.err.println("Errore: "+ e.getMessage());
+            return null;
         }
     }
 
@@ -563,5 +568,15 @@ public class ControllerGRPC
         }
     }
 
+    public List<Treno> getTuttiITreni()
+    {
+        GestoreViaggi gv = GestoreViaggi.getInstance();
+        return gv.getTuttiITreni();
+    }
+
+    public Treno getTreno(String id)
+    {
+        return GestoreViaggi.getInstance().getTreno(id);
+    }
 }
 

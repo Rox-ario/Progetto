@@ -489,10 +489,6 @@ public final class GestoreViaggi {
         return viaggi.get(id);
     }
 
-    public Collection<Treno> getTreni() {
-        return treni.values();
-    }
-
     public Collection<Tratta> getTratte() {
         return tratte.values();
     }
@@ -664,5 +660,18 @@ public final class GestoreViaggi {
 
         //TODO eventualmente ordinare la lista o restituire un HashMap
         return risultati;
+    }
+
+    public List<Treno> getTuttiITreni()
+    {
+        return (List<Treno>) treni.values();
+    }
+
+    public Treno getTreno(String id)
+    {
+        if(id != null && treni.containsKey(id))
+            return treni.get(id);
+        else
+            return null;
     }
 }

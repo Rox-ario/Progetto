@@ -6,6 +6,7 @@ import it.trenical.server.command.biglietto.*;
 import it.trenical.server.domain.Biglietto;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.gestore.GestoreBiglietti;
+import it.trenical.server.dto.BigliettoDTO;
 import it.trenical.server.dto.ModificaBigliettoDTO;
 
 import java.util.List;
@@ -16,8 +17,7 @@ import java.util.List;
  */
 public class BigliettoServiceImpl extends BigliettoServiceGrpc.BigliettoServiceImplBase
 {
-
-    private final GestoreBiglietti gestoreBiglietti = GestoreBiglietti.getInstance();
+    private final ControllerGRPC controllerGRPC = ControllerGRPC.getInstance();
 
     @Override
     public void acquistaBiglietto(AcquistaBigliettoRequest request,
@@ -30,28 +30,22 @@ public class BigliettoServiceImpl extends BigliettoServiceGrpc.BigliettoServiceI
         {
             ClasseServizio classe = ClasseServizio.valueOf(request.getClasseServizio().toUpperCase());
 
-            AssegnaBiglietto commandAssegna = new AssegnaBiglietto(
+           String idBiglietto = controllerGRPC.acquistaBiglietto(
                     request.getViaggioId(),
                     request.getClienteId(),
                     classe
             );
-            commandAssegna.esegui();
-
-            Biglietto biglietto = commandAssegna.getBiglietto();
-
-            PagaBiglietto commandPaga = new PagaBiglietto(biglietto.getID());
-            commandPaga.esegui();
 
             AcquistaBigliettoResponse response = AcquistaBigliettoResponse.newBuilder()
                     .setSuccess(true)
                     .setMessage("Biglietto acquistato con successo")
-                    .setBigliettoId(biglietto.getID())
+                    .setBigliettoId(idBiglietto)
                     .build();
 
             responseObserver.onNext(response);
             responseObserver.onCompleted();
 
-            System.out.println("Biglietto acquistato: " + biglietto.getID());
+            System.out.println("Biglietto acquistato: " + GestoreBiglietti.getInstance().getBigliettoPerID(idBiglietto).toString());
 
         }
         catch (Exception e)
@@ -77,13 +71,13 @@ public class BigliettoServiceImpl extends BigliettoServiceGrpc.BigliettoServiceI
 
         try
         {
-            List<Biglietto> biglietti = gestoreBiglietti.getBigliettiUtente(request.getClienteId());
-
+            List<Biglietto> biglietti = controllerGRPC.getBigliettiCliente(request.getClienteId());
             GetBigliettiResponse.Builder responseBuilder = GetBigliettiResponse.newBuilder();
 
             for (Biglietto biglietto : biglietti)
             {
                 BigliettoInfo info = convertiBigliettoToProto(biglietto);
+
                 responseBuilder.addBiglietti(info);
             }
 
@@ -114,13 +108,7 @@ public class BigliettoServiceImpl extends BigliettoServiceGrpc.BigliettoServiceI
         {
             ClasseServizio nuovaClasse = ClasseServizio.valueOf(request.getNuovaClasse().toUpperCase());
 
-            ModificaBigliettoDTO dto = new ModificaBigliettoDTO(
-                    request.getBigliettoId(),
-                    nuovaClasse
-            );
-
-            ModificaBigliettoCommand command = new ModificaBigliettoCommand(dto);
-            command.esegui();
+            controllerGRPC.modificaBiglietto(request.getBigliettoId(), nuovaClasse);
 
             ModificaBigliettoResponse response = ModificaBigliettoResponse.newBuilder()
                     .setSuccess(true)
@@ -156,8 +144,7 @@ public class BigliettoServiceImpl extends BigliettoServiceGrpc.BigliettoServiceI
 
         try
         {
-            CancellaBiglietto command = new CancellaBiglietto(request.getBigliettoId());
-            command.esegui();
+            controllerGRPC.cancellaBiglietto(request.getBigliettoId());
 
             CancellaBigliettoResponse response = CancellaBigliettoResponse.newBuilder()
                     .setSuccess(true)
