@@ -3,6 +3,7 @@ package it.trenical.server.domain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Stazione
 {
@@ -13,6 +14,18 @@ public class Stazione
     private final double latitudine;
     private final double longitudine;
 
+    //per l'inizializzazione
+    public Stazione(String citta, String nome, ArrayList<Integer> binari, double latitudine, double longitudine)
+    {
+        this.id = UUID.randomUUID().toString();
+        this.citta = citta;
+        this.nome = nome;
+        this.binari = binari;
+        this.latitudine = latitudine;
+        this.longitudine = longitudine;
+    }
+
+    //per il ritiro da db
     public Stazione(String id, String citta, String nome, ArrayList<Integer> binari, double latitudine, double longitudine)
     {
         this.id = id;
@@ -77,13 +90,13 @@ public class Stazione
 
     @Override
     public String toString() {
-        return "Stazione{" +
-                "id='" + id + '\'' +
-                ", citta='" + citta + '\'' +
-                ", nome='" + nome + '\'' +
+        return "[" +
+                "id='" + id +
+                ", citta='" + citta +
+                ", nome='" + nome +
                 ", binari=" + binari +
                 ", latitudine=" + latitudine +
                 ", longitudine=" + longitudine +
-                '}';
+                "]";
     }
 }

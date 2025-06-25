@@ -215,14 +215,23 @@ public class Viaggio extends SoggettoViaggio
 
     @Override
     public String toString() {
-        return "Viaggio{" +
-                "id='" + id + '\'' +
+        return "[" +
+                "id='" + id +
                 ", inizio=" + getInizioReale() +
                 ", fine=" + getFineReale() +
                 ", stato=" + stato +
                 ", binario di Partenza=" + getBinario(TipoBinario.PARTENZA) +
                 ", binario di Arrivo=" + getBinario(TipoBinario.ARRIVO)+
                 ", ritardoMinuti=" + ritardoMinuti +
-                '}';
+                ", Tratta" + tratta.toString()+
+                ']';
+    }
+
+    public Calendar getInizio() {
+        return inizio;
+    }
+
+    public Calendar getFine() {
+        return fine;
     }
 }

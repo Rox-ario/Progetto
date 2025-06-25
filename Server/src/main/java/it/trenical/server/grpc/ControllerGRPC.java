@@ -7,10 +7,7 @@ import it.trenical.server.command.promozione.PromozioneCommand;
 import it.trenical.server.command.viaggio.ComandoViaggio;
 import it.trenical.server.domain.*;
 import it.trenical.server.domain.cliente.Cliente;
-import it.trenical.server.domain.enumerations.ClasseServizio;
-import it.trenical.server.domain.enumerations.StatoBiglietto;
-import it.trenical.server.domain.enumerations.TipoPromozione;
-import it.trenical.server.domain.enumerations.TipoTreno;
+import it.trenical.server.domain.enumerations.*;
 import it.trenical.server.domain.gestore.*;
 import it.trenical.server.dto.*;
 import it.trenical.server.utils.Assembler;
@@ -577,6 +574,50 @@ public class ControllerGRPC
     public Treno getTreno(String id)
     {
         return GestoreViaggi.getInstance().getTreno(id);
+    }
+
+    public Stazione getStazione(String id){return GestoreViaggi.getInstance().getStazione(id);}
+
+    public List<Tratta> getTutteLeTratte()
+    {
+        return (List<Tratta>) GestoreViaggi.getInstance().getTratte();
+    }
+
+    public void aggiungiStazione(Stazione stazione)
+    {
+        GestoreViaggi gv = GestoreViaggi.getInstance();
+        gv.aggiungiStazione(stazione);
+    }
+
+    public List<Stazione> getTutteLeStazioni()
+    {
+        return GestoreViaggi.getInstance().getTutteLeStazioni();
+    }
+
+
+    public Viaggio programmaViaggio(String idTreno, String idTratta, Calendar partenza, Calendar arrivo)
+    {
+        return GestoreViaggi.getInstance().programmaViaggio(idTreno, idTratta, partenza, arrivo);
+    }
+
+    public void aggiornaStatoViaggio(String idViaggio, StatoViaggio nuovoStato)
+    {
+        GestoreViaggi.getInstance().cambiaStatoViaggio(idViaggio, nuovoStato);
+    }
+
+    public void aggiornaRitardoViaggio(String id, int ritardo)
+    {
+        GestoreViaggi.getInstance().aggiornaRitardoViaggio(id, ritardo);
+    }
+
+    public List<Viaggio> getViaggiPerStato(StatoViaggio statoViaggio)
+    {
+       return GestoreViaggi.getInstance().getViaggiPerStato(statoViaggio);
+    }
+
+    public List<Viaggio> getViaggiPerData(Calendar dataDa, Calendar dataA)
+    {
+        return GestoreViaggi.getInstance().getViaggiPerData();
     }
 }
 

@@ -1,14 +1,16 @@
 package it.trenical.server.admin;
 
+import it.trenical.server.domain.Stazione;
+import it.trenical.server.domain.Tratta;
 import it.trenical.server.domain.Treno;
+import it.trenical.server.domain.Viaggio;
+import it.trenical.server.domain.enumerations.StatoViaggio;
 import it.trenical.server.domain.enumerations.TipoTreno;
+import it.trenical.server.domain.gestore.GestoreViaggi;
 import it.trenical.server.grpc.ControllerGRPC;
-import org.checkerframework.checker.units.qual.C;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Scanner;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class AdminCLI
 {
@@ -88,7 +90,7 @@ public class AdminCLI
         System.out.println("4.Gestione Biglietti");
         System.out.println("5.Gestione Promozioni");
         System.out.println("6.Gestione Clienti");
-        System.out.println("7.Statistiche Sistema");
+        System.out.println("7.Gestione Stazioni");
         System.out.println("8.Utilità Database");
         System.out.println("0.Esci");
         System.out.print("\nScelta: ");
@@ -104,7 +106,7 @@ public class AdminCLI
             case 4: menuBiglietti(); break;
             case 5: menuPromozioni(); break;
             case 6: menuClienti(); break;
-            case 7: mostraStatistiche(); break;
+            case 7 : menuStazioni(); break;
             case 8: menuDatabase(); break;
             case 0: running = false; break;
             default: System.out.println("Scelta non valida");
@@ -227,71 +229,215 @@ public class AdminCLI
     {
         System.out.println("\nAGGIUNGI NUOVA TRATTA");
 
-        System.out.print("ID Tratta (es. MI-RM): ");
-        String id = scanner.nextLine().trim();
-
         // Stazione partenza
         System.out.println("\nSTAZIONE DI PARTENZA");
-        String idPartenza = scanner.nextLine();
-        System.out.print("Città: ");
-        String cittaPartenza = scanner.nextLine();
-        System.out.print("Nome stazione: ");
-        String nomePartenza = scanner.nextLine();
-        System.out.print("Latitudine: ");
-        double latPartenza = leggiDouble();
-        System.out.print("Longitudine: ");
-        double lonPartenza = leggiDouble();
+        System.out.println("ID Stazione di Partenza: ");
+        String idStazionePartenza = scanner.nextLine();
 
-        ArrayList<Integer> binariPartenza = new ArrayList<>();
-        binariPartenza.add(1);
-        binariPartenza.add(2);
-
-        Stazione partenza = new Stazione(idPartenza, cittaPartenza, nomePartenza,
-                binariPartenza, latPartenza, lonPartenza);
+        Stazione partenza = controllerGRPC.getStazione(idStazionePartenza);
+        while(partenza == null)
+        {
+            System.out.println("Spiacente, stazione "+ idStazionePartenza+" non trovata.\nPer riprovare prema 1");
+            int scelta = Integer.parseInt(scanner.nextLine());
+            if(scelta == 1)
+            {
+                idStazionePartenza = scanner.nextLine();
+                partenza = controllerGRPC.getStazione(idStazionePartenza);
+            }
+            else
+            {
+                System.out.println("Tornando indietro..."); return;
+            }
+        }
 
         // Stazione arrivo
-        System.out.println("\n📍 STAZIONE DI ARRIVO");
-        System.out.print("ID Stazione (es. RM01): ");
-        String idArrivo = scanner.nextLine();
-        System.out.print("Città: ");
-        String cittaArrivo = scanner.nextLine();
-        System.out.print("Nome stazione: ");
-        String nomeArrivo = scanner.nextLine();
-        System.out.print("Latitudine: ");
-        double latArrivo = leggiDouble();
-        System.out.print("Longitudine: ");
-        double lonArrivo = leggiDouble();
+        System.out.println("\nSTAZIONE DI ARRIVO");
+        System.out.print("ID Stazione di Arrivo: ");
+        String idStazioneArrivo = scanner.nextLine();
 
-        ArrayList<Integer> binariArrivo = new ArrayList<>();
-        binariArrivo.add(1);
-        binariArrivo.add(2);
-        binariArrivo.add(3);
-
-        Stazione arrivo = new Stazione(idArrivo, cittaArrivo, nomeArrivo,
-                binariArrivo, latArrivo, lonArrivo);
-
-        try {
-            Tratta tratta = new Tratta(id, partenza, arrivo);
+        Stazione arrivo = controllerGRPC.getStazione(idStazioneArrivo);
+        while(arrivo == null)
+        {
+            System.out.println("Spiacente, stazione "+ idStazioneArrivo+" non trovata.\nPer riprovare prema 1");
+            int scelta = Integer.parseInt(scanner.nextLine());
+            if(scelta == 1)
+            {
+                idStazioneArrivo = scanner.nextLine();
+                arrivo = controllerGRPC.getStazione(idStazioneArrivo);
+            }
+            else
+            {
+                System.out.println("Tornando indietro..."); return;
+            }
+        }
+        try
+        {
+            Tratta tratta = new Tratta(partenza, arrivo);
             controllerGRPC.aggiungiTratta(tratta);
-            System.out.println("✅ Tratta " + id + " aggiunta con successo!");
-        } catch (Exception e) {
-            System.err.println("❌ Errore: " + e.getMessage());
+            System.out.println("Tratta " + tratta.getId() + " aggiunta con successo!");
+            System.out.println("Dettagli tratta:\n"+ tratta.toString());
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore: " + e.getMessage());
         }
     }
 
-    private void visualizzaTratte() {
-        System.out.println("\n🛤️ ELENCO TRATTE DISPONIBILI");
+    private void visualizzaTratte()
+    {
+        System.out.println("\nELENCO TRATTE DISPONIBILI");
         System.out.println("============================");
 
-        // TODO: Aggiungere metodo getTratte() in ServerOperations
+        List<Tratta> tratte = controllerGRPC.getTutteLeTratte();
+        StringBuilder sb = new StringBuilder();
+        sb.append("[\n");
+        for(Tratta t : tratte)
+        {
+            sb.append(t);
+        }
+        sb.append("\n]");
+        System.out.println(sb.toString());
+
         System.out.println("Funzionalità in sviluppo...");
     }
 
-    // ==================== GESTIONE VIAGGI ====================
+    private void menuStazioni()
+    {
+        while(true)
+        {
+            System.out.println("\nGESTIONE STAZIONI");
+            System.out.println("==================");
+            System.out.println("1. Aggiungi una nuova stazione");
+            System.out.println("2. Prendi tutte le stazioni");
+            System.out.println("0. Torna indietro");
+            System.out.print("\nScelta: ");
 
-    private void menuViaggi() {
-        while (true) {
-            System.out.println("\n📅 GESTIONE VIAGGI");
+            int scelta = leggiScelta();
+
+            switch (scelta)
+            {
+                case 1: aggiungiStazione(); break;
+                case 2: visualizzaStazioni(); break;
+                case 0: return;
+                default: System.out.println("Scelta non valida");
+            }
+        }
+    }
+
+    private void aggiungiStazione()
+    {
+        System.out.println("\nAGGIUNGI NUOVA STAZIONE");
+
+        System.out.println("Nome della citta': ");
+        String città = scanner.nextLine();
+        System.out.println("Nome della stazione: ");
+        String nome = scanner.nextLine();
+        System.out.println("Latitudine: ");
+        double latitudine = Double.parseDouble(scanner.nextLine());
+        System.out.println("Longitudine: ");
+        double longitudine = Double.parseDouble(scanner.nextLine());
+        while(città == null || nome == null)
+        {
+            System.out.println("Dati inseriti in un formato non applicabile.\nPer riprovare prema 1");
+            int scelta = Integer.parseInt(scanner.nextLine());
+            if(scelta == 1)
+            {
+                System.out.println("Nome della citta': ");
+                città = scanner.nextLine();
+                System.out.println("Nome della stazione: ");
+                nome = scanner.nextLine();
+            }
+            else
+            {
+                System.out.println("Tornando indietro...");
+                return;
+            }
+        }
+
+        System.out.println("Elenca i binari da aggiungere: ");
+        ArrayList<Integer> binari = promptBinari();
+        while(binari == null || binari.isEmpty())
+        {
+            System.out.println("La lista di binari non può essere vuota, se desidera annullare l'intera operazione, prema 0");
+            int scelta = Integer.parseInt(scanner.nextLine());
+            if(scelta == 1)
+            {
+                System.out.println("Tornando indietro...");
+                return;
+            }
+            else
+            {
+                binari = promptBinari();
+            }
+        }
+        try
+        {
+            Stazione nuovaStazione = new Stazione(città, nome, binari, latitudine, longitudine);
+            controllerGRPC.aggiungiStazione(nuovaStazione);
+            System.out.println("Stazione " + nuovaStazione.getId() + " aggiunta con successo!");
+            System.out.println("Dettagli stazione:\n"+ nuovaStazione.toString());
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore: " + e.getMessage());
+        }
+    }
+
+    private ArrayList<Integer> promptBinari() {
+        ArrayList<Integer> binari = new ArrayList<>();
+        System.out.println("Digita il numero di ciascun binario e premi INVIO.");
+        System.out.println("Quando hai finito, premi INVIO su riga vuota per terminare.");
+        System.out.println("Per annullare l’operazione, premi INVIO senza aver inserito alcun binario.");
+
+        while (true)
+        {
+            System.out.print("Binario #" + (binari.size()+1) + ": ");
+            String line = scanner.nextLine().trim();
+            // Se è vuoto al primo prompt → annulliamo
+            if (line.isEmpty() && binari.isEmpty())
+            {
+                return null;
+            }
+            // Se è vuoto dopo aver almeno inserito un binario → finisco
+            if (line.isEmpty())
+            {
+                break;
+            }
+            // Provo a fare il parse
+            try
+            {
+                int numero = Integer.parseInt(line);
+                binari.add(numero);
+            }
+            catch (NumberFormatException ex)
+            {
+                System.out.println("Input non valido, devi inserire un numero intero per il binario");
+            }
+        }
+        return binari;
+    }
+
+    private void visualizzaStazioni()
+    {
+        System.out.println("\nELENCO STAZIONI DISPONIBILI");
+        System.out.println("============================");
+
+        List<Stazione> stazioni = controllerGRPC.getTutteLeStazioni();
+        StringBuilder sb = new StringBuilder();
+        sb.append("[\n");
+        for(Stazione s : stazioni)
+        {
+            sb.append(s);
+        }
+        sb.append("\n]");
+        System.out.println(sb.toString());
+    }
+
+    private void menuViaggi()
+    {
+        while (true)
+        {
+            System.out.println("\nGESTIONE VIAGGI");
             System.out.println("==================");
             System.out.println("1. Programma nuovo viaggio");
             System.out.println("2. Aggiorna stato viaggio");
@@ -302,19 +448,20 @@ public class AdminCLI
 
             int scelta = leggiScelta();
 
-            switch (scelta) {
+            switch (scelta)
+            {
                 case 1: programmaViaggio(); break;
                 case 2: aggiornaStatoViaggio(); break;
                 case 3: aggiungiRitardo(); break;
-                case 4: visualizzaViaggiOggi(); break;
+                case 4: visualizzaViaggi(); break;
                 case 0: return;
-                default: System.out.println("⚠️ Scelta non valida");
+                default: System.out.println("Scelta non valida");
             }
         }
     }
 
     private void programmaViaggio() {
-        System.out.println("\n➕ PROGRAMMA NUOVO VIAGGIO");
+        System.out.println("\nPROGRAMMA NUOVO VIAGGIO");
 
         System.out.print("ID Treno: ");
         String idTreno = scanner.nextLine().trim();
@@ -335,16 +482,18 @@ public class AdminCLI
             Calendar partenza = parseDataOra(dataStr, oraPartenzaStr);
             Calendar arrivo = parseDataOra(dataStr, oraArrivoStr);
 
-            controllerGRPC.programmaViaggio(idTreno, idTratta, partenza, arrivo);
-            System.out.println("✅ Viaggio programmato con successo!");
-
-        } catch (Exception e) {
-            System.err.println("❌ Errore: " + e.getMessage());
+            Viaggio v = controllerGRPC.programmaViaggio(idTreno, idTratta, partenza, arrivo);
+            System.out.println("Viaggio programmato con successo!");
+            System.out.println("Dettagli viaggio\n"+ v.toString());
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore: " + e.getMessage());
         }
     }
 
     private void aggiornaStatoViaggio() {
-        System.out.println("\n🔄 AGGIORNA STATO VIAGGIO");
+        System.out.println("\nAGGIORNA STATO VIAGGIO");
 
         System.out.print("ID Viaggio: ");
         String idViaggio = scanner.nextLine().trim();
@@ -359,53 +508,138 @@ public class AdminCLI
         int statoScelta = leggiScelta();
         StatoViaggio nuovoStato = null;
 
-        switch (statoScelta) {
+        switch (statoScelta)
+        {
             case 1: nuovoStato = StatoViaggio.PROGRAMMATO; break;
             case 2: nuovoStato = StatoViaggio.IN_CORSO; break;
             case 3: nuovoStato = StatoViaggio.TERMINATO; break;
-            case 4: nuovoStato = StatoViaggio.IN_RITARDO; break;
+            case 4: nuovoStato = StatoViaggio.IN_RITARDO; aggiungiRitardo(); break;
             default:
-                System.out.println("❌ Stato non valido");
+                System.out.println("Stato non valido");
                 return;
         }
 
-        try {
+        try
+        {
             controllerGRPC.aggiornaStatoViaggio(idViaggio, nuovoStato);
-            System.out.println("✅ Stato aggiornato con successo!");
+            System.out.println("Stato aggiornato con successo!");
         } catch (Exception e) {
-            System.err.println("❌ Errore: " + e.getMessage());
+            System.err.println("Errore: " + e.getMessage());
         }
     }
 
-    private void aggiungiRitardo() {
-        System.out.println("\n⏰ AGGIUNGI RITARDO");
+    private void aggiungiRitardo()
+    {
+        try
+        {
+            System.out.println("\nAGGIUNGI RITARDO");
 
-        System.out.print("ID Viaggio: ");
-        String idViaggio = scanner.nextLine().trim();
+            System.out.print("ID Viaggio: ");
+            String idViaggio = scanner.nextLine().trim();
 
-        System.out.print("Minuti di ritardo: ");
-        int minuti = leggiIntero();
+            System.out.print("Minuti di ritardo: ");
+            int minuti = leggiIntero();
 
-        // TODO: Aggiungere metodo aggiungiRitardo() in ServerOperations
-        System.out.println("Funzionalità in sviluppo...");
+            ControllerGRPC.getInstance().aggiornaRitardoViaggio(idViaggio, minuti);
+        }catch(Exception e)
+        {
+            System.err.println("Errore: "+e.getMessage());
+        }
     }
 
-    private void visualizzaViaggiOggi() {
-        System.out.println("\n📅 VIAGGI DI OGGI");
+    private void visualizzaViaggi()
+    {
+        System.out.println("\nVIAGGI");
         System.out.println("==================");
 
-        // TODO: Aggiungere metodo getViaggiOggi() in ServerOperations
-        System.out.println("Funzionalità in sviluppo...");
+        System.out.println("Quali viaggi ti piacerebbe visualizzare?");
+        System.out.println("1. Viaggi programmati");
+        System.out.println("2. Viaggi in ritardo");
+        System.out.println("3. Viaggi in corso");
+        System.out.println("4. Viaggi terminati");
+        System.out.println("5. Viaggi per data");
+        System.out.println("0. Torna indietro");
+
+        int scelta = Integer.parseInt(scanner.nextLine());
+        switch (scelta)
+        {
+            case 1: cercaViaggi(StatoViaggio.PROGRAMMATO); break;
+            case 2: cercaViaggi(StatoViaggio.IN_RITARDO); break;
+            case 3: cercaViaggi(StatoViaggio.IN_CORSO); break;
+            case 4: cercaViaggi(StatoViaggio.TERMINATO); break;
+            case 5: cercaViaggiPerData();break;
+            case 0: System.out.println("Tornando indietro..."); break;
+            default : System.out.println("Scelta non valida");
+                return;
+        }
     }
 
-    // ==================== STATISTICHE ====================
-
-    private void mostraStatistiche() {
-        System.out.println(controllerGRPC.getStatisticheServizio());
-
-        System.out.print("\nPremi INVIO per continuare...");
-        scanner.nextLine();
+    private void cercaViaggi(StatoViaggio statoViaggio)
+    {
+        System.out.println("Ricercando viaggi... di tipo "+ statoViaggio.name());
+        try
+        {
+            List<Viaggio> viaggi = controllerGRPC.getViaggiPerStato(statoViaggio);
+            StringBuilder sb = new StringBuilder();
+            sb.append("[\n");
+            for(Viaggio v : viaggi)
+            {
+                sb.append(v);
+            }
+            sb.append("\n]");
+            System.out.println(sb.toString());
+        }
+        catch(Exception e)
+        {
+            System.err.println("Errore: "+ e.getMessage());
+        }
     }
+
+    private void cercaViaggiPerData()
+    {
+        System.out.println("Inserisci una data nel formato dd/MM/yyyy");
+        System.out.println("Da: ");
+        String da = scanner.nextLine();
+        System.out.println("A: ");
+        String a = scanner.nextLine();
+        while(da == null || a == null)
+        {
+            System.out.println("Le date inserite non sono corrette. Premere 1 per riprovare (0 per tornare indietro)");
+            int scelta = Integer.parseInt(scanner.nextLine());
+            if(scelta == 1)
+            {
+                System.out.println("Da: ");
+                da = scanner.nextLine();
+                System.out.println("A: ");
+                a = scanner.nextLine();
+            }
+            else
+            {
+                System.out.println("Tornando indietro...");
+                return;
+            }
+        }
+
+        Calendar dataDa = parseDataOra(da, "00:00");
+        Calendar dataA = parseDataOra(a, "23:59");
+        try
+        {
+            List<Viaggio> viaggi = controllerGRPC.getViaggiPerData(dataDa, dataA);
+            StringBuilder sb = new StringBuilder();
+            sb.append("[\n");
+            for(Viaggio v : viaggi)
+            {
+                sb.append(v);
+            }
+            sb.append("\n]");
+            System.out.println(sb.toString());
+        }
+        catch(Exception e)
+        {
+            System.err.println("Errore: "+ e.getMessage());
+        }
+    }
+
 
     // ==================== ALTRI MENU (PLACEHOLDER) ====================
 
@@ -462,23 +696,25 @@ public class AdminCLI
         }
     }
 
-    private Calendar parseDataOra(String data, String ora) {
-        try {
-            String[] partiData = data.split("/");
-            String[] partiOra = ora.split(":");
+    private Calendar parseDataOra(String data, String ora)
+    {
+        try
+        {
+            //utilizzo SimpleDateFormat
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+            sdf.setLenient(false); //questo per evitare problemi di time zone
 
-            int giorno = Integer.parseInt(partiData[0]);
-            int mese = Integer.parseInt(partiData[1]) - 1;
-            int anno = Integer.parseInt(partiData[2]);
-            int ore = Integer.parseInt(partiOra[0]);
-            int minuti = Integer.parseInt(partiOra[1]);
+            //un'unica stringa costruita come dd/MM/yyyy HH:mm
+            String dataCompleta = data.trim() + " " + ora.trim();
+
+            Date dataRifatta = sdf.parse(dataCompleta);
 
             Calendar cal = Calendar.getInstance();
-            cal.set(anno, mese, giorno, ore, minuti, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-
+            cal.setTime(dataRifatta);
             return cal;
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new IllegalArgumentException("Formato data/ora non valido");
         }
     }

@@ -2,6 +2,7 @@ package it.trenical.server.domain;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Tratta
 {
@@ -11,6 +12,14 @@ public class Tratta
 
     public Tratta(String id, Stazione stazionePartenza, Stazione stazioneArrivo) {
         this.id = id;
+        if(stazioneArrivo.equals(stazionePartenza))
+            throw new IllegalArgumentException("Stazione di Arrivo non può essere uguale alla stazione di partenza");
+        StazionePartenza = stazionePartenza;
+        StazioneArrivo = stazioneArrivo;
+    }
+
+    public Tratta(Stazione stazionePartenza, Stazione stazioneArrivo) {
+        this.id = UUID.randomUUID().toString();
         if(stazioneArrivo.equals(stazionePartenza))
             throw new IllegalArgumentException("Stazione di Arrivo non può essere uguale alla stazione di partenza");
         StazionePartenza = stazionePartenza;
@@ -42,10 +51,10 @@ public class Tratta
 
     @Override
     public String toString() {
-        return "Tratta{" +
+        return "[" +
                 "id='" + id + '\'' +
                 ", StazionePartenza=" + StazionePartenza +
                 ", StazioneArrivo=" + StazioneArrivo +
-                '}';
+                ']';
     }
 }

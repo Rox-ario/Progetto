@@ -5,6 +5,7 @@ import it.trenical.server.domain.*;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.StatoViaggio;
 import it.trenical.server.domain.enumerations.TipoTreno;
+import org.checkerframework.checker.units.qual.C;
 
 import java.sql.*;
 import java.util.*;
@@ -15,7 +16,7 @@ public final class GestoreViaggi {
     private final Map<String, Treno> treni;
     private final Map<String, Tratta> tratte;
     private final Map<String, Viaggio> viaggi;
-    private Map<String, Stazione> stazioniTemp = new HashMap<>(); //per quando sto caricando le stazioni ma non ho nè viaggi nè treni
+    private Map<String, Stazione> stazioni = new HashMap<>();
 
     private GestoreViaggi()
     {
@@ -58,7 +59,7 @@ public final class GestoreViaggi {
                 ArrayList<Integer> binari = parseBinari(rs.getString("binari"));
 
                 Stazione s = new Stazione(id, citta, nome, binari, lat, lon);
-                stazioniTemp.put(id, s);
+                stazioni.put(id, s);
             }
 
         }
@@ -140,8 +141,8 @@ public final class GestoreViaggi {
                 String partenzaId = rs.getString("stazione_partenza_id");
                 String arrivoId = rs.getString("stazione_arrivo_id");
 
-                Stazione partenza = stazioniTemp.get(partenzaId);
-                Stazione arrivo = stazioniTemp.get(arrivoId);
+                Stazione partenza = stazioni.get(partenzaId);
+                Stazione arrivo = stazioni.get(arrivoId);
 
                 if (partenza != null && arrivo != null)
                 {
@@ -369,8 +370,6 @@ public final class GestoreViaggi {
         }
     }
 
-
-
     private boolean trenoUsato(Treno t, Calendar inizio, Calendar fine) {
         for (String id : viaggi.keySet()) {
             Viaggio viaggio = viaggi.get(id);
@@ -385,7 +384,7 @@ public final class GestoreViaggi {
         return false;
     }
 
-    public boolean programmaViaggio(String trenoId, String trattaId, Calendar inizio, Calendar fine) {
+    public Viaggio programmaViaggio(String trenoId, String trattaId, Calendar inizio, Calendar fine) {
         if (!treni.containsKey(trenoId) || !tratte.containsKey(trattaId)) {
             throw new IllegalArgumentException("Treno o tratta non trovati");
         }
@@ -407,7 +406,7 @@ public final class GestoreViaggi {
 
         GestoreBiglietti gb = GestoreBiglietti.getInstance();
         gb.aggiungiViaggio(v.getId());
-        return true;
+        return v;
     }
 
     private void salvaViaggioInDB(Viaggio v) 
@@ -673,5 +672,52 @@ public final class GestoreViaggi {
             return treni.get(id);
         else
             return null;
+    }
+
+    public Stazione getStazione(String id)
+    {
+        if(id == null || !stazioni.containsKey(id))
+            return null;
+        else
+            return stazioni.get(id);
+    }
+
+    public void aggiungiStazione(Stazione stazione)
+    {
+        salvaStazioneSeNonEsiste(stazione);
+    }
+
+    public List<Stazione> getTutteLeStazioni()
+    {
+        return (List<Stazione>) stazioni.values();
+    }
+
+    public List<Viaggio> getViaggiPerStato(StatoViaggio statoViaggio)
+    {
+        List<Viaggio> res = new ArrayList<Viaggio>();
+        for(Viaggio v : viaggi.values())
+        {
+            if(v.getStato() == statoViaggio)
+                res.add(v);
+        }
+        return res;
+    }
+
+    public List<Viaggio> getViaggioPerData(Calendar da, Calendar a)
+    {
+        List<Viaggio> res = new ArrayList<>();
+        for(Viaggio v : viaggi.values())
+        {
+            if(inMezzo(v, da, a))
+                res.add(v);
+        }
+        return res;
+    }
+
+    private boolean inMezzo(Viaggio v, Calendar da, Calendar a)
+    {
+        Calendar dataInizio = v.getInizio();
+        Calendar dataFine = v.getFine();
+        return dataInizio.after(da) && dataFine.before(a);
     }
 }
