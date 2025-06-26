@@ -14,7 +14,6 @@ import java.util.List;
 
 public class ViaggioController
 {
-    private final ServerProxy serverProxy;
 
     public List<ViaggioDTO> cercaViaggio(String cittaPartenza, String cittaArrivo,
                                          Calendar dataAndata, Calendar dataRitorno,
@@ -42,7 +41,7 @@ public class ViaggioController
                     cittaArrivo.trim()
             );
 
-            List<ViaggioDTO> risultati = ControllerGRPC.cercaViaggio(filtro);
+            List<ViaggioDTO> risultati = ServerProxy.cercaViaggio(filtro);
 
             if (risultati.isEmpty())
             {
@@ -89,7 +88,7 @@ public class ViaggioController
 
             for (int i = 0; i < numeroBiglietti; i++)
             {
-                ControllerGRPC.acquistaBiglietto(idViaggio, idCliente, classeScelta);
+                ServerProxy.acquistaBiglietto(idViaggio, idCliente, classeScelta);
             }
 
             System.out.println("Acquisto completato con successo!");
@@ -218,7 +217,7 @@ public class ViaggioController
     {
         if (cal == null) return "N/A";
 
-        return ""+cal.get(Calendar.DAY_OF_MONTH)+"/"+cal.get(Calendar.MONTH) + 1+"/"+ cal.get(Calendar.YEAR)+
+        return cal.get(Calendar.DAY_OF_MONTH)+"/"+cal.get(Calendar.MONTH) + 1+"/"+ cal.get(Calendar.YEAR)+
                 " "+ cal.get(Calendar.HOUR_OF_DAY) + ":"+cal.get(Calendar.MINUTE);
     }
 }

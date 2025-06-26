@@ -1,5 +1,6 @@
 package it.trenical.client.domain;
 
+import it.trenical.client.grpc.ServerProxy;
 import it.trenical.client.singleton.SessioneCliente;
 import it.trenical.server.dto.ClienteDTO;
 import it.trenical.server.grpc.ControllerGRPC;
@@ -46,7 +47,7 @@ $     $           fin
             nuovoCliente.setRiceviPromozioni(wantsPromozioni);
 
             //registrazione al server
-            ControllerGRPC.registraCliente(nuovoCliente);
+            ServerProxy.registraCliente(nuovoCliente);
 
             System.out.println("Registrazione completata con successo, benvenut*!");
 
@@ -115,7 +116,7 @@ $     $           fin
             }
 
             //chiamo il server per l'autenticazione del povero cristo
-            ClienteDTO cliente = ControllerGRPC.login(email.trim().toLowerCase(), password);
+            ClienteDTO cliente = ServerProxy.login(email.trim().toLowerCase(), password);
 
             //avvio la sessione
             SessioneCliente.getInstance().login(cliente);
@@ -163,7 +164,7 @@ $     $           fin
                 return true;
             }
 
-            ControllerGRPC.aderisciAFedelta(cliente.getId(), attivaNotifichePromozioni);
+            ServerProxy.aderisciAFedelta(cliente.getId(), attivaNotifichePromozioni);
 
             //aggiorniamo la sessione locale
             cliente.setFedelta(true);
@@ -200,7 +201,7 @@ $     $           fin
                 return true;
             }
 
-            ControllerGRPC.rimuoviFedelta(cliente.getId());
+            ServerProxy.rimuoviFedelta(cliente.getId());
 
             cliente.setFedelta(false);
             cliente.setRiceviPromozioni(false);

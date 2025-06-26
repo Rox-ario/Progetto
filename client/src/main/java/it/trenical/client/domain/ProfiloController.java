@@ -1,5 +1,7 @@
 package it.trenical.client.domain;
 
+import io.grpc.Server;
+import it.trenical.client.grpc.ServerProxy;
 import it.trenical.client.singleton.SessioneCliente;
 import it.trenical.server.dto.ClienteDTO;
 import it.trenical.server.dto.ModificaClienteDTO;
@@ -19,13 +21,13 @@ public class ProfiloController
     {
         try
         {
-            if (!verificaAccesso())
+            if (!Loggato())
             {
                 return null;
             }
 
             String idCliente = SessioneCliente.getInstance().getIdClienteLoggato();
-            ClienteDTO profilo = ControllerGRPC.getProfiloCliente(idCliente);
+            ClienteDTO profilo = ServerProxy.getProfiloCliente(idCliente);
 
             mostraDettagliProfilo(profilo);
             return profilo;
@@ -43,7 +45,7 @@ public class ProfiloController
     {
         try
         {
-            if (!verificaAccesso())
+            if (!Loggato())
             {
                 return false;
             }
@@ -65,7 +67,7 @@ public class ProfiloController
 
             System.out.println("Modifica profilo in corso...");
 
-            ControllerGRPC.modificaProfiloCliente(dto);
+            ServerProxy.modificaProfiloCliente(dto);
 
             //aggiorna la sessione locale con i nuovi dati
             aggiornaSessioneLocale(dto);
@@ -85,13 +87,13 @@ public class ProfiloController
     {
         try
         {
-            if (!verificaAccesso())
+            if (!Loggato())
             {
                 return new ArrayList<>();
             }
 
             String idCliente = SessioneCliente.getInstance().getIdClienteLoggato();
-            List<String> promozioni = ControllerGRPC.getPromozioniAttive(idCliente);
+            List<String> promozioni = ServerProxy.getPromozioniAttive(idCliente);
 
             if (promozioni.isEmpty())
             {
@@ -123,13 +125,13 @@ public class ProfiloController
     {
         try
         {
-            if (!verificaAccesso())
+            if (!Loggato())
             {
                 return new ArrayList<>();
             }
 
             String idCliente = SessioneCliente.getInstance().getIdClienteLoggato();
-            List<NotificaDTO> notifiche = ControllerGRPC.getNotifiche(idCliente, soloNonLette);
+            List<NotificaDTO> notifiche = ServerProxy.getNotifiche(idCliente, soloNonLette);
 
             if (notifiche.isEmpty())
             {
@@ -167,7 +169,7 @@ public class ProfiloController
     }
 
 
-    private boolean verificaAccesso()
+    private boolean Loggato()
     {
         if (!SessioneCliente.getInstance().isLoggato())
         {
@@ -322,7 +324,7 @@ public class ProfiloController
     {
         try
         {
-            if (!verificaAccesso())
+            if (!Loggato())
             {
                 return 0;
             }
@@ -357,7 +359,7 @@ public class ProfiloController
     {
         try
         {
-            if (!verificaAccesso())
+            if (!Loggato())
             {
                 return;
             }

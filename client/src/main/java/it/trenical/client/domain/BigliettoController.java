@@ -1,15 +1,14 @@
 package it.trenical.client.domain;
 
+import it.trenical.client.grpc.ServerProxy;
 import it.trenical.client.singleton.SessioneCliente;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.StatoBiglietto;
 import it.trenical.server.dto.BigliettoDTO;
-import it.trenical.server.grpc.ControllerGRPC;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /*
  Controller per la gestione dei biglietti dell'utente.
@@ -17,17 +16,18 @@ import java.util.stream.Collectors;
  */
 public class BigliettoController
 {
+
     public List<BigliettoDTO> getMieiBiglietti()
     {
         try
         {
-            if (!verificaAccesso())
+            if (!Loggato())
             {
                 return new ArrayList<>();
             }
 
             String idCliente = SessioneCliente.getInstance().getIdClienteLoggato();
-            List<BigliettoDTO> biglietti = ControllerGRPC.getBigliettiCliente(idCliente);
+            List<BigliettoDTO> biglietti = ServerProxy.getBigliettiCliente(idCliente);
 
             if (biglietti.isEmpty())
             {
@@ -81,7 +81,7 @@ public class BigliettoController
     {
         try
         {
-            if (!verificaAccesso())
+            if (!Loggato())
             {
                 return null;
             }
@@ -92,7 +92,7 @@ public class BigliettoController
                 return null;
             }
 
-            BigliettoDTO biglietto = ControllerGRPC.getBiglietto(idBiglietto.trim());
+            BigliettoDTO biglietto = ServerProxy.getBiglietto(idBiglietto.trim());
 
             //verifico che il biglietto appartenga all'utente loggato
             String idClienteLoggato = SessioneCliente.getInstance().getIdClienteLoggato();
@@ -118,7 +118,7 @@ public class BigliettoController
     {
         try
         {
-            if (!verificaAccesso())
+            if (!Loggato())
             {
                 return false;
             }
@@ -157,7 +157,7 @@ public class BigliettoController
             System.out.println("Modifica in corso...");
             System.out.println("Da: " + biglietto.getClasseServizio() + " -> A: " + nuovaClasse);
 
-            ControllerGRPC.modificaBiglietto(idBiglietto.trim(), nuovaClasse);
+            ServerProxy.modificaBiglietto(idBiglietto.trim(), nuovaClasse);
 
             System.out.println("Biglietto modificato con successo!");
             System.out.println("Controlla la tua email per eventuali addebiti o rimborsi");
@@ -176,7 +176,7 @@ public class BigliettoController
     {
         try
         {
-            if (!verificaAccesso())
+            if (!Loggato())
             {
                 return false;
             }
@@ -202,7 +202,7 @@ public class BigliettoController
 
             System.out.println("Cancellazione biglietto in corso...");
 
-            ControllerGRPC.cancellaBiglietto(idBiglietto.trim());
+            ServerProxy.cancellaBiglietto(idBiglietto.trim());
 
             System.out.println("Biglietto cancellato con successo!");
             System.out.println("Eventuali rimborsi saranno accreditati sul tuo conto");
@@ -298,7 +298,7 @@ public class BigliettoController
     }
 
 
-    private boolean verificaAccesso()
+    private boolean Loggato()
     {
         if (!SessioneCliente.getInstance().isLoggato())
         {
@@ -343,7 +343,7 @@ public class BigliettoController
             case PAGATO: return "Pagato";
             case NON_PAGATO: return "Da pagare";
             case ANNULLATO: return "Annullato";
-            default: return "Sconosciuto";
+            default: return "Non disponibile";
         }
     }
 
