@@ -1,5 +1,6 @@
 package it.trenical.client.domain;
 
+import it.trenical.client.grpc.ServerProxy;
 import it.trenical.client.singleton.SessioneCliente;
 import it.trenical.server.domain.FiltroPasseggeri;
 import it.trenical.server.domain.enumerations.ClasseServizio;
@@ -13,6 +14,8 @@ import java.util.List;
 
 public class ViaggioController
 {
+    private final ServerProxy serverProxy;
+
     public List<ViaggioDTO> cercaViaggio(String cittaPartenza, String cittaArrivo,
                                          Calendar dataAndata, Calendar dataRitorno,
                                          int numeroPasseggeri, ClasseServizio classePreferita,

@@ -26,6 +26,266 @@ service BigliettoService
   rpc CancellaBiglietto(CancellaBigliettoRequest) returns (CancellaBigliettoResponse);
 }
 
+service ClienteService
+{
+  rpc GetProfilo(GetProfiloRequest) returns (GetProfiloResponse);
+  rpc ModificaProfilo(ModificaProfiloRequest) returns (ModificaProfiloResponse);
+  rpc AderisciAFedelta(AderisciAFedeltaRequest) returns (AderisciAFedeltaResponse);
+  rpc RimuoviFedelta(RimuoviFedeltaRequest) returns (RimuoviFedeltaResponse);
+}
+
+service NotificheService
+{
+  rpc GetNotifiche(GetNotificheRequest) returns (GetNotificheResponse);
+  rpc ContaNotificheNonLette(ContaNotificheRequest) returns (ContaNotificheResponse);
+}
+
+service PromozioniService
+{
+  rpc GetPromozioniAttive(GetPromozioniRequest) returns (GetPromozioniResponse);
+}
+
+message GetProfiloRequest
+{
+  string cliente_id = 1;
+}
+
+message GetProfiloResponse
+{
+  bool success = 1;
+  string message = 2;
+  ClienteCompleto cliente = 3;
+}
+
+message ClienteCompleto {
+  string id = 1;
+  string nome = 2;
+  string cognome = 3;
+  string email = 4;
+  string password = 5;
+  bool is_fedelta = 6;
+  bool ricevi_notifiche = 7;
+  bool ricevi_promozioni = 8;
+}
+
+message ModificaProfiloRequest
+{
+  string cliente_id = 1;
+  string nome = 2;
+  string cognome = 3;
+  string password = 4; //manca la mail ma perché non la si può modificare
+}
+
+message ModificaProfiloResponse
+{
+  bool success = 1;
+  string message = 2;
+  ClienteCompleto cliente_aggiornato = 3;
+}
+
+message AderisciAFedeltaRequest
+{
+  string cliente_id = 1;
+  bool attiva_notifiche_promozioni = 2;
+}
+
+message AderisciAFedeltaResponse
+{
+  bool success = 1;
+  string message = 2;
+}
+
+message RimuoviFedeltaRequest
+{
+  string cliente_id = 1;
+  string motivo = 2;  //opzionale
+}
+
+message RimuoviFedeltaResponse
+{
+  bool success = 1;
+  string message = 2;
+}
+
+message AggiornaPreferenzeRequest
+{
+  string cliente_id = 1;
+  bool ricevi_notifiche = 2;
+  bool ricevi_promozioni = 3;
+}
+
+message AggiornaPreferenzeResponse
+{
+  bool success = 1;
+  string message = 2;
+}
+
+message GetNotificheRequest
+{
+  string cliente_id = 1;
+  bool solo_non_lette = 2;
+}
+
+message GetNotificheResponse
+{
+  repeated NotificaDettagliata notifiche = 1;
+  int32 totale_non_lette = 2;
+}
+
+message NotificaDettagliata
+{
+  string id = 1;
+  string messaggio = 2;
+  int64 timestamp = 3;
+  TipoNotifica tipo = 4;
+  string riferimento_id = 6;  //id del viaggio/biglietto/promozione correlats
+}
+
+enum TipoNotifica
+{
+  SISTEMA = 0;
+  VIAGGIO = 1;
+  PROMOZIONE = 2;
+}
+
+message ContaNotificheRequest
+{
+  string cliente_id = 1;
+}
+
+message ContaNotificheResponse
+{
+  int32 non_lette = 1;
+  int32 totali = 2;
+}
+
+message GetPromozioniRequest
+{
+  string cliente_id = 1;
+  bool solo_applicabili = 2;  //Solo promozioni applicabili al cliente
+  string tipo_filtro = 3;  //FEDELTA, TRATTA, TRENO
+}
+
+message GetPromozioniResponse
+{
+  repeated PromozioneDettagliata promozioni = 1;
+}
+
+message PromozioneDettagliata
+{
+  string id = 1;
+  string descrizione = 2;
+  double percentuale_sconto = 3;
+  int64 data_inizio = 4;
+  int64 data_fine = 5;
+  TipoPromozione tipo = 6;
+  bool applicabile_al_cliente = 7;
+  string tratta_id = 9; //opzionale se è di tipo treno
+  string tipo_treno = 10; //opzionale se è di tipo tratta
+}
+
+enum TipoPromozione
+{
+  PROMO_FEDELTA = 0;
+  PROMO_TRATTA = 1;
+  PROMO_TRENO = 2;
+}
+
+message VerificaPromozioneRequest
+{
+  string cliente_id = 1;
+  string promozione_id = 2;
+  string viaggio_id = 3;
+}
+
+message VerificaPromozioneResponse
+{
+  bool applicabile = 1;
+  string motivo = 2;  //Se non applicabile, spiego il perché
+  double sconto_previsto = 3;
+}
+
+//per recuperare un singolo biglietto
+service BigliettoServiceExt
+{
+  rpc GetBiglietto(GetBigliettoRequest) returns (GetBigliettoResponse);
+  rpc GetStoricoBiglietti(GetStoricoBigliettiRequest) returns (GetStoricoBigliettiResponse);
+}
+
+message GetBigliettoRequest {
+  string biglietto_id = 1;
+  string cliente_id = 2;  //per la sicurezza
+}
+
+message GetBigliettoResponse
+{
+  bool success = 1;
+  string message = 2;
+  BigliettoInfo biglietto = 3;
+}
+
+message GetStoricoBigliettiRequest
+{
+  string cliente_id = 1;
+  int64 data_da = 2;
+  int64 data_a = 3;
+  string stato_filtro = 4;  //PAGATO, ANNULLATO, etc.
+}
+
+message GetStoricoBigliettiResponse
+{
+  repeated BigliettoInfo biglietti = 1;
+  int32 totale = 2;
+}
+
+
+message BaseResponse
+{
+  bool success = 1;
+  string message = 2;
+  int32 error_code = 3;  //per una gestione più dettagliata degli errori
+}
+
+// Miglioramento di ViaggioInfo esistente
+message ViaggioDettagliato
+{
+  string id = 1;
+  string citta_partenza = 2;
+  string citta_arrivo = 3;
+  int64 orario_partenza = 4;
+  int64 orario_arrivo = 5;
+  string stato = 6;
+  map<string, int32> posti_per_classe = 7;  // ECONOMY->50, BUSINESS->20, etc.
+  TrenoInfo treno = 8;
+  TrattaInfo tratta = 9;
+  int32 ritardo_minuti = 10;
+  string binario_partenza = 11;
+  string binario_arrivo = 12;
+}
+
+message TrenoInfo
+{
+  string id = 1;
+  string tipo = 2;
+  int32 posti_totali = 3;
+}
+
+message TrattaInfo
+{
+  string id = 1;
+  StazioneInfo stazione_partenza = 2;
+  StazioneInfo stazione_arrivo = 3;
+  double distanza_km = 4;
+}
+
+message StazioneInfo
+{
+  string id = 1;
+  string nome = 2;
+  string citta = 3;
+  double latitudine = 4;
+  double longitudine = 5;
+}
 
 message LoginRequest
 {

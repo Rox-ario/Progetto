@@ -208,6 +208,6 @@ public class GestoreNotifiche
 
     public int contaNotificheNonLette(String idCliente)
     {
-        return notifichePerCliente.size();
+        return notifichePerCliente.get(idCliente).size();
     }
 }

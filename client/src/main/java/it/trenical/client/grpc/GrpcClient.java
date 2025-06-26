@@ -8,7 +8,7 @@ import it.trenical.grpc.*;
 import java.util.concurrent.TimeUnit;
 
 
-//Usa il pattern Singleton per garantire una sola connessione.
+//Uso il pattern Singleton per garantire una sola connessione.
 
 public class GrpcClient
 {
