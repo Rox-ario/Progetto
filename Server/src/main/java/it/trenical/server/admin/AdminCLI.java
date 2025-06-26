@@ -681,6 +681,28 @@ public class AdminCLI
         }
     }
 
+    private void visualizzaPromoPerCategoria(TipoPromozione tipo)
+    {
+        System.out.println("\nELENCO PROMOZIONI PER CATEGORIA "+ tipo.name());
+        try
+        {
+            List<Promozione> promozioni = controllerGRPC.getPromoPerTipo(tipo);
+            StringBuilder sb = new StringBuilder();
+            sb.append("[\n");
+            for(Promozione p : promozioni)
+            {
+                sb.append(p);
+            }
+            sb.append("\n]");
+            System.out.println(sb.toString());
+
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore: "+e.getMessage());
+        }
+    }
+
     private void visualizzaPromozioni()
     {
         System.out.println("\nELENCO PROMOZIONI");
@@ -704,7 +726,145 @@ public class AdminCLI
 
     private void creaPromozione()
     {
+        try
+        {
+            System.out.println("\nCREA PROMOZIONE");
+            System.out.println("Scegli il tipo: ");
+            System.out.println("1. Treno");
+            System.out.println("2. Fedelta");
+            System.out.println("3. Tratta");
+            System.out.println("0. torna indietro");
+            int scelta = leggiScelta();
+            switch (scelta)
+            {
+                case 1: creaPromozioneTreno(); break;
+                case 2: creaPromozioneFedelta(); break;
+                case 3: creaPromozioneTratta(); break;
+                default: System.out.println("Tornando indietro..."); return;
+            }
+        }catch(Exception e)
+        {
+            System.err.println("Errore: "+ e.getMessage());
+        }
+    }
 
+    private void creaPromozioneTreno()
+    {
+        System.out.println("Hai scelto di creare una promozione basata su un treno");
+        System.out.println("Premi 1 per vedere tutti i treni disponibili, 0 se hai già un id in mente: ");
+        int vedere = leggiIntero();
+        if(vedere == 1)
+        {
+            visualizzaTuttiITreni();
+        }
+        System.out.println("Vuoi anche vedere tutte le promozioni di questo tipo? In tal caso premi 1");
+        vedere = leggiIntero();
+        if(vedere == 1)
+        {
+            visualizzaPromoPerCategoria(TipoPromozione.TRENO);
+        }
+        System.out.println("Inserisci l'id del treno: ");
+        String idTreno = scanner.nextLine();
+        Treno treno = controllerGRPC.getTreno(idTreno);
+        while(treno == null)
+        {
+            System.out.println("Spiacente, la scelta non è valida, per riprovare prema 1");
+            int scelta = leggiIntero();
+            if(scelta == 1)
+            {
+                System.out.println("Inserisci l'id del treno: ");
+                idTreno = scanner.nextLine();
+                treno = controllerGRPC.getTreno(idTreno);
+            }
+            else
+            {
+                System.out.println("Tornando indietro...");
+                return;
+            }
+        }
+        System.out.println("Adesso digita la data di inizio promozione nel formato dd/MM/yyyy: ");
+        String dataInizio = scanner.nextLine();
+        System.out.println("Adesso digita la data di fine promozione nel formato dd/MM/yyyy: ");
+        String dataFine= scanner.nextLine();
+        System.out.println("Inserisci lo sconto da applicare: ");
+        double sconto = scanner.nextDouble();
+
+        Calendar inizio = parseDataOra(dataInizio, "00:00");
+        Calendar fine = parseDataOra(dataFine, "23:59");
+
+        controllerGRPC.creaPromozione(TipoPromozione.TRENO, inizio, fine, sconto, null, treno);
+        System.out.println("Promozione creata con successo!");
+    }
+
+    private void creaPromozioneFedelta()
+    {
+        System.out.println("Hai scelto di creare una promozione fedelta");
+        System.out.println("Premi 1 per vedere tutte le promozioni fedelta disponibili, 0 altrimenti");
+        int vedere = leggiIntero();
+        if(vedere == 1)
+        {
+            visualizzaPromoPerCategoria(TipoPromozione.FEDELTA);
+        }
+        System.out.println("Digita la data di inizio promozione nel formato dd/MM/yyyy: ");
+        String dataInizio = scanner.nextLine();
+        System.out.println("Digita la data di fine promozione nel formato dd/MM/yyyy: ");
+        String dataFine= scanner.nextLine();
+        System.out.println("Inserisci lo sconto da applicare: ");
+        double sconto = scanner.nextDouble();
+
+        Calendar inizio = parseDataOra(dataInizio, "00:00");
+        Calendar fine = parseDataOra(dataFine, "23:59");
+
+        controllerGRPC.creaPromozione(TipoPromozione.FEDELTA, inizio, fine, sconto, null, null);
+        System.out.println("Promozione creata con successo!");
+    }
+
+    private void creaPromozioneTratta()
+    {
+        System.out.println("Hai scelto di creare una promozione basata su una tratta");
+        System.out.println("Premi 1 per vedere tutti le tratte disponibili, 0 se hai già un id in mente: ");
+        int vedere = leggiIntero();
+        if(vedere == 1)
+        {
+            visualizzaTratte();
+        }
+        System.out.println("Vuoi anche vedere tutte le promozioni di questo tipo? In tal caso premi 1");
+        vedere = leggiIntero();
+        if(vedere == 1)
+        {
+            visualizzaPromoPerCategoria(TipoPromozione.TRATTA);
+        }
+        System.out.println("Inserisci l'id del tratta: ");
+        String idTratta = scanner.nextLine();
+        Tratta tratta = controllerGRPC.getTratta(idTratta);
+        while(tratta == null)
+        {
+            System.out.println("Spiacente, la scelta non è valida, per riprovare prema 1");
+            int scelta = leggiIntero();
+            if(scelta == 1)
+            {
+                System.out.println("Inserisci l'id del tratta: ");
+                idTratta = scanner.nextLine();
+                tratta = controllerGRPC.getTratta(idTratta);
+            }
+            else
+            {
+                System.out.println("Tornando indietro...");
+                return;
+            }
+        }
+        System.out.println("Adesso digita la data di inizio promozione nel formato dd/MM/yyyy: ");
+        String dataInizio = scanner.nextLine();
+        System.out.println("Adesso digita la data di fine promozione nel formato dd/MM/yyyy: ");
+        String dataFine= scanner.nextLine();
+        System.out.println("Inserisci lo sconto da applicare: ");
+        double sconto = scanner.nextDouble();
+
+        Calendar inizio = parseDataOra(dataInizio, "00:00");
+        Calendar fine = parseDataOra(dataFine, "23:59");
+
+        controllerGRPC.creaPromozione(TipoPromozione.TRATTA, inizio, fine, sconto, tratta, null);
+        System.out.println("Promozione creata con successo!");
     }
 
     private void menuClienti() {

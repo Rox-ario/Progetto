@@ -720,4 +720,11 @@ public final class GestoreViaggi {
         Calendar dataFine = v.getFine();
         return dataInizio.after(da) && dataFine.before(a);
     }
+
+    public Tratta getTratta(String id)
+    {
+        if(id == null || !tratte.containsKey(id))
+            return null;
+        return tratte.get(id);
+    }
 }

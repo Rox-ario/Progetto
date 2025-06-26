@@ -253,6 +253,7 @@ public class CatalogoPromozione
         {
             registraObserverPromozioneFedelta((PromozioneFedelta) p);
         }
+        System.out.println("Promozione creata\nDettagli: "+ p.toString());
     }
 
     private void salvaPromozioneInDB(Promozione p)

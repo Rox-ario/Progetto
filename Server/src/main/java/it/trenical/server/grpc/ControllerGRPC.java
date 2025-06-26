@@ -549,7 +549,7 @@ public class ControllerGRPC
 
     public void creaPromozione(TipoPromozione tipo, Calendar dataInizio,
                                Calendar dataFine, double sconto,
-                               Tratta tratta, Treno treno) throws Exception
+                               Tratta tratta, Treno treno)
     {
         try
         {
@@ -560,8 +560,10 @@ public class ControllerGRPC
 
             System.out.println("Promozione creata: " + tipo);
 
-        } catch (Exception e) {
-            throw new Exception("Impossibile creare promozione: " + e.getMessage());
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore: "+ e.getMessage());
         }
     }
 
@@ -628,6 +630,11 @@ public class ControllerGRPC
     public List<Promozione> getPromo()
     {
         return CatalogoPromozione.getInstance().getTutteLePromozioni();
+    }
+
+    public Tratta getTratta(String id)
+    {
+        return GestoreViaggi.getInstance().getTratta(id);
     }
 }
 
