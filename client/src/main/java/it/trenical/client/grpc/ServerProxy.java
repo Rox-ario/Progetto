@@ -11,17 +11,16 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-/*
-    E' un proxy di tipo remoto che serve per nascondere la complessità delle chiamate grpc al client
-    Lo uso come singleton
- */
+//E' un proxy di tipo remoto che serve per nascondere la complessità delle chiamate grpc al client
+
 public class ServerProxy
 {
 
     private final GrpcClient grpcClient;
     private static ServerProxy instance;
 
-    private ServerProxy() {
+    private ServerProxy()
+    {
         this.grpcClient = GrpcClient.getInstance();
     }
 
@@ -107,13 +106,13 @@ public class ServerProxy
                     .setDataViaggio(filtro.getDataInizio().getTimeInMillis())
                     .setNumeroPasseggeri(filtro.getNumero())
                     .setClasseServizio(filtro.getClasseServizio().toString())
-                    .setTipoTreno(filtro.getTipoTreno() != null ? filtro.getTipoTreno().toString() : "COMFORT")
+                    .setTipoTreno(filtro.getTipoTreno().name())
                     .build();
 
             CercaViaggiResponse response = getInstance().grpcClient.getViaggioStub().cercaViaggi(request);
 
             List<ViaggioDTO> risultati = new ArrayList<>();
-            for (ViaggioInfo info : response.getViaggiosList())
+            for (ViaggioInfo info : response.getViaggiList())
             {
                 ViaggioDTO dto = convertiViaggioInfoToDTO(info);
                 risultati.add(dto);
@@ -226,60 +225,171 @@ public class ServerProxy
     }
 
 
-    public static BigliettoDTO getBiglietto(String idBiglietto) throws Exception
+    public static BigliettoDTO getBiglietto(String idBiglietto, String idCliente) throws Exception
     {
-        throw new UnsupportedOperationException("Metodo non implementato nel servizio gRPC");
+        try
+        {
+            GetBigliettoRequest request = GetBigliettoRequest.newBuilder()
+                    .setBigliettoId(idBiglietto)
+                    .setClienteId(idCliente)
+                    .build();
+
+            GetBigliettoResponse response = getInstance().grpcClient.getBigliettoStub().getBiglietto(request);
+
+            if (!response.getSuccess())
+            {
+                throw new Exception(response.getMessage());
+            }
+
+            return convertiBigliettoInfoToDTO(response.getBiglietto());
+        }
+        catch (StatusRuntimeException e)
+        {
+            throw new Exception("Errore nel recuper del biglietto: " + e.getMessage());
+        }
     }
-
-    // ==================== METODI PROFILO CLIENTE ====================
-
 
     public static ClienteDTO getProfiloCliente(String idCliente) throws Exception
     {
-        throw new UnsupportedOperationException("Metodo non implementato nel servizio gRPC");
+        try
+        {
+            GetProfiloRequest request = GetProfiloRequest.newBuilder()
+                    .setClienteId(idCliente)
+                    .build();
+
+            GetProfiloResponse response = getInstance().grpcClient.getClienteStub().getProfilo(request);
+
+            if (!response.getSuccess())
+            {
+                throw new Exception(response.getMessage());
+            }
+
+            return convertiClienteInfoToDTO(response.getCliente());
+        }
+        catch (StatusRuntimeException e)
+        {
+            throw new Exception("Errore nel recuper del biglietto: " + e.getMessage());
+        }
     }
 
-    /**
-     * Modifica il profilo di un cliente
-     */
-    public static void modificaProfiloCliente(ModificaClienteDTO dto) throws Exception {
-        // Workaround: dovrebbe esserci un endpoint specifico
-        throw new UnsupportedOperationException("Metodo non implementato nel servizio gRPC");
+    public static void modificaProfiloCliente(ModificaClienteDTO dto) throws Exception
+    {
+        try
+        {
+            ModificaProfiloRequest request = ModificaProfiloRequest.newBuilder()
+                    .setClienteId(dto.getId())
+                    .build();
+
+            ModificaProfiloResponse response = getInstance().grpcClient.getClienteStub().modificaProfilo(request);
+
+            if (!response.getSuccess())
+            {
+                throw new Exception(response.getMessage());
+            }
+        }
+        catch (StatusRuntimeException e)
+        {
+            throw new Exception("Errore nella modifica biglietto: " + e.getMessage());
+        }
     }
 
-    /**
-     * Aderisce al programma fedeltà
-     */
-    public static void aderisciAFedelta(String idCliente, boolean attivaNotifichePromozioni) throws Exception {
-        // Workaround: dovrebbe esserci un endpoint specifico
-        throw new UnsupportedOperationException("Metodo non implementato nel servizio gRPC");
+    public static void aderisciAFedelta(String idCliente, boolean attivaNotifichePromozioni) throws Exception
+    {
+        try
+        {
+            AderisciAFedeltaRequest request = AderisciAFedeltaRequest.newBuilder()
+                    .setClienteId(idCliente)
+                    .setAttivaNotifichePromozioni(attivaNotifichePromozioni)
+                    .build();
+
+            AderisciAFedeltaResponse response = getInstance().grpcClient.getClienteStub().aderisciAFedelta(request);
+
+            if (!response.getSuccess())
+            {
+                throw new Exception(response.getMessage());
+            }
+        }
+        catch (StatusRuntimeException e)
+        {
+            throw new Exception("Errore nella modifica biglietto: " + e.getMessage());
+        }
     }
 
-    /**
-     * Rimuove l'adesione al programma fedeltà
-     */
-    public static void rimuoviFedelta(String idCliente) throws Exception {
-        // Workaround: dovrebbe esserci un endpoint specifico
-        throw new UnsupportedOperationException("Metodo non implementato nel servizio gRPC");
+    public static void rimuoviFedelta(String idCliente) throws Exception
+    {
+        try
+        {
+            RimuoviFedeltaRequest request = RimuoviFedeltaRequest.newBuilder()
+                    .setClienteId(idCliente)
+                    .build();
+
+            RimuoviFedeltaResponse response = getInstance().grpcClient.getClienteStub().rimuoviFedelta(request);
+
+            if (!response.getSuccess())
+            {
+                throw new Exception(response.getMessage());
+            }
+        }
+        catch (StatusRuntimeException e)
+        {
+            throw new Exception("Errore nella modifica biglietto: " + e.getMessage());
+        }
     }
 
-    /**
-     * Recupera le notifiche di un cliente
-     */
-    public static List<NotificaDTO> getNotifiche(String idCliente, boolean soloNonLette) throws Exception {
-        // Workaround: dovrebbe esserci un endpoint specifico
-        throw new UnsupportedOperationException("Metodo non implementato nel servizio gRPC");
+    public static List<NotificaDTO> getNotifiche(String idCliente, boolean soloNonLette) throws Exception
+    {
+        try
+        {
+            GetNotificheRequest request = GetNotificheRequest.newBuilder()
+                    .setClienteId(idCliente)
+                    .build();
+
+            GetNotificheResponse response = getInstance().grpcClient.getNotificheStub().getNotifiche(request);
+
+            List<NotificaDTO> notifiche = new ArrayList<>();
+            for (NotificaDettagliata info : response.getNotificheList())
+            {
+                NotificaDTO dto = convertiNotificaDettagliataToDTO(info);
+                notifiche.add(dto);
+            }
+
+            return notifiche;
+        }
+        catch (StatusRuntimeException e)
+        {
+            throw new Exception("Errore nella modifica biglietto: " + e.getMessage());
+        }
     }
 
-    /**
-     * Recupera le promozioni attive
-     */
-    public static List<String> getPromozioniAttive(String idCliente) throws Exception {
-        // Workaround: dovrebbe esserci un endpoint specifico
-        throw new UnsupportedOperationException("Metodo non implementato nel servizio gRPC");
-    }
+    public static List<String> getPromozioniAttive(String idCliente) throws Exception
+    {
+        try
+        {
+            GetPromozioniRequest request = GetPromozioniRequest.newBuilder()
+                    .setClienteId(idCliente)
+                    .build();
 
-    // ==================== METODI DI CONVERSIONE ====================
+            GetPromozioniResponse response = getInstance().grpcClient.getPromozioniStub().getPromozioniAttive(request);
+
+            List<String> promozioni = new ArrayList<>();
+            for (PromozioneDettagliata info : response.getPromozioniList())
+            {
+                Calendar dataInizioMillis = Calendar.getInstance();
+                dataInizioMillis.setTimeInMillis(info.getDataInizio());
+                Calendar dataFineMillis = Calendar.getInstance();
+                dataFineMillis.setTimeInMillis(info.getDataFine());
+
+                PromozioneDTO dto = convertiPromozioneDettagliataToDTO(info, dataInizioMillis, dataFineMillis);
+                promozioni.add(dto.toString());
+            }
+
+            return promozioni;
+        }
+        catch (StatusRuntimeException e)
+        {
+            throw new Exception("Errore nella modifica biglietto: " + e.getMessage());
+        }
+    }
 
     private static ViaggioDTO convertiViaggioInfoToDTO(ViaggioInfo info)
     {
@@ -297,10 +407,6 @@ public class ServerProxy
         dto.setFine(arrivo);
 
         dto.setPostiDisponibili(info.getPostiDisponibili());
-
-        // Nota: alcuni campi come Treno e Tratta non sono disponibili nel proto
-        // quindi non possiamo settarli nel DTO
-
         return dto;
     }
 
@@ -317,6 +423,44 @@ public class ServerProxy
                 dataAcquisto,
                 StatoBiglietto.valueOf(info.getStato()),
                 info.getPrezzo()
+        );
+    }
+
+    private static ClienteDTO convertiClienteInfoToDTO(ClienteCompleto info)
+    {
+        return new ClienteDTO(
+                info.getId(),
+                info.getNome(),
+                info.getCognome(),
+                info.getEmail(),
+                info.getPassword(),
+                info.getIsFedelta(),
+                info.getRiceviNotifiche(),
+                info.getRiceviPromozioni()
+        );
+    }
+
+    private static NotificaDTO convertiNotificaDettagliataToDTO(NotificaDettagliata info)
+    {
+        return new NotificaDTO(
+                info.getMessaggio()
+        );
+    }
+
+    private static PromozioneDTO convertiPromozioneDettagliataToDTO(PromozioneDettagliata info, Calendar dataInizio, Calendar dataFine)
+    {
+        //conviene desumerne il tipo
+        it.trenical.server.domain.enumerations.TipoPromozione tipoConvertito =
+                it.trenical.server.domain.enumerations.TipoPromozione.valueOf(info.getTipo().name());
+        return new PromozioneDTO(
+                info.getId(),
+                info.getDescrizione(),
+                info.getPercentualeSconto(),
+                dataInizio,
+                dataFine,
+                tipoConvertito,
+                info.getTrattaId(),
+                info.getTipoTreno()
         );
     }
 }

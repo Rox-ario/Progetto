@@ -24,6 +24,8 @@ service BigliettoService
   rpc GetBigliettiCliente(GetBigliettiRequest) returns (GetBigliettiResponse);
   rpc ModificaBiglietto(ModificaBigliettoRequest) returns (ModificaBigliettoResponse);
   rpc CancellaBiglietto(CancellaBigliettoRequest) returns (CancellaBigliettoResponse);
+  rpc GetBiglietto(GetBigliettoRequest) returns (GetBigliettoResponse);
+  rpc GetStoricoBiglietti(GetStoricoBigliettiRequest) returns (GetStoricoBigliettiResponse);
 }
 
 service ClienteService
@@ -179,9 +181,8 @@ message PromozioneDettagliata
   int64 data_inizio = 4;
   int64 data_fine = 5;
   TipoPromozione tipo = 6;
-  bool applicabile_al_cliente = 7;
-  string tratta_id = 9; //opzionale se è di tipo treno
-  string tipo_treno = 10; //opzionale se è di tipo tratta
+  string tratta_id = 7; //opzionale se è di tipo treno
+  string tipo_treno = 8; //opzionale se è di tipo tratta
 }
 
 enum TipoPromozione
@@ -203,13 +204,6 @@ message VerificaPromozioneResponse
   bool applicabile = 1;
   string motivo = 2;  //Se non applicabile, spiego il perché
   double sconto_previsto = 3;
-}
-
-//per recuperare un singolo biglietto
-service BigliettoServiceExt
-{
-  rpc GetBiglietto(GetBigliettoRequest) returns (GetBigliettoResponse);
-  rpc GetStoricoBiglietti(GetStoricoBigliettiRequest) returns (GetStoricoBigliettiResponse);
 }
 
 message GetBigliettoRequest {

@@ -11,10 +11,7 @@ import it.trenical.server.dto.ModificaBigliettoDTO;
 
 import java.util.List;
 
-/*
-  Implementazione del servizio biglietti gRPC.
-  Gestisce acquisto, modifica, cancellazione e recupero dei biglietti.
- */
+//qui metto i metodi principali per il viglietto
 public class BigliettoServiceImpl extends BigliettoServiceGrpc.BigliettoServiceImplBase
 {
     private final ControllerGRPC controllerGRPC = ControllerGRPC.getInstance();
@@ -44,9 +41,6 @@ public class BigliettoServiceImpl extends BigliettoServiceGrpc.BigliettoServiceI
 
             responseObserver.onNext(response);
             responseObserver.onCompleted();
-
-            System.out.println("Biglietto acquistato: " + GestoreBiglietti.getInstance().getBigliettoPerID(idBiglietto).toString());
-
         }
         catch (Exception e)
         {
@@ -166,6 +160,120 @@ public class BigliettoServiceImpl extends BigliettoServiceGrpc.BigliettoServiceI
             responseObserver.onCompleted();
 
             System.err.println("Cancellazione fallita: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void getBiglietto(GetBigliettoRequest request,
+                             StreamObserver<GetBigliettoResponse> responseObserver)
+    {
+        System.out.println("Richiesta biglietto: " + request.getBigliettoId());
+
+        try
+        {
+            BigliettoDTO biglietto = controllerGRPC.getBiglietto(request.getBigliettoId());
+
+            if (!request.getClienteId().isEmpty() &&
+                    !biglietto.getIDCliente().equals(request.getClienteId())) {
+                throw new IllegalAccessException("Biglietto non autorizzato per questo cliente");
+            }
+
+            BigliettoInfo bigliettoInfo = BigliettoInfo.newBuilder()
+                    .setId(biglietto.getID())
+                    .setViaggioId(biglietto.getIDViaggio())
+                    .setClasseServizio(biglietto.getClasseServizio().toString())
+                    .setPrezzo(biglietto.getPrezzo())
+                    .setStato(biglietto.getStatoBiglietto().toString())
+                    .setDataAcquisto(biglietto.getDataAcquisto().getTimeInMillis())
+                    .build();
+
+            GetBigliettoResponse response = GetBigliettoResponse.newBuilder()
+                    .setSuccess(true)
+                    .setMessage("Biglietto trovato")
+                    .setBiglietto(bigliettoInfo)
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+
+        }
+        catch (Exception e)
+        {
+            GetBigliettoResponse response = GetBigliettoResponse.newBuilder()
+                    .setSuccess(false)
+                    .setMessage("Errore: " + e.getMessage())
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        }
+    }
+
+    @Override
+    public void getStoricoBiglietti(GetStoricoBigliettiRequest request,
+                                    StreamObserver<GetStoricoBigliettiResponse> responseObserver)
+    {
+        System.out.println("Richiesta storico biglietti per: " + request.getClienteId());
+
+        try
+        {
+            GetBigliettiRequest bigliettiRequest = GetBigliettiRequest.newBuilder()
+                    .setClienteId(request.getClienteId())
+                    .build();
+
+            //creo uno stream observer temporaneo per catturare la response
+            StreamObserver<GetBigliettiResponse> tempObserver = new StreamObserver<GetBigliettiResponse>()
+            {
+                @Override
+                //serve per inviare la risposta al client (completa o incompleya che sia)
+                public void onNext(GetBigliettiResponse value)
+                {
+                    //convertiamo la risposta
+                    GetStoricoBigliettiResponse.Builder responseBuilder =
+                            GetStoricoBigliettiResponse.newBuilder();
+
+                    for (BigliettoInfo biglietto : value.getBigliettiList())
+                    {
+                        if (!request.getStatoFiltro().isEmpty() &&
+                                !biglietto.getStato().equals(request.getStatoFiltro())) {
+                            continue;
+                        }
+
+                        if (request.getDataDa() > 0 &&
+                                biglietto.getDataAcquisto() < request.getDataDa()) {
+                            continue;
+                        }
+
+                        if (request.getDataA() > 0 &&
+                                biglietto.getDataAcquisto() > request.getDataA()) {
+                            continue;
+                        }
+
+                        responseBuilder.addBiglietti(biglietto);
+                    }
+
+                    responseBuilder.setTotale(responseBuilder.getBigliettiCount());
+                    responseObserver.onNext(responseBuilder.build());
+                }
+
+                @Override
+                public void onError(Throwable t)
+                {
+                    responseObserver.onError(t);
+                }
+
+                @Override
+                public void onCompleted()
+                {
+                    responseObserver.onCompleted();
+                }
+            };
+
+            getBigliettiCliente(bigliettiRequest, tempObserver);
+
+        } catch (Exception e) {
+            System.err.println("Errore storico biglietti: " + e.getMessage());
+            responseObserver.onError(e);
         }
     }
 

@@ -19,6 +19,9 @@ public class GrpcClient
     private final AuthServiceGrpc.AuthServiceBlockingStub authStub;
     private final ViaggioServiceGrpc.ViaggioServiceBlockingStub viaggioStub;
     private final BigliettoServiceGrpc.BigliettoServiceBlockingStub bigliettoStub;
+    private final ClienteServiceGrpc.ClienteServiceBlockingStub clienteStub;
+    private final NotificheServiceGrpc.NotificheServiceBlockingStub notificheStub;
+    private final PromozioniServiceGrpc.PromozioniServiceBlockingStub promozioniStub;
 
     private static final String HOST = "localhost";
     private static final int PORT = 50051;
@@ -34,6 +37,9 @@ public class GrpcClient
         this.authStub = AuthServiceGrpc.newBlockingStub(channel);
         this.viaggioStub = ViaggioServiceGrpc.newBlockingStub(channel);
         this.bigliettoStub = BigliettoServiceGrpc.newBlockingStub(channel);
+        this.clienteStub = ClienteServiceGrpc.newBlockingStub(channel);
+        this.notificheStub = NotificheServiceGrpc.newBlockingStub(channel);
+        this.promozioniStub = PromozioniServiceGrpc.newBlockingStub(channel);
 
         System.out.println("Connessione stabilita con server TreniCal su " + HOST + ":" + PORT);
     }
@@ -60,6 +66,21 @@ public class GrpcClient
     public BigliettoServiceGrpc.BigliettoServiceBlockingStub getBigliettoStub()
     {
         return bigliettoStub;
+    }
+
+    public ClienteServiceGrpc.ClienteServiceBlockingStub getClienteStub()
+    {
+        return clienteStub;
+    }
+
+    public NotificheServiceGrpc.NotificheServiceBlockingStub getNotificheStub()
+    {
+        return notificheStub;
+    }
+
+    public PromozioniServiceGrpc.PromozioniServiceBlockingStub getPromozioniStub()
+    {
+        return promozioniStub;
     }
 
     //chiuso la connessione col server

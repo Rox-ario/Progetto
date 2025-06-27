@@ -4,7 +4,10 @@ import it.trenical.server.command.biglietto.*;
 import it.trenical.server.command.cliente.*;
 import it.trenical.server.command.promozione.CreaPromozioneCommand;
 import it.trenical.server.command.promozione.PromozioneCommand;
+import it.trenical.server.command.viaggio.AggiornaRitardoViaggio;
+import it.trenical.server.command.viaggio.AggiornaViaggio;
 import it.trenical.server.command.viaggio.ComandoViaggio;
+import it.trenical.server.command.viaggio.ProgrammaViaggio;
 import it.trenical.server.domain.*;
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.*;
@@ -446,13 +449,13 @@ public class ControllerGRPC
     {
         try
         {
-            List<BigliettoDTO> tuttiBiglietti = getBigliettiCliente(idCliente);
+            List<Biglietto> tuttiBiglietti = getBigliettiCliente(idCliente);
 
             List<BigliettoDTO> filtrati = new ArrayList<>();
-            for(BigliettoDTO bigliettoDTO : tuttiBiglietti)
+            for(Biglietto biglietto : tuttiBiglietti)
             {
-                if (bigliettoDTO.getStatoBiglietto() == StatoBiglietto.valueOf(stato))
-                    filtrati.add(bigliettoDTO);
+                if (biglietto.getStatoBiglietto() == StatoBiglietto.valueOf(stato))
+                    filtrati.add(Assembler.bigliettoToDTO(biglietto));
             }
 
             System.out.println("Filtrati " + filtrati.size() + " biglietti con stato: " + stato);
@@ -599,17 +602,21 @@ public class ControllerGRPC
 
     public Viaggio programmaViaggio(String idTreno, String idTratta, Calendar partenza, Calendar arrivo)
     {
-        return GestoreViaggi.getInstance().programmaViaggio(idTreno, idTratta, partenza, arrivo);
+        ProgrammaViaggio command = new ProgrammaViaggio(idTreno, idTratta, partenza, arrivo);
+        eseguiComandoViaggio(command);
+        return command.getViaggio();
     }
 
     public void aggiornaStatoViaggio(String idViaggio, StatoViaggio nuovoStato)
     {
-        GestoreViaggi.getInstance().cambiaStatoViaggio(idViaggio, nuovoStato);
+        AggiornaViaggio command = new AggiornaViaggio(idViaggio, nuovoStato);
+        eseguiComandoViaggio(command);
     }
 
     public void aggiornaRitardoViaggio(String id, int ritardo)
     {
-        GestoreViaggi.getInstance().aggiornaRitardoViaggio(id, ritardo);
+        AggiornaRitardoViaggio commando = new AggiornaRitardoViaggio(id, ritardo);
+        eseguiComandoViaggio(commando);
     }
 
     public List<Viaggio> getViaggiPerStato(StatoViaggio statoViaggio)
@@ -635,6 +642,13 @@ public class ControllerGRPC
     public Tratta getTratta(String id)
     {
         return GestoreViaggi.getInstance().getTratta(id);
+    }
+
+    public NotificheClienteDTO getNotificheClienteDTO(String id)
+    {
+        RecuperaNotificheCommand command = new RecuperaNotificheCommand(id, true);
+        eseguiComandoCliente(command);
+        return command.getRisultato();
     }
 }
 

@@ -136,4 +136,9 @@ public class Biglietto
     {
         return dataAcquisto;
     }
+
+    public StatoBiglietto getStatoBiglietto()
+    {
+        return statoBiglietto;
+    }
 }

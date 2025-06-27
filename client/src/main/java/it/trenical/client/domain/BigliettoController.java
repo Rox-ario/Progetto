@@ -92,15 +92,8 @@ public class BigliettoController
                 return null;
             }
 
-            BigliettoDTO biglietto = ServerProxy.getBiglietto(idBiglietto.trim());
-
-            //verifico che il biglietto appartenga all'utente loggato
             String idClienteLoggato = SessioneCliente.getInstance().getIdClienteLoggato();
-            if (!biglietto.getIDCliente().equals(idClienteLoggato))
-            {
-                System.err.println("Non hai i permessi per visualizzare questo biglietto");
-                return null;
-            }
+            BigliettoDTO biglietto = ServerProxy.getBiglietto(idBiglietto.trim(), idClienteLoggato);
 
             mostraDettagliBiglietto(biglietto);
             return biglietto;

@@ -18,6 +18,9 @@ public class GrpcServer
                 .addService(new AuthServiceImpl())
                 .addService(new ViaggioServiceImpl())
                 .addService(new BigliettoServiceImpl())
+                .addService(new ClienteServiceImpl())
+                .addService(new NotificheServiceImpl())
+                .addService(new PromozioniServiceImpl())
                 .build()
                 .start();
 
