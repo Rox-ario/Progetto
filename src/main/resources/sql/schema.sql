@@ -1,7 +1,6 @@
 CREATE DATABASE IF NOT EXISTS trenical;
 USE trenical;
 
---Tabella Clienti
 CREATE TABLE clienti
  (
     id VARCHAR(36) PRIMARY KEY,
@@ -14,7 +13,6 @@ CREATE TABLE clienti
     ricevi_promozioni BOOLEAN DEFAULT FALSE
 );
 
--- Tabella Stazioni
 CREATE TABLE stazioni
  (
     id VARCHAR(10) PRIMARY KEY,
@@ -25,7 +23,6 @@ CREATE TABLE stazioni
     binari VARCHAR(255) NOT NULL
  );
 
--- Tabella Tratte
 CREATE TABLE tratte
 (
     id VARCHAR(10) PRIMARY KEY,
@@ -35,14 +32,12 @@ CREATE TABLE tratte
     FOREIGN KEY (stazione_arrivo_id) REFERENCES stazioni(id)
 );
 
--- Tabella Treni
 CREATE TABLE treni
 (
     id VARCHAR(20) PRIMARY KEY,
     tipo VARCHAR(20) NOT NULL
 );
 
--- Tabella Viaggi
 CREATE TABLE viaggi
 (
     id VARCHAR(36) PRIMARY KEY,
@@ -56,7 +51,6 @@ CREATE TABLE viaggi
     FOREIGN KEY (tratta_id) REFERENCES tratte(id)
 );
 
--- Tabella Biglietti
 CREATE TABLE biglietti
  (
     id VARCHAR(36) PRIMARY KEY,
@@ -70,7 +64,6 @@ CREATE TABLE biglietti
     FOREIGN KEY (cliente_id) REFERENCES clienti(id)
 );
 
--- Tabella Banca
 CREATE TABLE clienti_banca
 (
     cliente_id VARCHAR(36) PRIMARY KEY,
@@ -91,9 +84,9 @@ CREATE TABLE promozioni
     percentuale_sconto DOUBLE NOT NULL,
     stato VARCHAR(20) DEFAULT 'PROGRAMMATA',
 
-    -- Campi opzionali
-    tratta_id VARCHAR(10), -- solo per tipo TRATTA
-    tipo_treno VARCHAR(20), -- solo per tipo TRENO
+
+    tratta_id VARCHAR(10),
+    tipo_treno VARCHAR(20),
 
     FOREIGN KEY (tratta_id) REFERENCES tratte(id)
 );

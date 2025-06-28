@@ -1,8 +1,11 @@
 package it.trenical.server.database;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class ConnessioneADB
 {
@@ -39,6 +42,36 @@ public class ConnessioneADB
             {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public static void inizializzaDatabase(String pathFileSql) throws Exception
+    {
+        String sql = new String(Files.readAllBytes(Paths.get(pathFileSql)));
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD))
+        {
+            Statement stmt = conn.createStatement();
+            String[] statements = sql.split(";");
+
+            for (String query : statements)
+            {
+                System.out.println("query prima: "+query);
+                query = query.trim();
+
+                if (query.isEmpty() || query.startsWith("--") || query.startsWith("#")) {
+                    continue;
+                }
+
+                query = query.replaceAll("--.*", "").trim();
+
+                if (!query.isEmpty())
+                {
+                    System.out.println("query dopo: "+ query);
+                    stmt.execute(query);
+                }
+            }
+
         }
     }
 }
