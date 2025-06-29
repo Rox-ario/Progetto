@@ -80,6 +80,23 @@ public class ControllerGRPC
         }
     }
 
+    public void registraCliente(ClienteDTO clienteDTO, DatiBancariDTO datiBancari) throws Exception {
+        try {
+            RegistraClienteCommand command = new RegistraClienteCommand(
+                    clienteDTO,
+                    clienteDTO.getPassword(),
+                    datiBancari //
+            );
+            eseguiComandoCliente(command);
+
+            System.out.println("Cliente registrato con successo: " + clienteDTO.getEmail());
+
+        } catch (Exception e) {
+            System.err.println("Errore durante la registrazione con dati bancari: " + e.getMessage());
+            throw new Exception("Registrazione fallita: " + e.getMessage());
+        }
+    }
+
     public void registraCliente(ClienteDTO clienteDTO) throws Exception
     {
         try

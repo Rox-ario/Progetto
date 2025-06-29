@@ -3,11 +3,10 @@ package domain.gestore;
 import it.trenical.server.database.ConnessioneADB;
 import it.trenical.server.domain.*;
 import it.trenical.server.domain.cliente.Cliente;
+import it.trenical.server.domain.cliente.ClienteBanca;
 import it.trenical.server.domain.enumerations.*;
-import it.trenical.server.domain.gestore.CatalogoPromozione;
-import it.trenical.server.domain.gestore.GestoreBiglietti;
-import it.trenical.server.domain.gestore.GestoreClienti;
-import it.trenical.server.domain.gestore.GestoreViaggi;
+import it.trenical.server.domain.gestore.*;
+import it.trenical.server.dto.DatiBancariDTO;
 import it.trenical.server.dto.RimborsoDTO;
 
 import org.junit.jupiter.api.*;
@@ -34,6 +33,7 @@ class GestoreBigliettiTest {
     private GestoreBiglietti gestoreBiglietti;
     private GestoreViaggi gestoreViaggi;
     private GestoreClienti gestoreClienti;
+    private GestoreBanca gestoreBanca;
 
     // Oggetti di test riutilizzabili
     private Cliente clienteTest;
@@ -48,7 +48,10 @@ class GestoreBigliettiTest {
     private List<String> clientiDaPulire = new ArrayList<>();
 
     @BeforeAll
-    void setupAll() throws Exception {
+    void setupAll() throws Exception
+    {
+        pulisciDatabaseCompleto();
+
         // Verifico che il database sia accessibile
         verificaConnessioneDB();
 
@@ -56,6 +59,7 @@ class GestoreBigliettiTest {
         gestoreBiglietti = GestoreBiglietti.getInstance();
         gestoreViaggi = GestoreViaggi.getInstance();
         gestoreClienti = GestoreClienti.getInstance();
+        gestoreBanca = GestoreBanca.getInstance();
 
         // Creo stazioni di test con ArrayList di binari
         ArrayList<Integer> binari = new ArrayList<>();
@@ -76,24 +80,107 @@ class GestoreBigliettiTest {
         gestoreViaggi.aggiungiTratta(trattaTest);
     }
 
+    @AfterEach
+    void cleanup() throws SQLException
+    {
+        // ✅ PULIZIA DOPO OGNI TEST per evitare interferenze
+
+        // Rimuovi biglietti creati in questo test
+        for (String idBiglietto : bigliettiDaPulire)
+        {
+            rimuoviBigliettoDaDB(idBiglietto);
+        }
+
+        // Svuoto le liste
+        bigliettiDaPulire.clear();
+        viaggiDaPulire.clear();
+        clientiDaPulire.clear();
+    }
+
+    @AfterAll
+    void tearDownAll() throws SQLException {
+        // ✅ PULIZIA FINALE completa
+        pulisciDatabaseCompleto();
+        System.out.println("\n=== TEST COMPLETATI ===");
+        System.out.println("Database pulito dai dati di test");
+    }
+
+    // ✅ METODO per pulizia completa del database
+    private void pulisciDatabaseCompleto() throws SQLException {
+        Connection conn = null;
+        try {
+            conn = ConnessioneADB.getConnection();
+            Statement stmt = conn.createStatement();
+
+            // Disabilito foreign key checks per eliminare in qualsiasi ordine
+            stmt.execute("SET FOREIGN_KEY_CHECKS = 0");
+
+            // Pulisco tabelle in ordine inverso delle dipendenze
+            stmt.execute("DELETE FROM biglietti WHERE cliente_id LIKE 'TEST_%' OR viaggio_id IN " +
+                    "(SELECT id FROM viaggi WHERE treno_id LIKE 'TR_TEST_%')");
+            stmt.execute("DELETE FROM viaggi WHERE treno_id LIKE 'TR_TEST_%'");
+            stmt.execute("DELETE FROM clienti_banca WHERE cliente_id LIKE 'TEST_%'");
+            stmt.execute("DELETE FROM clienti WHERE id LIKE 'TEST_%'");
+            stmt.execute("DELETE FROM treni WHERE id LIKE 'TR_TEST_%'");
+            stmt.execute("DELETE FROM tratte WHERE stazione_partenza_id IN " +
+                    "(SELECT id FROM stazioni WHERE nome LIKE '%TEST%')");
+            stmt.execute("DELETE FROM stazioni WHERE nome LIKE '%TEST%'");
+
+            // Riabilito foreign key checks
+            stmt.execute("SET FOREIGN_KEY_CHECKS = 1");
+
+            System.out.println("✓ Database pulito dai dati di test");
+
+        } finally {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
+    // ✅ METODO per rimuovere biglietto specifico
+    private void rimuoviBigliettoDaDB(String idBiglietto) throws SQLException {
+        String sql = "DELETE FROM biglietti WHERE id = ?";
+        Connection conn = null;
+
+        try {
+            conn = ConnessioneADB.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, idBiglietto);
+            pstmt.executeUpdate();
+        } finally {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
     @BeforeEach
     void setup() {
-        // Creo un treno di test
-        String idTreno = "TR_TEST_" + 1;
-        gestoreViaggi.aggiungiTreno(idTreno, TipoTreno.ITALO);
+        // Creo un treno di test con ID univoco basato su timestamp
+        long timestamp = System.currentTimeMillis();
+        String idTreno = "TR_TEST_" + timestamp;  // ✅ ID univoco
 
-        // Creo un cliente di test usando il Builder pattern
-        String idCliente = "TEST_" + 1;
+        try {
+            gestoreViaggi.aggiungiTreno(idTreno, TipoTreno.ITALO);
+        } catch (Exception e) {
+            // Se il treno esiste già, uso un ID diverso
+            idTreno = "TR_TEST_" + timestamp + "_ALT";
+            gestoreViaggi.aggiungiTreno(idTreno, TipoTreno.ITALO);
+        }
+
+        // Creo un cliente di test con ID univoco
+        String idCliente = "TEST_" + timestamp;  // ✅ ID univoco
         clienteTest = new Cliente.Builder()
                 .ID(idCliente)
                 .Nome("Mario")
                 .Cognome("Rossi")
-                .Email("marioRossi@test.it")
+                .Email("marioRossi" + timestamp + "@test.it")  // ✅ Email univoca
                 .Password("password123")
                 .build();
 
         gestoreClienti.aggiungiCliente(clienteTest);
         clientiDaPulire.add(clienteTest.getId());
+
+        ClienteBanca clienteBanca = gestoreBanca.getClienteBanca(clienteTest.getId());
+        assertNotNull(clienteBanca, "Il cliente dovrebbe essere presente anche in clienti_banca");
+        System.out.println("✓ Cliente test creato con carta: " + clienteBanca.getNumeroCarta());
 
         // Creo un viaggio di test per domani alle 14:00
         Calendar partenza = Calendar.getInstance();
@@ -137,6 +224,12 @@ class GestoreBigliettiTest {
 
         // Verifico che il biglietto sia stato salvato nel database
         verificaBigliettoNelDB(biglietto.getID(), idCliente, idViaggio, classe, biglietto.getPrezzo());
+
+        ClienteBanca clienteBanca = gestoreBanca.getClienteBanca(idCliente);
+        assertNotNull(clienteBanca, "I dati bancari del cliente dovrebbero esistere");
+        assertEquals("Banca Trenical", clienteBanca.getBanca(), "La banca dovrebbe essere quella corretta");
+
+        System.out.println("✓ Biglietto creato con successo per cliente con carta: " + clienteBanca.getNumeroCarta());
     }
 
     /**
@@ -296,11 +389,53 @@ class GestoreBigliettiTest {
         }
     }
 
+    @Test
+    @Order(7)
+    @DisplayName("Registrazione cliente con carta personalizzata")
+    void testRegistrazioneClienteConCartaPersonalizzata() throws SQLException {
+        // Given: creo dati bancari personalizzati
+        String idClienteCustom = "CUSTOM_" + System.currentTimeMillis();
+        String cartaPersonalizzata = "4000-1111-2222-3333";
+        String bancaPersonalizzata = "Banca del Cliente VIP";
+
+        DatiBancariDTO datiBancari = new DatiBancariDTO();
+        datiBancari.setNumeroCarta(cartaPersonalizzata);
+        datiBancari.setNomeBanca(bancaPersonalizzata);
+
+        // Creo il cliente
+        Cliente clienteCustom = new Cliente.Builder()
+                .ID(idClienteCustom)
+                .Nome("Giulia")
+                .Cognome("Bianchi")
+                .Email("giulia" + System.currentTimeMillis() + "@custom.it")
+                .Password("password456")
+                .isFedelta(true)
+                .build();
+
+        // When: registro il cliente con dati bancari personalizzati
+        gestoreClienti.aggiungiCliente(clienteCustom, datiBancari);
+        clientiDaPulire.add(clienteCustom.getId());
+
+        // Then: verifico che i dati bancari siano stati salvati correttamente
+        GestoreBanca gestoreBanca = GestoreBanca.getInstance();
+        ClienteBanca clienteBanca = gestoreBanca.getClienteBanca(idClienteCustom);
+
+        assertNotNull(clienteBanca, "Il cliente banca dovrebbe esistere");
+        assertEquals(cartaPersonalizzata, clienteBanca.getNumeroCarta(),
+                "La carta dovrebbe essere quella personalizzata");
+        assertEquals(bancaPersonalizzata, clienteBanca.getBanca(),
+                "La banca dovrebbe essere quella personalizzata");
+        assertEquals(1000.00, clienteBanca.getSaldo(), 0.01,
+                "Il saldo iniziale dovrebbe essere 1000");
+
+        System.out.println("✓ Cliente registrato con carta personalizzata: " + cartaPersonalizzata);
+    }
+
     /**
      * TEST 7: Test calcolo penali
      */
     @Test
-    @Order(7)
+    @Order(8)
     @DisplayName("Test calcolo penali per diversi periodi temporali")
     void testCalcoloPenali() {
         Calendar now = Calendar.getInstance();
@@ -342,12 +477,6 @@ class GestoreBigliettiTest {
         bigliettiDaPulire.clear();
         viaggiDaPulire.clear();
         clientiDaPulire.clear();
-    }
-
-    @AfterAll
-    void tearDownAll() {
-        System.out.println("\n=== TEST COMPLETATI ===");
-        System.out.println("Database pulito dai dati di test");
     }
 
     // ========== METODI DI SUPPORTO ==========

@@ -3,7 +3,7 @@ USE trenical;
 
 CREATE TABLE clienti
  (
-    id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(100) PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     cognome VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE clienti
 
 CREATE TABLE stazioni
  (
-    id VARCHAR(10) PRIMARY KEY,
+    id VARCHAR(100) PRIMARY KEY,
     citta VARCHAR(100) NOT NULL,
     nome VARCHAR(100) NOT NULL,
     latitudine DOUBLE NOT NULL,
@@ -25,27 +25,27 @@ CREATE TABLE stazioni
 
 CREATE TABLE tratte
 (
-    id VARCHAR(10) PRIMARY KEY,
-    stazione_partenza_id VARCHAR(10) NOT NULL,
-    stazione_arrivo_id VARCHAR(10) NOT NULL,
+    id VARCHAR(100) PRIMARY KEY,
+    stazione_partenza_id VARCHAR(100) NOT NULL,
+    stazione_arrivo_id VARCHAR(100) NOT NULL,
     FOREIGN KEY (stazione_partenza_id) REFERENCES stazioni(id),
     FOREIGN KEY (stazione_arrivo_id) REFERENCES stazioni(id)
 );
 
 CREATE TABLE treni
 (
-    id VARCHAR(20) PRIMARY KEY,
-    tipo VARCHAR(20) NOT NULL
+    id VARCHAR(100) PRIMARY KEY,
+    tipo VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE viaggi
 (
-    id VARCHAR(36) PRIMARY KEY,
-    treno_id VARCHAR(20) NOT NULL,
-    tratta_id VARCHAR(10) NOT NULL,
+    id VARCHAR(100) PRIMARY KEY,
+    treno_id VARCHAR(100) NOT NULL,
+    tratta_id VARCHAR(100) NOT NULL,
     orario_partenza DATETIME NOT NULL,
     orario_arrivo DATETIME NOT NULL,
-    stato VARCHAR(20) DEFAULT 'PROGRAMMATO',
+    stato VARCHAR(100) DEFAULT 'PROGRAMMATO',
     ritardo_minuti INT DEFAULT 0,
     FOREIGN KEY (treno_id) REFERENCES treni(id),
     FOREIGN KEY (tratta_id) REFERENCES tratte(id)
@@ -53,12 +53,12 @@ CREATE TABLE viaggi
 
 CREATE TABLE biglietti
  (
-    id VARCHAR(36) PRIMARY KEY,
-    viaggio_id VARCHAR(36) NOT NULL,
-    cliente_id VARCHAR(36) NOT NULL,
-    classe_servizio VARCHAR(20) NOT NULL,
+    id VARCHAR(100) PRIMARY KEY,
+    viaggio_id VARCHAR(100) NOT NULL,
+    cliente_id VARCHAR(100) NOT NULL,
+    classe_servizio VARCHAR(100) NOT NULL,
     prezzo DECIMAL(10,2) NOT NULL,
-    stato VARCHAR(20) DEFAULT 'NON_PAGATO',
+    stato VARCHAR(100) DEFAULT 'NON_PAGATO',
     data_acquisto TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (viaggio_id) REFERENCES viaggi(id),
     FOREIGN KEY (cliente_id) REFERENCES clienti(id)
@@ -66,9 +66,9 @@ CREATE TABLE biglietti
 
 CREATE TABLE clienti_banca
 (
-    cliente_id VARCHAR(36) PRIMARY KEY,
-    cliente_nome VARCHAR(36) NOT NULL,
-    cliente_cognome VARCHAR(36) NOT NULL,
+    cliente_id VARCHAR(100) PRIMARY KEY,
+    cliente_nome VARCHAR(100) NOT NULL,
+    cliente_cognome VARCHAR(100) NOT NULL,
     banca_cliente VARCHAR(100) NOT NULL,
     cliente_numeroCarta VARCHAR(100) NOT NULL,
     saldo DECIMAL(10,2) DEFAULT 1000.00,
@@ -77,23 +77,23 @@ CREATE TABLE clienti_banca
 
 CREATE TABLE promozioni
 (
-    id VARCHAR(36) PRIMARY KEY,
-    tipo VARCHAR(20) NOT NULL,
+    id VARCHAR(100) PRIMARY KEY,
+    tipo VARCHAR(100) NOT NULL,
     data_inizio DATE NOT NULL,
     data_fine DATE NOT NULL,
     percentuale_sconto DOUBLE NOT NULL,
     stato VARCHAR(20) DEFAULT 'PROGRAMMATA',
 
 
-    tratta_id VARCHAR(10),
-    tipo_treno VARCHAR(20),
+    tratta_id VARCHAR(100),
+    tipo_treno VARCHAR(100),
 
     FOREIGN KEY (tratta_id) REFERENCES tratte(id)
 );
 
 CREATE TABLE notifiche
 (
-    id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(100) PRIMARY KEY,
     cliente_id VARCHAR(36) NOT NULL,
     messaggio TEXT NOT NULL,
     timestamp DATETIME NOT NULL,

@@ -3,6 +3,7 @@ import io.grpc.stub.StreamObserver;
 import it.trenical.grpc.*;
 import it.trenical.server.command.cliente.*;
 import it.trenical.server.dto.ClienteDTO;
+import it.trenical.server.dto.DatiBancariDTO;
 
 /*
  Implementazione del servizio di autenticazione gRPC.
@@ -73,8 +74,19 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase
             clienteDTO.setRiceviNotifiche(request.getRiceviNotifiche());
             clienteDTO.setRiceviPromozioni(request.getRiceviPromozioni());
 
+            DatiBancariDTO datiBancari = null;
+            if (!request.getNumeroCarta().isEmpty())
+            {
+                datiBancari = new DatiBancariDTO();
+                datiBancari.setIdCliente(clienteDTO.getId());
+                datiBancari.setNomeCliente(clienteDTO.getNome());
+                datiBancari.setCognome(clienteDTO.getCognome());
+                datiBancari.setNumeroCarta(request.getNumeroCarta());
+                datiBancari.setSaldo(1000.00); // Saldo iniziale standard
+            }
+
             //uso il facade
-            controllerGRPC.registraCliente(clienteDTO);
+            controllerGRPC.registraCliente(clienteDTO, datiBancari);;
 
             //invio la risposta di successo
             RegistraResponse response = RegistraResponse.newBuilder()

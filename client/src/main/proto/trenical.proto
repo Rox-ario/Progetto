@@ -303,6 +303,7 @@ message RegistraRequest
   bool is_fedelta = 5;
   bool ricevi_notifiche = 6;
   bool ricevi_promozioni = 7;
+  string numeroCarta = 8;
 }
 
 message RegistraResponse

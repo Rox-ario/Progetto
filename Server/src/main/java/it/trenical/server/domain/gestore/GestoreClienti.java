@@ -2,6 +2,7 @@ package it.trenical.server.domain.gestore;
 
 import it.trenical.server.database.ConnessioneADB;
 import it.trenical.server.domain.cliente.Cliente;
+import it.trenical.server.dto.DatiBancariDTO;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -108,10 +109,21 @@ public final class GestoreClienti
         clientiById.putIfAbsent(id, c);
         clientiByEmail.putIfAbsent(email, c);
 
-        salvaClienteInDB(c);
+        aggiungiCliente(c, null);
     }
 
-    private void salvaClienteInDB(Cliente c)
+    public void aggiungiCliente(Cliente c, DatiBancariDTO datiBancariCustom)
+    {
+        String id = c.getId();
+        String email = c.getEmail();
+
+        clientiById.putIfAbsent(id, c);
+        clientiByEmail.putIfAbsent(email, c);
+
+        salvaClienteInDB(c, datiBancariCustom);
+    }
+
+    private void salvaClienteInDB(Cliente c, DatiBancariDTO datiBancariDTO)
     {
         String sql = "INSERT INTO clienti (id, nome, cognome, email, password, is_fedelta, " +
                 "ricevi_notifiche, ricevi_promozioni) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -119,7 +131,7 @@ public final class GestoreClienti
         try
         {
             conn = ConnessioneADB.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql); //dato che probabile dovrò fare pi§ chiamate di questo genere
+            PreparedStatement pstmt = conn.prepareStatement(sql);
 
             pstmt.setString(1, c.getId());
             pstmt.setString(2, c.getNome());
@@ -132,21 +144,57 @@ public final class GestoreClienti
 
             pstmt.executeUpdate();
 
-            //ci aggiungo anche i clienti_banca con saldo iniziale
-            String sqlBanca = "INSERT INTO clienti_banca (cliente_id, saldo) VALUES (?, 1000.00)";
+            String numeroCarta, banca;
+
+            if (datiBancariDTO != null && datiBancariDTO.getNumeroCarta() != null)
+            {
+                numeroCarta = datiBancariDTO.getNumeroCarta();
+                banca = datiBancariDTO.getNomeBanca() != null ?
+                        datiBancariDTO.getNomeBanca() : "Banca Trenical";
+
+                if (!isValidCardFormat(numeroCarta))
+                {
+                    throw new IllegalArgumentException("Formato carta non valido: " + numeroCarta);
+                }
+            }
+            else
+            {
+                throw new IllegalArgumentException("La carta non può essere inventata");
+            }
+
+            String sqlBanca = "INSERT INTO clienti_banca (cliente_id, cliente_nome, cliente_cognome, " +
+                    "banca_cliente, cliente_numeroCarta, saldo) VALUES (?, ?, ?, ?, ?, 1000.00)";
             PreparedStatement pstmtBanca = conn.prepareStatement(sqlBanca);
             pstmtBanca.setString(1, c.getId());
+            pstmtBanca.setString(2, c.getNome());
+            pstmtBanca.setString(3, c.getCognome());
+            pstmtBanca.setString(4, banca);
+            pstmtBanca.setString(5, numeroCarta);
             pstmtBanca.executeUpdate();
 
         }
         catch (SQLException e)
         {
             System.err.println("Errore salvataggio cliente: " + e.getMessage());
+            throw new RuntimeException("Impossibile salvare il cliente", e);
         }
         finally
         {
             ConnessioneADB.closeConnection(conn);
         }
+    }
+
+    private boolean isValidCardFormat(String carta) {
+        if (carta == null) return false;
+
+        //rimuovo i trattini e controllo che siano solo numeri
+        String numeriSolo = carta.replace("-", "").replace(" ", "");
+
+        //deve essere 16 cifre
+        if (numeriSolo.length() != 16) return false;
+
+        //deve contenere solo numeri
+        return numeriSolo.matches("\\d{16}");
     }
 
     public boolean autenticaCliente(String email, String password)
