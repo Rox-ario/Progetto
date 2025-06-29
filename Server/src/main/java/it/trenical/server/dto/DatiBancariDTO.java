@@ -9,8 +9,17 @@ public class DatiBancariDTO
     private String numeroCarta;
     private double saldo;
 
-    public DatiBancariDTO(){}
+    public DatiBancariDTO(String id, String nome, String cognome, String numeroCarta)
+    {
+        idCliente = id;
+        nomeCliente = nome;
+        this.cognome = cognome;
+        nomeBanca = "Banca Trenical";
+        this.numeroCarta = numeroCarta;
+        saldo = 1000.0;
+    }
 
+    //per DB
     public DatiBancariDTO(String id, String nome, String cognome, String nomeBanca, String numeroCarta, double saldo)
     {
         idCliente = id;
@@ -67,5 +76,17 @@ public class DatiBancariDTO
 
     public void setCognome(String cognome) {
         this.cognome = cognome;
+    }
+
+    @Override
+    public String toString() {
+        return "[" +
+                "idCliente='" + idCliente + '\'' +
+                ", nomeCliente='" + nomeCliente + '\'' +
+                ", cognome='" + cognome + '\'' +
+                ", nomeBanca='" + nomeBanca + '\'' +
+                ", numeroCarta='" + numeroCarta + '\'' +
+                ", saldo=" + saldo +
+                ']';
     }
 }

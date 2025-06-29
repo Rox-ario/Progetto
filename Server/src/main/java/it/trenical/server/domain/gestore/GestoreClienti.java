@@ -2,6 +2,7 @@ package it.trenical.server.domain.gestore;
 
 import it.trenical.server.database.ConnessioneADB;
 import it.trenical.server.domain.cliente.Cliente;
+import it.trenical.server.domain.cliente.ClienteBanca;
 import it.trenical.server.dto.DatiBancariDTO;
 
 import java.sql.*;
@@ -101,30 +102,37 @@ public final class GestoreClienti
         return null;
     }
 
-    public void aggiungiCliente(Cliente c)
-    {
-        String id = c.getId();
-        String email = c.getEmail();
-
-        clientiById.putIfAbsent(id, c);
-        clientiByEmail.putIfAbsent(email, c);
-
-        aggiungiCliente(c, null);
-    }
-
     public void aggiungiCliente(Cliente c, DatiBancariDTO datiBancariCustom)
     {
+        if (datiBancariCustom == null) {
+            throw new IllegalArgumentException("I dati bancari sono obbligatori per la registrazione");
+        }
+
         String id = c.getId();
         String email = c.getEmail();
 
         clientiById.putIfAbsent(id, c);
         clientiByEmail.putIfAbsent(email, c);
+
+        System.out.println("Dati bancari = " + datiBancariCustom.toString());
+        GestoreBanca.getInstance().registraClienteBanca(
+                new ClienteBanca(
+                        c.getId(),
+                        c.getNome(),
+                        c.getCognome(),
+                        datiBancariCustom.getNumeroCarta(),
+                        datiBancariCustom.getSaldo()
+                )
+        );
 
         salvaClienteInDB(c, datiBancariCustom);
     }
 
     private void salvaClienteInDB(Cliente c, DatiBancariDTO datiBancariDTO)
     {
+        if (datiBancariDTO == null || datiBancariDTO.getNumeroCarta() == null) {
+            throw new IllegalArgumentException("I dati bancari sono obbligatori");
+        }
         String sql = "INSERT INTO clienti (id, nome, cognome, email, password, is_fedelta, " +
                 "ricevi_notifiche, ricevi_promozioni) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = null;

@@ -3,7 +3,7 @@ USE trenical;
 
 CREATE TABLE clienti
  (
-    id VARCHAR(100) PRIMARY KEY,
+    id VARCHAR(255) PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     cognome VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE clienti
 
 CREATE TABLE stazioni
  (
-    id VARCHAR(100) PRIMARY KEY,
+    id VARCHAR(255) PRIMARY KEY,
     citta VARCHAR(100) NOT NULL,
     nome VARCHAR(100) NOT NULL,
     latitudine DOUBLE NOT NULL,
@@ -25,24 +25,24 @@ CREATE TABLE stazioni
 
 CREATE TABLE tratte
 (
-    id VARCHAR(100) PRIMARY KEY,
-    stazione_partenza_id VARCHAR(100) NOT NULL,
-    stazione_arrivo_id VARCHAR(100) NOT NULL,
+    id VARCHAR(255) PRIMARY KEY,
+    stazione_partenza_id VARCHAR(255) NOT NULL,
+    stazione_arrivo_id VARCHAR(255) NOT NULL,
     FOREIGN KEY (stazione_partenza_id) REFERENCES stazioni(id),
     FOREIGN KEY (stazione_arrivo_id) REFERENCES stazioni(id)
 );
 
 CREATE TABLE treni
 (
-    id VARCHAR(100) PRIMARY KEY,
+    id VARCHAR(255) PRIMARY KEY,
     tipo VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE viaggi
 (
-    id VARCHAR(100) PRIMARY KEY,
-    treno_id VARCHAR(100) NOT NULL,
-    tratta_id VARCHAR(100) NOT NULL,
+    id VARCHAR(255) PRIMARY KEY,
+    treno_id VARCHAR(255) NOT NULL,
+    tratta_id VARCHAR(255) NOT NULL,
     orario_partenza DATETIME NOT NULL,
     orario_arrivo DATETIME NOT NULL,
     stato VARCHAR(100) DEFAULT 'PROGRAMMATO',
@@ -53,9 +53,9 @@ CREATE TABLE viaggi
 
 CREATE TABLE biglietti
  (
-    id VARCHAR(100) PRIMARY KEY,
-    viaggio_id VARCHAR(100) NOT NULL,
-    cliente_id VARCHAR(100) NOT NULL,
+    id VARCHAR(255) PRIMARY KEY,
+    viaggio_id VARCHAR(255) NOT NULL,
+    cliente_id VARCHAR(255) NOT NULL,
     classe_servizio VARCHAR(100) NOT NULL,
     prezzo DECIMAL(10,2) NOT NULL,
     stato VARCHAR(100) DEFAULT 'NON_PAGATO',
@@ -66,7 +66,7 @@ CREATE TABLE biglietti
 
 CREATE TABLE clienti_banca
 (
-    cliente_id VARCHAR(100) PRIMARY KEY,
+    cliente_id VARCHAR(255) PRIMARY KEY,
     cliente_nome VARCHAR(100) NOT NULL,
     cliente_cognome VARCHAR(100) NOT NULL,
     banca_cliente VARCHAR(100) NOT NULL,
@@ -77,24 +77,21 @@ CREATE TABLE clienti_banca
 
 CREATE TABLE promozioni
 (
-    id VARCHAR(100) PRIMARY KEY,
+    id VARCHAR(255) PRIMARY KEY,
     tipo VARCHAR(100) NOT NULL,
     data_inizio DATE NOT NULL,
     data_fine DATE NOT NULL,
     percentuale_sconto DOUBLE NOT NULL,
     stato VARCHAR(20) DEFAULT 'PROGRAMMATA',
-
-
-    tratta_id VARCHAR(100),
+    tratta_id VARCHAR(255),
     tipo_treno VARCHAR(100),
-
     FOREIGN KEY (tratta_id) REFERENCES tratte(id)
 );
 
 CREATE TABLE notifiche
 (
-    id VARCHAR(100) PRIMARY KEY,
-    cliente_id VARCHAR(36) NOT NULL,
+    id VARCHAR(255) PRIMARY KEY,
+    cliente_id VARCHAR(255) NOT NULL,
     messaggio TEXT NOT NULL,
     timestamp DATETIME NOT NULL,
     FOREIGN KEY (cliente_id) REFERENCES clienti(id)

@@ -215,6 +215,9 @@ public class ClientCLI
         System.out.print("Password: ");
         String password = scanner.nextLine().trim();
 
+        System.out.print("Numero carta (16 cifre): ");
+        String numeroCarta = scanner.nextLine().trim();
+
         System.out.print("Vuoi aderire al programma FedeltàTreno? (s/n): ");
         boolean wantsFedelta = scanner.nextLine().trim().toLowerCase().startsWith("s");
 
@@ -227,9 +230,11 @@ public class ClientCLI
             wantsPromozioni = scanner.nextLine().trim().toLowerCase().startsWith("s");
         }
 
-        if (authController.registrati(nome, cognome, email, password, wantsFedelta, wantsNotifiche, wantsPromozioni))
+        if (authController.registrati(nome, cognome, email, password, numeroCarta,
+                wantsFedelta, wantsNotifiche, wantsPromozioni))
         {
             System.out.println("Registrazione completata! Ora puoi effettuare l'accesso.");
+            System.out.println("I tuoi dati bancari sono stati salvati e verranno utilizzati per i pagamenti.");
         }
         else
         {

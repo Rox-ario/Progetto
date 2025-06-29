@@ -63,7 +63,11 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase
 
         try
         {
-            //creo un il DTO dal request gRPC
+            //CONTROLLO OBBLIGATORIO: verifico che il numero carta sia presente
+            if (request.getNumeroCarta() == null || request.getNumeroCarta().trim().isEmpty()) {
+                throw new IllegalArgumentException("Il numero di carta è obbligatorio per la registrazione");
+            }
+
             ClienteDTO clienteDTO = new ClienteDTO();
             clienteDTO.setId(java.util.UUID.randomUUID().toString());
             clienteDTO.setNome(request.getNome());
@@ -74,21 +78,15 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase
             clienteDTO.setRiceviNotifiche(request.getRiceviNotifiche());
             clienteDTO.setRiceviPromozioni(request.getRiceviPromozioni());
 
-            DatiBancariDTO datiBancari = null;
-            if (!request.getNumeroCarta().isEmpty())
-            {
-                datiBancari = new DatiBancariDTO();
-                datiBancari.setIdCliente(clienteDTO.getId());
-                datiBancari.setNomeCliente(clienteDTO.getNome());
-                datiBancari.setCognome(clienteDTO.getCognome());
-                datiBancari.setNumeroCarta(request.getNumeroCarta());
-                datiBancari.setSaldo(1000.00); // Saldo iniziale standard
-            }
+            DatiBancariDTO datiBancari = new DatiBancariDTO(
+                    clienteDTO.getId(),
+                    clienteDTO.getNome(),
+                    clienteDTO.getCognome(),
+                    request.getNumeroCarta()
+            );
 
-            //uso il facade
-            controllerGRPC.registraCliente(clienteDTO, datiBancari);;
+            controllerGRPC.registraCliente(clienteDTO, datiBancari);
 
-            //invio la risposta di successo
             RegistraResponse response = RegistraResponse.newBuilder()
                     .setSuccess(true)
                     .setMessage("Registrazione completata con successo")
@@ -99,9 +97,7 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase
 
             System.out.println("Registrazione completata per: " + request.getEmail());
 
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             RegistraResponse response = RegistraResponse.newBuilder()
                     .setSuccess(false)
                     .setMessage("Errore registrazione: " + e.getMessage())

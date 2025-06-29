@@ -24,15 +24,17 @@ public class AuthController
 [a-zA-Z0-9]       l'ultimo carattere deve essere una lettera o una cifra
 $     $           fin
      */
+    private final String regex_carta = "^[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}$";
 
     public AuthController()
     {}
 
     public boolean registrati(String nome, String cognome, String email, String password,
-                              boolean wantsFedelta, boolean wantsNotifiche, boolean wantsPromozioni)
+                              String numeroCarta,
+                              boolean isFedelta, boolean wantsNotifiche, boolean wantsPromozioni)
     {
         try {
-            if (!validaInputRegistrazione(nome, cognome, email, password))
+            if (!validaInputRegistrazione(nome, cognome, email, password, numeroCarta)) // AGGIUNGI numeroCarta
             {
                 return false;
             }
@@ -42,15 +44,13 @@ $     $           fin
             nuovoCliente.setNome(nome.trim());
             nuovoCliente.setCognome(cognome.trim());
             nuovoCliente.setEmail(email.trim().toLowerCase());
-            nuovoCliente.setFedelta(wantsFedelta);
+            nuovoCliente.setFedelta(isFedelta);
             nuovoCliente.setRiceviNotifiche(wantsNotifiche);
             nuovoCliente.setRiceviPromozioni(wantsPromozioni);
 
-            //registrazione al server
-            ServerProxy.registraCliente(nuovoCliente);
+            ServerProxy.registraCliente(nuovoCliente, numeroCarta);
 
             System.out.println("Registrazione completata con successo, benvenut*!");
-
             return true;
 
         }
@@ -61,7 +61,10 @@ $     $           fin
         }
     }
 
-    private boolean validaInputRegistrazione(String nome, String cognome, String email, String password)
+
+
+    private boolean validaInputRegistrazione(String nome, String cognome, String email,
+                                             String password, String numeroCarta)
     {
         if (nome == null || nome.trim().isEmpty()) {
             System.err.println("Il nome non può essere vuoto");
@@ -78,17 +81,27 @@ $     $           fin
             return false;
         }
 
-        if (!email.matches(regex_email))
-        {
+        if (!email.matches(regex_email)) {
             System.err.println("Formato email non valido");
             return false;
         }
 
-        if (password == null || !password.matches(regex_password))
-        {
+        if (password == null || !password.matches(regex_password)) {
             System.err.println("La password contiene degli errori di formato");
             return false;
         }
+
+        if (numeroCarta == null || numeroCarta.trim().isEmpty()) {
+            System.err.println("Il numero di carta è obbligatorio per la registrazione");
+            return false;
+        }
+
+        String cartaPulita = numeroCarta.replaceAll("[- ]", "");
+        if (!cartaPulita.matches("^[0-9]{16}$")) {
+            System.err.println("Formato carta non valido. Deve essere di 16 cifre");
+            return false;
+        }
+
         return true;
     }
 

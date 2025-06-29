@@ -34,7 +34,7 @@ public class ServerProxy
     }
 
 
-    public static void registraCliente(ClienteDTO dto) throws Exception
+    public static void registraCliente(ClienteDTO dto, String numeroCarta) throws Exception
     {
         try
         {
@@ -46,6 +46,7 @@ public class ServerProxy
                     .setIsFedelta(dto.isFedelta())
                     .setRiceviNotifiche(dto.isRiceviNotifiche())
                     .setRiceviPromozioni(dto.isRiceviPromozioni())
+                    .setNumeroCarta(numeroCarta)  // AGGIUNGI NUMERO CARTA
                     .build();
 
             RegistraResponse response = getInstance().grpcClient.getAuthStub().registra(request);

@@ -97,22 +97,6 @@ public class ControllerGRPC
         }
     }
 
-    public void registraCliente(ClienteDTO clienteDTO) throws Exception
-    {
-        try
-        {
-            RegistraClienteCommand command = new RegistraClienteCommand(clienteDTO, clienteDTO.getPassword());
-            eseguiComandoCliente(command);
-
-            System.out.println("Cliente registrato con successo: " + clienteDTO.getEmail());
-
-        } catch (Exception e)
-        {
-            System.err.println("Errore durante la registrazione: " + e.getMessage());
-            throw new Exception("Registrazione fallita: " + e.getMessage());
-        }
-    }
-
     public ClienteDTO login(String email, String password) throws Exception
     {
         try

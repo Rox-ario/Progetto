@@ -12,18 +12,6 @@ public class RegistraClienteCommand implements ComandoCliente
     private final String password;
     private final DatiBancariDTO datiBancari;
 
-    public RegistraClienteCommand(ClienteDTO dto, String password) {
-        this.dto = dto;
-        this.password = password;
-        this.datiBancari = null;
-
-        //Se il nuovo cliente è non fedeltà allor non può avere notifiche sulle promozioni fedeltà
-        if (!dto.isFedelta() && dto.isRiceviPromozioni())
-        {
-            dto.setRiceviPromozioni(false);
-        }
-    }
-
     public RegistraClienteCommand(ClienteDTO dto, String password, DatiBancariDTO datiBancari) {
         this.dto = dto;
         this.password = password;

@@ -8,7 +8,8 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class GestoreBanca {
+public final class GestoreBanca
+{
     private static GestoreBanca instance = null;
 
     private final Map<String, ClienteBanca> clienti;

@@ -191,14 +191,24 @@ public class CatalogoPromozione
     {
         List<Promozione> promozioniStessoTipo = promozioniPerTipo.get(nuovaPromo.getTipo());
 
+        System.out.println("Promo da esaminare = "+ nuovaPromo.getID());
+        System.out.println("Tutte le promo create:");
         for (Promozione esistente : promozioniStessoTipo)
         {
+            System.out.println("Promo = " + esistente.getID());
+        }
+        for (Promozione esistente : promozioniStessoTipo)
+        {
+            System.out.println("Promo esistente = "+ esistente.getID());
             if (sovrapponeTemporalmente(nuovaPromo, esistente))
             {
                 // in base al tipo verifico cose
                 if (nuovaPromo.getTipo() == TipoPromozione.FEDELTA) {
                     // Le promozioni fedeltà non possono sovrapporsi MAI
-                    return true;
+                    PromozioneFedelta nuova = (PromozioneFedelta) nuovaPromo;
+                    PromozioneFedelta vecchia = (PromozioneFedelta) esistente;
+                    if(nuova.equals(vecchia))
+                        return true;
                 }
                 else if (nuovaPromo.getTipo() == TipoPromozione.TRATTA)
                 {
@@ -242,8 +252,8 @@ public class CatalogoPromozione
             throw new IllegalArgumentException("Errore: la promozione inserita è null");
         if (verificaSovrapposizione(p))
             throw new IllegalArgumentException("Errore: la promozione si sovrappone con altre nel periodo: "+
-                    p.getDataInizio().get(Calendar.DAY_OF_MONTH)+"/"+p.getDataInizio().get(Calendar.MONTH)+"/"+p.getDataInizio().get(Calendar.YEAR)+
-                    "-"+p.getDataInizio().get(Calendar.DAY_OF_MONTH)+"/"+p.getDataInizio().get(Calendar.MONTH)+"/"+p.getDataInizio().get(Calendar.YEAR));
+                    p.getDataInizio().get(Calendar.DAY_OF_MONTH)+"/"+(p.getDataInizio().get(Calendar.MONTH)+1)+"/"+p.getDataInizio().get(Calendar.YEAR)+
+                    "-"+p.getDataInizio().get(Calendar.DAY_OF_MONTH)+"/"+(p.getDataFine().get(Calendar.MONTH)+1)+"/"+p.getDataFine().get(Calendar.YEAR));
 
         salvaPromozioneInDB(p);
         promozioniPerTipo.get(p.getTipo()).add(p);

@@ -126,6 +126,7 @@ public class GestoreBiglietti
         }
         finally
         {
+            System.out.println("Biglietto "+ biglietto.toString()+ " salvato nel db");
             ConnessioneADB.closeConnection(conn);
         }
     }
@@ -238,8 +239,8 @@ public class GestoreBiglietti
         if(!bigliettiPerUtente.containsKey(IDUtente)) //è la prima volta che acquista
         {
             bigliettiPerUtente.put(IDUtente, new ArrayList<>());
-            bigliettiPerUtente.get(IDUtente).add(b);
         }
+        bigliettiPerUtente.get(IDUtente).add(b);
         //il controllo per il viaggio non lo faccio perché quando creo un viaggio aggiorno la mappa qui
         bigliettiPerViaggio.get(IDViaggio).add(b);
 
