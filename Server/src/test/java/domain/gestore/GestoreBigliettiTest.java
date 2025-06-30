@@ -156,7 +156,7 @@ class GestoreBigliettiTest {
         ClienteBanca clienteBanca = gestoreBanca.getClienteBanca(clienteTest.getId());
         System.out.println(clienteBanca);
         assertNotNull(clienteBanca, "Il cliente dovrebbe essere presente anche in clienti_banca");
-        System.out.println("✓ Cliente test creato con carta: " + clienteBanca.getNumeroCarta());
+        System.out.println("Cliente test creato con carta: " + clienteBanca.getNumeroCarta());
 
         //creo un viaggio di test per domani alle 14:00
         Calendar partenza = Calendar.getInstance();
@@ -427,7 +427,7 @@ class GestoreBigliettiTest {
         clientiDaPulire.clear();
     }
 
-private void verificaConnessioneDB() {
+    private void verificaConnessioneDB() {
         Connection conn = null;
         try {
             conn = ConnessioneADB.getConnection();
