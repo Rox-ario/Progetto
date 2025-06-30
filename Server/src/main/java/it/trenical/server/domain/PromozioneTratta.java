@@ -19,8 +19,6 @@ public class PromozioneTratta implements Promozione
 
     public PromozioneTratta(Tratta tratta, Calendar dataInizio, Calendar dataFine, double percentualeSconto)
     {
-        if(dataInizio.before(Calendar.getInstance()))
-            throw new IllegalArgumentException("Errore: La promozione non può avere data di inizio PRIMA di oggi");
         if(dataInizio.after(dataFine))
             throw new IllegalArgumentException("Errore: La fine della promozione non può precedere l'inizio.");
         if(tratta == null)

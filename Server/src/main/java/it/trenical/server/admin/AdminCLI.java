@@ -782,15 +782,51 @@ public class AdminCLI
                 return;
             }
         }
-        System.out.println("Adesso digita la data di inizio promozione nel formato dd/MM/yyyy: ");
-        String dataInizio = scanner.nextLine();
-        System.out.println("Adesso digita la data di fine promozione nel formato dd/MM/yyyy: ");
-        String dataFine= scanner.nextLine();
+        Calendar inizio = null;
+        Calendar fine = null;
+        boolean dateValide = false;
+
+        while (!dateValide)
+        {
+            System.out.println("Digita la data di inizio promozione nel formato dd/MM/yyyy: ");
+            String dataInizio = scanner.nextLine();
+            System.out.println("Digita la data di fine promozione nel formato dd/MM/yyyy: ");
+            String dataFine = scanner.nextLine();
+
+            inizio = parseDataOra(dataInizio, "00:00");
+            fine = parseDataOra(dataFine, "23:59");
+
+            Calendar oggi = Calendar.getInstance();
+
+            if (inizio.before(oggi))
+            {
+                System.err.println("Errore: La data di inizio non può essere nel passato!");
+                System.out.println("Premi 1 per reinserire le date, 0 per annullare: ");
+                int scelta = leggiIntero();
+                if (scelta != 1)
+                {
+                    System.out.println("Creazione promozione annullata.");
+                    return;
+                }
+            }
+            else if (inizio.after(fine))
+            {
+                System.err.println("Errore: La data di inizio non può essere dopo la data di fine!");
+                System.out.println("Premi 1 per reinserire le date, 0 per annullare: ");
+                int scelta = leggiIntero();
+                if (scelta != 1)
+                {
+                    System.out.println("Creazione promozione annullata.");
+                    return;
+                }
+            }
+            else
+            {
+                dateValide = true;
+            }
+        }
         System.out.println("Inserisci lo sconto da applicare: ");
         double sconto = scanner.nextDouble();
-
-        Calendar inizio = parseDataOra(dataInizio, "00:00");
-        Calendar fine = parseDataOra(dataFine, "23:59");
 
         controllerGRPC.creaPromozione(TipoPromozione.TRENO, inizio, fine, sconto, null, treno);
         System.out.println("Promozione creata con successo!");

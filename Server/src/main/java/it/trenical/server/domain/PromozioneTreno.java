@@ -21,9 +21,7 @@ public class PromozioneTreno implements Promozione
 
     public PromozioneTreno(Calendar dataInizio, Calendar dataFine, double percentualeSconto, TipoTreno tipoTreno)
     {
-        if(dataInizio.before(Calendar.getInstance()))
-            throw new IllegalArgumentException("Errore: La promozione non può avere data di inizio PRIMA di oggi");
-        if(dataInizio.after(dataFine))
+       if(dataInizio.after(dataFine))
             throw new IllegalArgumentException("Errore: La fine della promozione non può precedere l'inizio.");
         this.dataInizio = dataInizio;
         this.dataFine = dataFine;

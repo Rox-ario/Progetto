@@ -279,7 +279,6 @@ class GestoreBigliettiTest {
         Calendar inizioPromo = Calendar.getInstance();
         inizioPromo.add(Calendar.DAY_OF_MONTH, 1);
         Calendar finePromo = (Calendar) inizioPromo.clone();
-        finePromo.add(Calendar.MONTH, 1);
         finePromo.add(Calendar.DAY_OF_MONTH, 1);
 
         PromozioneFedelta promoFedelta = new PromozioneFedelta(inizioPromo, finePromo, 0.20);
