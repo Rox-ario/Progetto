@@ -253,18 +253,41 @@ public class ModificaBigliettoCommandTest {
 
         //verifica del rimborso
         Biglietto bigliettoModificato = gestoreBiglietti.getBigliettoPerID(biglietto.getID());
-        double differenza = prezzoOriginale - bigliettoModificato.getPrezzoBiglietto();
-        double penaleAttesa = differenza * 0.10;
-        double rimborsoAtteso = differenza - penaleAttesa;
+        double differenzaTariffaria = bigliettoModificato.getPrezzoBiglietto() - prezzoOriginale;
+        double penale = CalcolatorePenali.calcolaPenale(Calendar.getInstance(), gestoreViaggi.getViaggio(bigliettoModificato.getIDViaggio()).getInizioReale(), differenzaTariffaria);
+        double importo = 0;
+        if (differenzaTariffaria < 0)  //il prezzo originale è maggiore del prezzo nuovo, quindi passo da una classe superiore a una inferiore il prezzo deve diminuire
+        {
+            double moltiplicatorePenale = CalcolatorePenali.calcolaPenaleDowngrade(ClasseServizio.BUSINESS, ClasseServizio.ECONOMY);
+            penale *= moltiplicatorePenale;
+        }
+
+        if (differenzaTariffaria > 0)
+        {
+            //Il nuovo biglietto costa di più: addebita la differenza
+            importo = differenzaTariffaria;
+        }
+        else if (differenzaTariffaria < 0)
+        {
+            //Il nuovo biglietto costa meno: calcola il rimborso al netto della penale
+            double rimborsoLordo = Math.abs(differenzaTariffaria);
+            double rimborsoNetto = rimborsoLordo - penale;
+            if (rimborsoNetto > 0)
+            {
+                importo = rimborsoNetto;
+            }
+            else
+            {
+                importo = Math.abs(rimborsoNetto);
+            }
+        }
+
 
         double saldoFinale = gestoreBanca.getClienteBanca(clienteTest.getId()).getSaldo();
-        assertEquals(saldoIniziale + rimborsoAtteso, saldoFinale, 0.01,
+        assertEquals(saldoIniziale + importo, saldoFinale, 0.01,
                 "Il rimborso dovrebbe essere la differenza meno il 10% di penale");
 
         System.out.println("Test modifica con penale 10% completato");
-        System.out.println("  - Differenza: €" + String.format("%.2f", differenza));
-        System.out.println("  - Penale: €" + String.format("%.2f", penaleAttesa));
-        System.out.println("  - Rimborso netto: €" + String.format("%.2f", rimborsoAtteso));
     }
 
     @Test
@@ -277,9 +300,12 @@ public class ModificaBigliettoCommandTest {
         creaViaggioCustom(partenza2Giorni);
 
         Biglietto biglietto = creaBigliettoPerTest(ClasseServizio.BUSINESS);
-        double prezzoOriginale = biglietto.getPrezzo();
+        double prezzoOriginale = biglietto.getPrezzoBiglietto();
         double saldoIniziale = gestoreBanca.getClienteBanca(clienteTest.getId()).getSaldo();
+        System.out.println("Prezzo pagato del biglietto= "+prezzoOriginale+"\n"+
+                "Saldo cliente dopo pagamento= "+ saldoIniziale);
 
+        //modifica a Economy (downgrade)
         ModificaBigliettoDTO dto = new ModificaBigliettoDTO(
                 biglietto.getID(),
                 ClasseServizio.ECONOMY
@@ -287,14 +313,40 @@ public class ModificaBigliettoCommandTest {
         ModificaBigliettoCommand command = new ModificaBigliettoCommand(dto);
         command.esegui();
 
-        //verifico il rimborso con penale 25%
+        //verifica del rimborso
         Biglietto bigliettoModificato = gestoreBiglietti.getBigliettoPerID(biglietto.getID());
-        double differenza = prezzoOriginale - bigliettoModificato.getPrezzo();
-        double penaleAttesa = differenza * 0.25;
-        double rimborsoAtteso = differenza - penaleAttesa;
+        double differenzaTariffaria = bigliettoModificato.getPrezzoBiglietto() - prezzoOriginale;
+        double penale = CalcolatorePenali.calcolaPenale(Calendar.getInstance(), gestoreViaggi.getViaggio(bigliettoModificato.getIDViaggio()).getInizioReale(), differenzaTariffaria);
+        double importo = 0;
+        if (differenzaTariffaria < 0)  //il prezzo originale è maggiore del prezzo nuovo, quindi passo da una classe superiore a una inferiore il prezzo deve diminuire
+        {
+            double moltiplicatorePenale = CalcolatorePenali.calcolaPenaleDowngrade(ClasseServizio.BUSINESS, ClasseServizio.ECONOMY);
+            penale *= moltiplicatorePenale;
+        }
+
+        if (differenzaTariffaria > 0)
+        {
+            //Il nuovo biglietto costa di più: addebita la differenza
+            importo = differenzaTariffaria;
+        }
+        else if (differenzaTariffaria < 0)
+        {
+            //Il nuovo biglietto costa meno: calcola il rimborso al netto della penale
+            double rimborsoLordo = Math.abs(differenzaTariffaria);
+            double rimborsoNetto = rimborsoLordo - penale;
+            if (rimborsoNetto > 0)
+            {
+                importo = rimborsoNetto;
+            }
+            else
+            {
+                importo = Math.abs(rimborsoNetto);
+            }
+        }
+
 
         double saldoFinale = gestoreBanca.getClienteBanca(clienteTest.getId()).getSaldo();
-        assertEquals(saldoIniziale + rimborsoAtteso, saldoFinale, 0.01,
+        assertEquals(saldoIniziale + importo, saldoFinale, 0.01,
                 "Il rimborso dovrebbe essere la differenza meno il 25% di penale");
 
         System.out.println("Test modifica con penale 25% completato");
@@ -310,9 +362,12 @@ public class ModificaBigliettoCommandTest {
         creaViaggioCustom(partenza12Ore);
 
         Biglietto biglietto = creaBigliettoPerTest(ClasseServizio.BUSINESS);
-        double prezzoOriginale = biglietto.getPrezzo();
+        double prezzoOriginale = biglietto.getPrezzoBiglietto();
         double saldoIniziale = gestoreBanca.getClienteBanca(clienteTest.getId()).getSaldo();
+        System.out.println("Prezzo pagato del biglietto= "+prezzoOriginale+"\n"+
+                "Saldo cliente dopo pagamento= "+ saldoIniziale);
 
+        //modifica a Economy (downgrade)
         ModificaBigliettoDTO dto = new ModificaBigliettoDTO(
                 biglietto.getID(),
                 ClasseServizio.ECONOMY
@@ -320,14 +375,40 @@ public class ModificaBigliettoCommandTest {
         ModificaBigliettoCommand command = new ModificaBigliettoCommand(dto);
         command.esegui();
 
-        //verifico il rimborso con penale 50%
+        //verifica del rimborso
         Biglietto bigliettoModificato = gestoreBiglietti.getBigliettoPerID(biglietto.getID());
-        double differenza = prezzoOriginale - bigliettoModificato.getPrezzo();
-        double penaleAttesa = differenza * 0.50;
-        double rimborsoAtteso = differenza - penaleAttesa;
+        double differenzaTariffaria = bigliettoModificato.getPrezzoBiglietto() - prezzoOriginale;
+        double penale = CalcolatorePenali.calcolaPenale(Calendar.getInstance(), gestoreViaggi.getViaggio(bigliettoModificato.getIDViaggio()).getInizioReale(), differenzaTariffaria);
+        double importo = 0;
+        if (differenzaTariffaria < 0)  //il prezzo originale è maggiore del prezzo nuovo, quindi passo da una classe superiore a una inferiore il prezzo deve diminuire
+        {
+            double moltiplicatorePenale = CalcolatorePenali.calcolaPenaleDowngrade(ClasseServizio.BUSINESS, ClasseServizio.ECONOMY);
+            penale *= moltiplicatorePenale;
+        }
+
+        if (differenzaTariffaria > 0)
+        {
+            //Il nuovo biglietto costa di più: addebita la differenza
+            importo = differenzaTariffaria;
+        }
+        else if (differenzaTariffaria < 0)
+        {
+            //Il nuovo biglietto costa meno: calcola il rimborso al netto della penale
+            double rimborsoLordo = Math.abs(differenzaTariffaria);
+            double rimborsoNetto = rimborsoLordo - penale;
+            if (rimborsoNetto > 0)
+            {
+                importo = rimborsoNetto;
+            }
+            else
+            {
+                importo = Math.abs(rimborsoNetto);
+            }
+        }
+
 
         double saldoFinale = gestoreBanca.getClienteBanca(clienteTest.getId()).getSaldo();
-        assertEquals(saldoIniziale + rimborsoAtteso, saldoFinale, 0.01,
+        assertEquals(saldoIniziale + importo, saldoFinale, 0.01,
                 "Il rimborso dovrebbe essere la differenza meno il 50% di penale");
 
         System.out.println("Test modifica con penale 50% completato");
@@ -343,25 +424,53 @@ public class ModificaBigliettoCommandTest {
         creaViaggioCustom(partenza5Giorni);
 
         Biglietto biglietto = creaBigliettoPerTest(ClasseServizio.BUSINESS);
-        double prezzoOriginale = biglietto.getPrezzo();
+        double prezzoOriginale = biglietto.getPrezzoBiglietto();
         double saldoIniziale = gestoreBanca.getClienteBanca(clienteTest.getId()).getSaldo();
+        System.out.println("Prezzo pagato del biglietto= "+prezzoOriginale+"\n"+
+                "Saldo cliente dopo pagamento= "+ saldoIniziale);
 
+        //modifica a Economy (downgrade)
         ModificaBigliettoDTO dto = new ModificaBigliettoDTO(
                 biglietto.getID(),
-                ClasseServizio.LOW_COST
+                ClasseServizio.ECONOMY
         );
         ModificaBigliettoCommand command = new ModificaBigliettoCommand(dto);
         command.esegui();
 
-        //verifico il rimborso con penale 10% * moltiplicatore downgrade (che è 1.2)
+        //verifica del rimborso
         Biglietto bigliettoModificato = gestoreBiglietti.getBigliettoPerID(biglietto.getID());
-        double differenza = prezzoOriginale - bigliettoModificato.getPrezzo();
-        double penaleBase = differenza * 0.10;
-        double penaleConMoltiplicatore = penaleBase * 1.2;
-        double rimborsoAtteso = differenza - penaleConMoltiplicatore;
+        double differenzaTariffaria = bigliettoModificato.getPrezzoBiglietto() - prezzoOriginale;
+        double penale = CalcolatorePenali.calcolaPenale(Calendar.getInstance(), gestoreViaggi.getViaggio(bigliettoModificato.getIDViaggio()).getInizioReale(), differenzaTariffaria);
+        double importo = 0;
+        if (differenzaTariffaria < 0)  //il prezzo originale è maggiore del prezzo nuovo, quindi passo da una classe superiore a una inferiore il prezzo deve diminuire
+        {
+            double moltiplicatorePenale = CalcolatorePenali.calcolaPenaleDowngrade(ClasseServizio.BUSINESS, ClasseServizio.ECONOMY);
+            penale *= moltiplicatorePenale;
+        }
+
+        if (differenzaTariffaria > 0)
+        {
+            //Il nuovo biglietto costa di più: addebita la differenza
+            importo = differenzaTariffaria;
+        }
+        else if (differenzaTariffaria < 0)
+        {
+            //Il nuovo biglietto costa meno: calcola il rimborso al netto della penale
+            double rimborsoLordo = Math.abs(differenzaTariffaria);
+            double rimborsoNetto = rimborsoLordo - penale;
+            if (rimborsoNetto > 0)
+            {
+                importo = rimborsoNetto;
+            }
+            else
+            {
+                importo = Math.abs(rimborsoNetto);
+            }
+        }
+
 
         double saldoFinale = gestoreBanca.getClienteBanca(clienteTest.getId()).getSaldo();
-        assertEquals(saldoIniziale + rimborsoAtteso, saldoFinale, 0.01,
+        assertEquals(saldoIniziale + importo, saldoFinale, 0.01,
                 "Il rimborso dovrebbe includere la penale extra per downgrade drastico");
     }
 
@@ -423,8 +532,8 @@ public class ModificaBigliettoCommandTest {
     @Test
     @Order(8)
     @DisplayName("Modifica con pagamento fallito e rollback")
-    void testModificaPagamentoFallitoRollback() throws Exception {
-
+    void testModificaPagamentoFallitoRollback() throws Exception
+    {
         //svuoto il conto del cliente
         GestoreBanca bancaManager = GestoreBanca.getInstance();
         System.out.println("Saldo cliente prima: "+ bancaManager.getClienteBanca(clienteTest.getId()).getSaldo());
@@ -437,11 +546,13 @@ public class ModificaBigliettoCommandTest {
         System.out.println("Il prezzo del biglietto è: "+ biglietto.getPrezzoBiglietto());
         ClasseServizio classeOriginale = biglietto.getClasseServizio();
         int postiEconomyPrima = viaggioTest.getPostiDisponibiliPerClasse(ClasseServizio.ECONOMY);
+        System.out.println("Posti disponibili Economy dopo aver assegnato il biglietto= "+ postiEconomyPrima);
         int postiBusinessPrima = viaggioTest.getPostiDisponibiliPerClasse(ClasseServizio.BUSINESS);
+        System.out.println("Posti disponibili Business = "+ postiBusinessPrima);
 
         ModificaBigliettoDTO dto = new ModificaBigliettoDTO(
                 biglietto.getID(),
-                ClasseServizio.FEDELTA
+                ClasseServizio.BUSINESS
         );
         ModificaBigliettoCommand command = new ModificaBigliettoCommand(dto);
 

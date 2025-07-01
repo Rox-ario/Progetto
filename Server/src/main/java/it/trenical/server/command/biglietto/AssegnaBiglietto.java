@@ -12,23 +12,6 @@ import it.trenical.server.domain.gestore.GestoreViaggi;
 
 import java.util.Calendar;
 
-/**
- * Command per l'assegnazione di un biglietto con controlli di business logic.
- * Gestisce i controlli specifici di prenotabilità e disponibilità, poi delega
- * a GestoreBiglietti per la creazione, validazioni base e persistenza.
- *
- * Responsabilità:
- * - Controllo disponibilità posti per classe
- * - Verifica stato e tempistiche viaggio
- * - Riduzione posti disponibili
- * - Rollback in caso di errore
- *
- * Delega a GestoreBiglietti:
- * - Validazione esistenza cliente/viaggio
- * - Creazione biglietto e calcolo prezzo
- * - Applicazione promozioni
- * - Salvataggio DB e notifiche
- */
 public class AssegnaBiglietto implements ComandoBiglietto
 {
     private final String IDViaggio;
@@ -86,7 +69,7 @@ public class AssegnaBiglietto implements ComandoBiglietto
             System.out.println("Biglietto assegnato con successo per il viaggio " + IDViaggio);
             System.out.println("Cliente: " + IDCliente);
             System.out.println("Classe: " + classeServizio);
-            System.out.println("Stato: NON_PAGATO (usa PagaBiglietto per completare)");
+            System.out.println("Stato: NON_PAGATO");
 
         }
         catch (Exception e)

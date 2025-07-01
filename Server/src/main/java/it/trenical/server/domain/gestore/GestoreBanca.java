@@ -101,6 +101,7 @@ public final class GestoreBanca
                 ConnessioneADB.closeConnection(conn);
             }
         }
+        System.out.println("Il saldo del cliente non è abbastanza");
         return false;
     }
 

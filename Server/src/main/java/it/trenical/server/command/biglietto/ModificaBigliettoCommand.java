@@ -95,7 +95,7 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
 
         //Una volta che ho calcolato la penale, gestisco tutto il ciclo sequenziale con la banca
         GestoreBanca bancaManager = GestoreBanca.getInstance();
-
+        System.out.println("Saldo del cliente = "+ bancaManager.getClienteBanca(b.getIDCliente()).getSaldo());
         System.out.println("Differenza tariffaria > 0?");
         if (differenzaTariffaria > 0)
         {
@@ -106,10 +106,8 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
             if (!bancaManager.eseguiPagamento(idCliente, importoDaPagare)) //quindi se il cliente non può pagare
             {
                 System.out.println("Pagamento non riuscito perché il saldo è insufficiente");
-                //il pagamento quindi fallisce e notifico
                 gb.modificaClasseServizio(b.getID(), b.getIDCliente(), b.getIDViaggio(), vecchiaClasse);
-                v.riduciPostiDisponibiliPerClasse(vecchiaClasse, 1);
-                v.incrementaPostiDisponibiliPerClasse(nuovaClasse, 1);
+                //il pagamento quindi fallisce e notifico
                 throw new IllegalStateException("Pagamento della differenza tariffaria fallito. Modifica annullata.");
             }
         }
@@ -136,11 +134,9 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
                 double importoDaPagare = Math.abs(rimborsoNetto);
                 if (importoDaPagare > 0) {
                     System.out.println("La penale supera il rimborso. Importo da pagare: " + importoDaPagare);
-                    if (!bancaManager.eseguiPagamento(idCliente, importoDaPagare)) {
-                        // Rollback
+                    if (!bancaManager.eseguiPagamento(idCliente, importoDaPagare))
+                    {
                         gb.modificaClasseServizio(b.getID(), b.getIDCliente(), b.getIDViaggio(), vecchiaClasse);
-                        v.riduciPostiDisponibiliPerClasse(vecchiaClasse, 1);
-                        v.incrementaPostiDisponibiliPerClasse(nuovaClasse, 1);
                         throw new IllegalStateException("Pagamento della penale fallito. Modifica annullata.");
                     }
                 }
