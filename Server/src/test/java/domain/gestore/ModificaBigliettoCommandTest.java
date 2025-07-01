@@ -53,6 +53,9 @@ public class ModificaBigliettoCommandTest {
         ArrayList<Integer> binari = new ArrayList<>();
         binari.add(1);
         binari.add(2);
+        binari.add(3);
+        binari.add(4);
+        binari.add(5);
 
         stazionePartenza = new Stazione("Roma", "Roma Termini TEST", binari, 41.9028, 12.4964);
         stazioneArrivo = new Stazione("Milano", "Milano Centrale TEST", binari, 45.4642, 9.1900);

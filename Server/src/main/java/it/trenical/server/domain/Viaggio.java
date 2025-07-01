@@ -226,4 +226,14 @@ public class Viaggio extends SoggettoViaggio
     public Calendar getFine() {
         return fine;
     }
+
+    public void setBinarioDiPartenza(int i)
+    {
+        binari.put(TipoBinario.PARTENZA, i);
+    }
+
+    public void setBinarioDiArrivo(int i)
+    {
+        binari.put(TipoBinario.ARRIVO, i);
+    }
 }

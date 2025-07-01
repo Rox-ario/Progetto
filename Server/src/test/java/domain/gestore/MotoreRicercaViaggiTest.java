@@ -15,10 +15,6 @@ import java.util.List;
 import java.util.Calendar;
 import java.util.ArrayList;
 
-/**
- * Test per il MotoreRicercaViaggi
- * Verifica le funzionalità di ricerca viaggi con diversi filtri
- */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MotoreRicercaViaggiTest {
@@ -27,7 +23,6 @@ public class MotoreRicercaViaggiTest {
     private GestoreViaggi gestoreViaggi;
     private GestoreClienti gestoreClienti;
 
-    // Dati di test
     private Stazione stazioneRoma;
     private Stazione stazioneMilano;
     private Stazione stazioneNapoli;
@@ -37,18 +32,18 @@ public class MotoreRicercaViaggiTest {
     void setupAll() throws Exception {
         System.out.println("\n=== INIZIO TEST MOTORE RICERCA VIAGGI ===");
 
-        // Pulisco il database dai dati di test precedenti
         pulisciDatabaseCompleto();
 
-        // Inizializzo i gestori (sono singleton)
         motoreRicerca = MotoreRicercaViaggi.getInstance();
         gestoreViaggi = GestoreViaggi.getInstance();
         gestoreClienti = GestoreClienti.getInstance();
 
-        // Creo le stazioni di test
         ArrayList<Integer> binari = new ArrayList<>();
         binari.add(1);
         binari.add(2);
+        binari.add(3);
+        binari.add(4);
+        binari.add(5);
 
         stazioneRoma = new Stazione("Roma", "Roma Termini TEST", binari, 41.9028, 12.4964);
         stazioneMilano = new Stazione("Milano", "Milano Centrale TEST", binari, 45.4642, 9.1900);
@@ -58,7 +53,6 @@ public class MotoreRicercaViaggiTest {
         gestoreViaggi.aggiungiStazione(stazioneMilano);
         gestoreViaggi.aggiungiStazione(stazioneNapoli);
 
-        // Creo le tratte
         Tratta trattaRomaMilano = new Tratta(stazioneRoma, stazioneMilano);
         Tratta trattaMilanoRoma = new Tratta(stazioneMilano, stazioneRoma);
         Tratta trattaRomaNapoli = new Tratta(stazioneRoma, stazioneNapoli);
@@ -67,23 +61,21 @@ public class MotoreRicercaViaggiTest {
         gestoreViaggi.aggiungiTratta(trattaMilanoRoma);
         gestoreViaggi.aggiungiTratta(trattaRomaNapoli);
 
-        // Creo i treni
         gestoreViaggi.aggiungiTreno("TR_TEST_REG_001", TipoTreno.INTERCITY); //treno1
         gestoreViaggi.aggiungiTreno("TR_TEST_AV_001", TipoTreno.ITALO); //treno2
 
-        // Programmo alcuni viaggi di test
         Calendar domani = Calendar.getInstance();
         domani.add(Calendar.DAY_OF_MONTH, 1);
         domani.set(Calendar.HOUR_OF_DAY, 8);
         domani.set(Calendar.MINUTE, 0);
 
-// Viaggio 1: Roma‑Milano con treno regionale alle 8:00
+        // Viaggio 1: Roma‑Milano con treno Intercity alle 8:00
         Calendar partenzaReg1 = (Calendar) domani.clone();
         Calendar arrivoReg1 = (Calendar) partenzaReg1.clone();
         arrivoReg1.add(Calendar.HOUR_OF_DAY, 4); // Arrivo alle 12:00
 
         Viaggio viaggio1 = gestoreViaggi.programmaViaggio(
-                "TR_TEST_REG_001",            // prima era trenoRegionale.getID()
+                "TR_TEST_REG_001",
                 trattaRomaMilano.getId(),
                 partenzaReg1,
                 arrivoReg1
@@ -93,14 +85,14 @@ public class MotoreRicercaViaggiTest {
 
         System.out.println("Id Viaggio 1 = "+ viaggio1.getId());
 
-// Viaggio 2: Roma‑Milano con alta velocità alle 9:00
+    // Viaggio 2: Roma‑Milano con Italo alle 9:00
         Calendar partenzaAV1 = (Calendar) domani.clone();
         partenzaAV1.set(Calendar.HOUR_OF_DAY, 9);
         Calendar arrivoAV1 = (Calendar) partenzaAV1.clone();
         arrivoAV1.add(Calendar.HOUR_OF_DAY, 3); // Arrivo alle 12:00
 
         Viaggio viaggio2 = gestoreViaggi.programmaViaggio(
-                "TR_TEST_AV_001",             // prima era trenoAltoVelocita.getID()
+                "TR_TEST_AV_001",
                 trattaRomaMilano.getId(),
                 partenzaAV1,
                 arrivoAV1
@@ -110,7 +102,7 @@ public class MotoreRicercaViaggiTest {
 
         System.out.println("Id Viaggio 2 = "+ viaggio2.getId());
 
-// Viaggio 3: Milano‑Roma (ritorno) — lo stesso AV riparte alle 14:00
+    // Viaggio 3: Milano‑Roma (ritorno) — lo stesso AV riparte alle 14:00
         Calendar partenzaRitorno = (Calendar) arrivoAV1.clone();
         partenzaRitorno.add(Calendar.HOUR_OF_DAY, 2); // Parte alle 14:00
         Calendar arrivoRitorno = (Calendar) partenzaRitorno.clone();
@@ -126,7 +118,7 @@ public class MotoreRicercaViaggiTest {
         viaggiDaPulire.add(viaggio3.getId());
         System.out.println("Id Viaggio 3 = "+ viaggio3.getId());
 
-// Viaggio 4: Roma‑Napoli con treno regionale alle 15:00
+    // Viaggio 4: Roma‑Napoli con treno regionale alle 15:00
         Calendar partenzaReg2 = (Calendar) arrivoReg1.clone();
         partenzaReg2.add(Calendar.HOUR_OF_DAY, 3); // Parte alle 15:00
         Calendar arrivoReg2 = (Calendar) partenzaReg2.clone();

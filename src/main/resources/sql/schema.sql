@@ -47,6 +47,8 @@ CREATE TABLE viaggi
     orario_arrivo DATETIME NOT NULL,
     stato VARCHAR(100) DEFAULT 'PROGRAMMATO',
     ritardo_minuti INT DEFAULT 0,
+    binario_partenza INT,
+    binario_arrivo INT,
     FOREIGN KEY (treno_id) REFERENCES treni(id),
     FOREIGN KEY (tratta_id) REFERENCES tratte(id)
 );

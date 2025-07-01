@@ -4,6 +4,7 @@ import it.trenical.server.database.ConnessioneADB;
 import it.trenical.server.domain.*;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.StatoViaggio;
+import it.trenical.server.domain.enumerations.TipoBinario;
 import it.trenical.server.domain.enumerations.TipoTreno;
 import org.checkerframework.checker.units.qual.C;
 
@@ -181,6 +182,8 @@ public final class GestoreViaggi {
                 Timestamp arrivo = rs.getTimestamp("orario_arrivo");
                 String stato = rs.getString("stato");
                 int ritardo = rs.getInt("ritardo_minuti");
+                int binarioPartenza = rs.getInt("binario_partenza");
+                int binarioArrivo = rs.getInt("binario_arrivo");
 
                 Calendar calPartenza = Calendar.getInstance();
                 calPartenza.setTimeInMillis(partenza.getTime());
@@ -203,7 +206,8 @@ public final class GestoreViaggi {
                     {
                         v.aggiornaRitardo(ritardo);
                     }
-
+                    v.setBinarioDiArrivo(binarioArrivo);
+                    v.setBinarioDiPartenza(binarioPartenza);
                     viaggi.put(id, v);
 
                     //registro il viaggio nel GestoreBiglietti
@@ -390,7 +394,9 @@ public final class GestoreViaggi {
     }
 
     public Viaggio programmaViaggio(String trenoId, String trattaId, Calendar inizio, Calendar fine) {
-        if (!treni.containsKey(trenoId) || !tratte.containsKey(trattaId)) {
+
+        if (!treni.containsKey(trenoId) || !tratte.containsKey(trattaId))
+        {
             throw new IllegalArgumentException("Treno o tratta non trovati");
         }
         Treno treno = treni.get(trenoId);
@@ -402,12 +408,19 @@ public final class GestoreViaggi {
         {
             throw new IllegalStateException("Treno già usato in un altro viaggio e nello stesso orario");
         }
+
+        Stazione sPartenza = tratta.getStazionePartenza();
+        Stazione sArrivo = tratta.getStazioneArrivo();
+        int binPar = scegliBinarioDisponibile(sPartenza, inizio, fine, TipoBinario.PARTENZA);
+        int binArr = scegliBinarioDisponibile(sArrivo,  inizio, fine, TipoBinario.ARRIVO);
         String idViaggio = UUID.randomUUID().toString();
         Viaggio v = new Viaggio(idViaggio, inizio, fine, treno, tratta);
+        v.setBinarioDiArrivo(binPar);
+        v.setBinarioDiArrivo(binArr);
 
         salvaViaggioInDB(v);
         viaggi.put(idViaggio, v);
-        
+
         System.out.println("Viaggio programmato correttamente");
 
         GestoreBiglietti gb = GestoreBiglietti.getInstance();
@@ -415,10 +428,45 @@ public final class GestoreViaggi {
         return v;
     }
 
+    //Restituisce un binario libero nella stazione 's', fra 'inizio' e 'fine'.
+    private int scegliBinarioDisponibile(Stazione s, Calendar inizio, Calendar fine, TipoBinario tipo)
+    {
+        for (int binario : s.getBinari())
+        {
+            boolean occupato = false;
+            // Scorro tutti i viaggi già programmati
+            for (Viaggio v : viaggi.values())
+            {
+                if(!v.getTratta().getStazionePartenza().equals(s) || !v.getTratta().getStazioneArrivo().equals(s))
+                    continue;
+                if (v.getBinario(tipo) != binario)
+                    continue;
+                Calendar vIn = v.getInizioReale();
+                Calendar vFi = v.getFineReale();
+                if (inizio.before(vFi) && fine.after(vIn))
+                {
+                    occupato = true;
+                    break;
+                }
+            }
+
+            if (!occupato)
+            {
+                return binario;
+            }
+        }
+
+        throw new IllegalStateException(
+                "Nessun binario libero in stazione " + s.getId() +
+                        " fra " + inizio.getTime() + " e " + fine.getTime()
+        );
+    }
+
+
     private void salvaViaggioInDB(Viaggio v) 
     {
         String sql = "INSERT INTO viaggi (id, treno_id, tratta_id, orario_partenza, orario_arrivo, " +
-                "stato, ritardo_minuti) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                "stato, ritardo_minuti, binario_partenza, binario_arrivo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = null;
 
         try
@@ -433,6 +481,8 @@ public final class GestoreViaggi {
             pstmt.setTimestamp(5, new Timestamp(v.getFineReale().getTimeInMillis()));
             pstmt.setString(6, v.getStato().name());
             pstmt.setInt(7, 0); //ritardo iniziale ovviamene 0
+            pstmt.setInt(8, v.getBinario(TipoBinario.PARTENZA));
+            pstmt.setInt(9, v.getBinario(TipoBinario.ARRIVO));
 
             pstmt.executeUpdate();
 
