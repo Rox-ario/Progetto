@@ -209,8 +209,8 @@ public class Viaggio extends SoggettoViaggio
     public String toString() {
         return "[" +
                 "id='" + id +
-                ", inizio=" + getInizioReale() +
-                ", fine=" + getFineReale() +
+                ", inizio=" + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +
+                ", fine=" + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +
                 ", stato=" + stato +
                 ", binario di Partenza=" + getBinario(TipoBinario.PARTENZA) +
                 ", binario di Arrivo=" + getBinario(TipoBinario.ARRIVO)+

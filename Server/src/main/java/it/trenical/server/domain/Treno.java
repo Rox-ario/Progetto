@@ -5,6 +5,7 @@ import it.trenical.server.domain.enumerations.TipoTreno;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Treno
 {
@@ -69,5 +70,16 @@ public class Treno
                 ", tipo=" + tipo +
                 ", postiPerClasse=" + postiPerClasse +
                 ']';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Treno treno)) return false;
+        return Objects.equals(ID, treno.ID) && tipo == treno.tipo && Objects.equals(postiPerClasse, treno.postiPerClasse);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ID, tipo, postiPerClasse);
     }
 }

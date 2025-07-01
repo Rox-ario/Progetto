@@ -370,15 +370,20 @@ public final class GestoreViaggi {
         }
     }
 
-    private boolean trenoUsato(Treno t, Calendar inizio, Calendar fine) {
+    private boolean trenoUsato(Treno t, Calendar inizio, Calendar fine)
+    {
         for (String id : viaggi.keySet()) {
             Viaggio viaggio = viaggi.get(id);
             Treno trenoAssociato = viaggio.getTreno();
             Calendar dataInizio = viaggio.getInizioReale();
             Calendar dataFine = viaggio.getFineReale();
-            if (t.equals(trenoAssociato)) {
-                if (inizio.before(dataFine) || fine.after(dataInizio))
+            if (t.equals(trenoAssociato))
+            {
+                if (inizio.before(dataFine) && fine.after(dataInizio))
+                {
+                    System.out.println("Treno già usato nel viaggio "+ viaggio.getId());
                     return true; //il treno è usato e si sobrappongono gli orari
+                }
             }
         }
         return false;
@@ -393,7 +398,8 @@ public final class GestoreViaggi {
         if (inizio == null || fine == null)
             throw new IllegalArgumentException("Inizio o Fine sono null");
         //controllo che il treno non sia già usato in un altro viaggio
-        if (trenoUsato(treno, inizio, fine)) {
+        if (trenoUsato(treno, inizio, fine))
+        {
             throw new IllegalStateException("Treno già usato in un altro viaggio e nello stesso orario");
         }
         String idViaggio = UUID.randomUUID().toString();
@@ -636,7 +642,8 @@ public final class GestoreViaggi {
         return viaggiDelGiorno;
     }
 
-    private List<Viaggio> getViaggiAndataERitorno(FiltroPasseggeri filtroPasseggeri) {
+    private List<Viaggio> getViaggiAndataERitorno(FiltroPasseggeri filtroPasseggeri)
+    {
         int numeroPasseggeri = filtroPasseggeri.getNumero();
         ClasseServizio classeServizio = filtroPasseggeri.getClasseServizio();
         TipoTreno tipoTreno = filtroPasseggeri.getTipoTreno();
@@ -649,12 +656,22 @@ public final class GestoreViaggi {
         //Per prima cosa cerco i viaggi di andata
         List<Viaggio> viaggiAndata = getViaggiSoloAndata(filtroPasseggeri);
         risultati.addAll(viaggiAndata);
+        for(Viaggio v : viaggiAndata)
+        {
+            System.out.println("Viaggi andata: "+ v.getId() + " da "+ v.getTratta().getStazionePartenza().getCitta() + " a "
+            + v.getTratta().getStazioneArrivo().getCitta());
+        }
 
         // dopodiché ritorno i viaggi di ritorno, mi sa che devo creare un filtro di ritorno
         FiltroPasseggeri filtroRitorno = new FiltroPasseggeri(
                 numeroPasseggeri, classeServizio, tipoTreno,
                 dataRitorno, null, true, cittaDiArrivo, cittaDiAndata);
         List<Viaggio> viaggiRitorno = getViaggiSoloAndata(filtroRitorno);
+        for(Viaggio v : viaggiRitorno)
+        {
+            System.out.println("Viaggi ritorno: "+ v.getId() + " da "+ v.getTratta().getStazionePartenza().getCitta() + " a "
+                    + v.getTratta().getStazioneArrivo().getCitta());
+        }
         risultati.addAll(viaggiRitorno);
 
         //TODO eventualmente ordinare la lista o restituire un HashMap
