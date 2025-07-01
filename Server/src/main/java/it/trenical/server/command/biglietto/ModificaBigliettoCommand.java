@@ -38,6 +38,7 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
         if(b.getStato() != StatoBiglietto.PAGATO)
             throw new IllegalArgumentException("Errore: il biglietto "+ idBiglietto+" non è stato ancora pagato");
 
+        System.out.println("ModificaBigliettoCommand: Prezzo Biglietto = "+ b.getPrezzoBiglietto());
         ClasseServizio vecchiaClasse = b.getClasseServizio();
         ClasseServizio nuovaClasse = modificaBigliettoDTO.getClasseServizio();
         String idCliente = b.getIDCliente();
@@ -62,7 +63,8 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
         }
 
         //Salvo il prezzo originale PRIMA della modifica
-        double prezzoOriginale = b.getPrezzo();
+        double prezzoOriginale = b.getPrezzoBiglietto();
+        System.out.println("Prezzo originale = "+ b.getPrezzoBiglietto());
 
         gb.modificaClasseServizio(b.getID(), b.getIDCliente(), b.getIDViaggio(), nuovaClasse);
 
@@ -72,8 +74,10 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
         b.applicaPromozione(cliente);
 
         //Calcolo la differenza tariffaria
-        double nuovoPrezzo = b.getPrezzo();
+        double nuovoPrezzo = b.getPrezzoBiglietto();
+        System.out.println("Nuovo prezzo = "+ nuovoPrezzo);
         double differenzaTariffaria = nuovoPrezzo - prezzoOriginale;
+        System.out.println("DifferenzaTariffaria = "+ differenzaTariffaria);
 
         System.out.println("Modifica biglietto - Prezzo originale: " + prezzoOriginale +
                 ", Nuovo prezzo: " + nuovoPrezzo +
@@ -92,14 +96,16 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
         //Una volta che ho calcolato la penale, gestisco tutto il ciclo sequenziale con la banca
         GestoreBanca bancaManager = GestoreBanca.getInstance();
 
+        System.out.println("Differenza tariffaria > 0?");
         if (differenzaTariffaria > 0)
         {
+            System.out.println("Differenza tariffaria > 0");
             //Il nuovo biglietto costa di più: addebita la differenza
             double importoDaPagare = differenzaTariffaria;
             System.out.println("Addebito differenza tariffaria: " + importoDaPagare);
-
             if (!bancaManager.eseguiPagamento(idCliente, importoDaPagare)) //quindi se il cliente non può pagare
             {
+                System.out.println("Pagamento non riuscito perché il saldo è insufficiente");
                 //il pagamento quindi fallisce e notifico
                 gb.modificaClasseServizio(b.getID(), b.getIDCliente(), b.getIDViaggio(), vecchiaClasse);
                 v.riduciPostiDisponibiliPerClasse(vecchiaClasse, 1);
@@ -109,6 +115,7 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
         }
         else if (differenzaTariffaria < 0)
         {
+            System.out.println("Differenza tar < 0");
             //Il nuovo biglietto costa meno: calcola il rimborso al netto della penale
             double rimborsoLordo = Math.abs(differenzaTariffaria);
             double rimborsoNetto = rimborsoLordo - penale;
@@ -119,10 +126,12 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
 
             if (rimborsoNetto > 0)
             {
+                System.out.println("Rimborso netto > 0");
                 RimborsoDTO rimborso = new RimborsoDTO(b.getID(), idCliente, rimborsoNetto);
                 bancaManager.rimborsa(rimborso);
             } else
             {
+                System.out.println("Rimborso netto < 0");
                 //La penale supera il rimborso: potrebbe essere necessario un pagamento aggiuntivo
                 double importoDaPagare = Math.abs(rimborsoNetto);
                 if (importoDaPagare > 0) {

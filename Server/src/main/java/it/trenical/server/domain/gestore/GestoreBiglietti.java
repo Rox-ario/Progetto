@@ -194,6 +194,13 @@ public class GestoreBiglietti
 
         biglietto.SetStatoBigliettoPAGATO();
 
+        //aggiorno il numero di posti nel viaggio
+        Viaggio v = GestoreViaggi.getInstance().getViaggio(biglietto.getIDViaggio());
+        System.out.println("Posti in "+ biglietto.getClasseServizio()+" prima: "+ v.getPostiDisponibiliPerClasse(biglietto.getClasseServizio()));
+        v.riduciPostiDisponibiliPerClasse(biglietto.getClasseServizio(), 1);
+        System.out.println("Posti in "+ biglietto.getClasseServizio()+" dopo: "+ v.getPostiDisponibiliPerClasse(biglietto.getClasseServizio()));
+
+
         //dopo aver aggiornato in memoria, aggiorno su DB
         aggiornaBigliettoInDB(biglietto);
 
@@ -222,10 +229,12 @@ public class GestoreBiglietti
         }
         Biglietto b = new Biglietto(IDViaggio, IDUtente, classeServizio);
         b.inizializzaPrezzoBiglietto(gv.getViaggio(IDViaggio)); //inizializzo il prezzo
+        System.out.println("prezzo = "+ b.getPrezzoBiglietto());
 
         //applico eventuali promozioni
         Cliente clienteBiglietto = gc.getClienteById(IDUtente);
         b.applicaPromozione(clienteBiglietto);
+        System.out.println("prezzo con promozione applicata = "+ b.getPrezzoBiglietto());
 
         aggiungiBiglietto(b, IDViaggio, IDUtente);
         return b;

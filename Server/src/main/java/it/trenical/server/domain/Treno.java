@@ -12,7 +12,8 @@ public class Treno
     private final TipoTreno tipo;
     private final Map<ClasseServizio, Integer> postiPerClasse;
 
-    public Treno(String ID, TipoTreno tipo) {
+    public Treno(String ID, TipoTreno tipo)
+    {
         this.ID = ID;
         this.tipo = tipo;
         postiPerClasse = new HashMap<>();

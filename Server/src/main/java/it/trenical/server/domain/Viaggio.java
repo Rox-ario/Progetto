@@ -119,18 +119,10 @@ public class Viaggio extends SoggettoViaggio
         return postiDisponibili.get(classeServizio);
     }
 
-    public boolean riduciPostiDisponibiliPerClasse(ClasseServizio classeServizio, int n)
+    public void riduciPostiDisponibiliPerClasse(ClasseServizio classeServizio, int n)
     {
-        if(postiDisponibili.get(classeServizio) == 0 || postiDisponibili.get(classeServizio) - n < 0)
-        {
-            throw new IllegalArgumentException("Errore: I posti per la classe "+ classeServizio+" sono esauriti");
-        }
-        else
-        {
-            int posti = postiDisponibili.get(classeServizio);
-            postiDisponibili.put(classeServizio, posti - n);
-        }
-        return true;
+        postiDisponibili.compute(classeServizio, (k, posti) -> posti - n);
+        System.out.println("Posti di "+ classeServizio+" decrementati di "+ n);
     }
 
     public void setBinario(TipoBinario tipo, int numero)
@@ -202,8 +194,8 @@ public class Viaggio extends SoggettoViaggio
 
     public void incrementaPostiDisponibiliPerClasse(ClasseServizio classeServizio, int i)
     {
-        int posti = postiDisponibili.get(classeServizio);
-        postiDisponibili.put(classeServizio, posti + i);
+        postiDisponibili.compute(classeServizio, (k, posti) -> posti + i);
+        System.out.println("Posti di "+ classeServizio+" incrementati di "+ i);
     }
 
     public NotificaDTO getNotificaTreno()

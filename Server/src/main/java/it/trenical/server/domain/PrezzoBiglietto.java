@@ -56,6 +56,7 @@ public class PrezzoBiglietto
         double aggiuntaServizio = biglietto.getClasseServizio().getCoefficienteAumentoPrezzo();
 
         prezzoBase = kilometri * aggiuntaServizio * aggiuntaTipo;
+        System.out.println("prezzoBase = "+ prezzoBase);
         //questo però è solo il prezzo base
     }
 

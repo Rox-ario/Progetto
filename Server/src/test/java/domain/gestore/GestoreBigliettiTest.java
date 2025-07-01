@@ -123,7 +123,7 @@ class GestoreBigliettiTest {
     }
 
     @BeforeEach
-    void setup() {
+    void setupEach() {
         long timestamp = System.currentTimeMillis();
         String idTreno = "TR_TEST_" + timestamp;
 

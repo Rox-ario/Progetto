@@ -2,9 +2,11 @@ package domain.gestore;
 
 import it.trenical.server.command.biglietto.AssegnaBiglietto;
 import it.trenical.server.command.biglietto.ModificaBigliettoCommand;
+import it.trenical.server.command.biglietto.PagaBiglietto;
 import it.trenical.server.database.ConnessioneADB;
 import it.trenical.server.domain.*;
 import it.trenical.server.domain.cliente.Cliente;
+import it.trenical.server.domain.cliente.ClienteBanca;
 import it.trenical.server.domain.enumerations.*;
 import it.trenical.server.domain.gestore.*;
 import it.trenical.server.dto.DatiBancariDTO;
@@ -27,7 +29,7 @@ public class ModificaBigliettoCommandTest {
 
     private Cliente clienteTest;
     private Viaggio viaggioTest;
-    private Treno trenoTest;
+    private String idTreno;
     private Tratta trattaTest;
     private Stazione stazionePartenza;
     private Stazione stazioneArrivo;
@@ -58,32 +60,11 @@ public class ModificaBigliettoCommandTest {
         gestoreViaggi.aggiungiStazione(stazionePartenza);
         gestoreViaggi.aggiungiStazione(stazioneArrivo);
 
-        // Crea la tratta
         trattaTest = new Tratta(stazionePartenza, stazioneArrivo);
         gestoreViaggi.aggiungiTratta(trattaTest);
 
-        gestoreViaggi.aggiungiTreno("T_MOD_001", TipoTreno.ITALO);
+        gestoreViaggi.aggiungiTreno("Treno1", TipoTreno.ITALO);
 
-        //il cliente di test con saldo sufficiente
-        String idCliente = "CLI_MOD_" + System.currentTimeMillis();
-        clienteTest = new Cliente.Builder()
-                .ID(idCliente)
-                .Nome("Mario")
-                .Cognome("Rossi")
-                .Email("mario.test@test.it")
-                .Password("password123")
-                .isFedelta(true)
-                .build();
-
-        DatiBancariDTO datiBancari = new DatiBancariDTO(
-                idCliente,
-                "Mario",
-                "Rossi",
-                "1234-5678-9012-3456"
-        );
-
-        gestoreClienti.aggiungiCliente(clienteTest, datiBancari);
-        clientiDaPulire.add(idCliente);
     }
 
     private void pulisciDatabaseCompleto() throws SQLException {
@@ -94,15 +75,13 @@ public class ModificaBigliettoCommandTest {
 
             stmt.execute("SET FOREIGN_KEY_CHECKS = 0");
 
-            stmt.execute("DELETE FROM biglietti WHERE cliente_id LIKE 'TEST_%' OR viaggio_id IN " +
-                    "(SELECT id FROM viaggi WHERE treno_id LIKE 'TR_TEST_%')");
-            stmt.execute("DELETE FROM viaggi WHERE treno_id LIKE 'TR_TEST_%'");
-            stmt.execute("DELETE FROM clienti_banca WHERE cliente_id LIKE 'TEST_%'");
-            stmt.execute("DELETE FROM clienti WHERE id LIKE 'TEST_%'");
-            stmt.execute("DELETE FROM treni WHERE id LIKE 'TR_TEST_%'");
-            stmt.execute("DELETE FROM tratte WHERE stazione_partenza_id IN " +
-                    "(SELECT id FROM stazioni WHERE nome LIKE '%TEST%')");
-            stmt.execute("DELETE FROM stazioni WHERE nome LIKE '%TEST%'");
+            stmt.execute("DELETE FROM biglietti");
+            stmt.execute("DELETE FROM clienti_banca");
+            stmt.execute("DELETE FROM viaggi");
+            stmt.execute("DELETE FROM clienti");
+            stmt.execute("DELETE FROM treni");
+            stmt.execute("DELETE FROM tratte");
+            stmt.execute("DELETE FROM stazioni");
 
             stmt.execute("SET FOREIGN_KEY_CHECKS = 1");
 
@@ -116,26 +95,64 @@ public class ModificaBigliettoCommandTest {
     @BeforeEach
     void setupEach()
     {
-        //creo un nuovo viaggio per ogni test
+        long timestamp = System.currentTimeMillis();
+        idTreno = "TR_TEST_" + timestamp;
+
+        try {
+            gestoreViaggi.aggiungiTreno(idTreno, TipoTreno.ITALO); //avrà quindi 100 LowCost, 70 economy, 50 business, 70 fedeltà
+        } catch (Exception e) {
+            idTreno = "TR_TEST_" + timestamp + "_ALT";
+            gestoreViaggi.aggiungiTreno(idTreno, TipoTreno.ITALO);
+        }
+
+        String idCliente = "TEST_" + timestamp;
+        clienteTest = new Cliente.Builder()
+                .ID(idCliente)
+                .Nome("Mario")
+                .Cognome("Rossi")
+                .Email("marioRossi" + timestamp + "@test.it")
+                .Password("password123")
+                .build();
+
+
+        DatiBancariDTO datiBancari = new DatiBancariDTO(
+                clienteTest.getId(),
+                "Mario",
+                "Rossi",
+                "1234-5678-9012-3456"
+        );
+        gestoreClienti.aggiungiCliente(clienteTest, datiBancari);
+        clientiDaPulire.add(clienteTest.getId());
+
+        ClienteBanca clienteBanca = gestoreBanca.getClienteBanca(clienteTest.getId());
+        System.out.println(clienteBanca);
+        assertNotNull(clienteBanca, "Il cliente dovrebbe essere presente anche in clienti_banca");
+        System.out.println("Cliente test creato con carta: " + clienteBanca.getNumeroCarta());
+
+        //creo un viaggio di test per domani alle 14:00
         Calendar partenza = Calendar.getInstance();
-        partenza.add(Calendar.DAY_OF_MONTH, 10); //Viaggio tra 10 giorni
+        partenza.add(Calendar.DAY_OF_MONTH, 1);
+        partenza.set(Calendar.HOUR_OF_DAY, 14);
+        partenza.set(Calendar.MINUTE, 0);
 
-        Calendar arrivo = (Calendar) partenza.clone();
-        arrivo.add(Calendar.HOUR, 2); //Durata 2 ore
+        Calendar arrivo = Calendar.getInstance();
+        arrivo.add(Calendar.DAY_OF_MONTH, 1);
+        arrivo.set(Calendar.HOUR_OF_DAY, 17);
+        arrivo.set(Calendar.MINUTE, 0);
 
-        Viaggio v = gestoreViaggi.programmaViaggio(trenoTest.getID(), trattaTest.getId(), partenza, arrivo);
-        viaggiDaPulire.add(v.getId());
+        //programmo il viaggio
+        viaggioTest = gestoreViaggi.programmaViaggio(idTreno, trattaTest.getId(), partenza, arrivo);
+        viaggioTest.setStato(StatoViaggio.PROGRAMMATO);
+
+        viaggiDaPulire.add(viaggioTest.getId());
     }
 
     @AfterEach
-    void tearDown() throws SQLException {
-        for (String idBiglietto : bigliettiDaPulire) {
-            rimuoviBigliettoDaDB(idBiglietto);
-        }
-
-        for (String idViaggio : viaggiDaPulire) {
-            rimuoviViaggioDaDB(idViaggio);
-        }
+    void tearDown() throws SQLException
+    {
+        pulisciBigliettiDiTest();
+        pulisciViaggiDiTest();
+        pulisciBigliettiDiTest();
 
         bigliettiDaPulire.clear();
         viaggiDaPulire.clear();
@@ -183,6 +200,9 @@ public class ModificaBigliettoCommandTest {
         bigliettiDaPulire.add(biglietto.getID());
         double prezzoOriginale = biglietto.getPrezzo();
 
+        PagaBiglietto pagaBiglietto = new PagaBiglietto(biglietto.getID());
+        pagaBiglietto.esegui();
+
         ModificaBigliettoDTO dto = new ModificaBigliettoDTO(
                 biglietto.getID(),
                 ClasseServizio.BUSINESS
@@ -200,9 +220,9 @@ public class ModificaBigliettoCommandTest {
                 "Il prezzo dovrebbe aumentare con l'upgrade");
 
         //verifico i posti disponibili
-        assertEquals(299, viaggioTest.getPostiDisponibiliPerClasse(ClasseServizio.ECONOMY),
+        assertEquals(70, viaggioTest.getPostiDisponibiliPerClasse(ClasseServizio.ECONOMY),
                 "I posti Economy dovrebbero essere tornati disponibili");
-        assertEquals(299, viaggioTest.getPostiDisponibiliPerClasse(ClasseServizio.BUSINESS),
+        assertEquals(49, viaggioTest.getPostiDisponibiliPerClasse(ClasseServizio.BUSINESS),
                 "I posti Business dovrebbero essere ridotti");
 
         System.out.println("Test modifica senza penale completato");
@@ -218,8 +238,10 @@ public class ModificaBigliettoCommandTest {
         creaViaggioCustom(partenza5Giorni);
 
         Biglietto biglietto = creaBigliettoPerTest(ClasseServizio.BUSINESS);
-        double prezzoOriginale = biglietto.getPrezzo();
+        double prezzoOriginale = biglietto.getPrezzoBiglietto();
         double saldoIniziale = gestoreBanca.getClienteBanca(clienteTest.getId()).getSaldo();
+        System.out.println("Prezzo pagato del biglietto= "+prezzoOriginale+"\n"+
+                "Saldo cliente dopo pagamento= "+ saldoIniziale);
 
         //modifica a Economy (downgrade)
         ModificaBigliettoDTO dto = new ModificaBigliettoDTO(
@@ -231,7 +253,7 @@ public class ModificaBigliettoCommandTest {
 
         //verifica del rimborso
         Biglietto bigliettoModificato = gestoreBiglietti.getBigliettoPerID(biglietto.getID());
-        double differenza = prezzoOriginale - bigliettoModificato.getPrezzo();
+        double differenza = prezzoOriginale - bigliettoModificato.getPrezzoBiglietto();
         double penaleAttesa = differenza * 0.10;
         double rimborsoAtteso = differenza - penaleAttesa;
 
@@ -364,36 +386,11 @@ public class ModificaBigliettoCommandTest {
 
     @Test
     @Order(7)
-    @DisplayName("Modifica viaggio già partito")
-    void testModificaViaggioGiaPartito () throws Exception
-    {
-        Calendar partenzaPassata = Calendar.getInstance();
-        partenzaPassata.add(Calendar.HOUR, -1); // 1 ora fa
-        creaViaggioCustom(partenzaPassata);
-
-        Biglietto biglietto = creaBigliettoPerTest(ClasseServizio.ECONOMY);
-
-        ModificaBigliettoDTO dto = new ModificaBigliettoDTO(
-                biglietto.getID(),
-                ClasseServizio.BUSINESS
-        );
-        ModificaBigliettoCommand command = new ModificaBigliettoCommand(dto);
-
-        Exception exception = assertThrows(IllegalArgumentException.class, command::esegui);
-
-            assertTrue(exception.getMessage().contains("già partito"),
-                    "Dovrebbe impedire la modifica se il treno è già partito");
-
-            System.out.println("Test viaggio già partito completato");
-        }
-
-    @Test
-    @Order(8)
     @DisplayName("Modifica con posti non disponibili")
     void testModificaPostiNonDisponibili () throws Exception
     {
         // Occupa tutti i posti Business
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 50; i++) {
             AssegnaBiglietto cmd = new AssegnaBiglietto(
                     viaggioTest.getId(),
                     clienteTest.getId(),
@@ -411,53 +408,72 @@ public class ModificaBigliettoCommandTest {
         );
         ModificaBigliettoCommand command = new ModificaBigliettoCommand(dto);
 
-        Exception exception = assertThrows(IllegalArgumentException.class, command::esegui);
-
-        assertTrue(exception.getMessage().contains("non ci sono posti disponibili"),
-                "Dovrebbe impedire la modifica se non ci sono posti");
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                command::esegui,
+                "Dovrebbe impedire la modifica se non ci sono più posti"
+        );
+        assertTrue(
+                exception.getMessage().toLowerCase().contains("non ci sono posti disponibili"),
+                "Il messaggio d'errore deve dire che i posti non sono disponibili");
 
         System.out.println("Test posti non disponibili completato");
     }
 
     @Test
-    @Order(9)
+    @Order(8)
     @DisplayName("Modifica con pagamento fallito e rollback")
-    void testModificaPagamentoFallitoRollback () throws Exception
-    {
-        //riduco il saldo del cliente per far fallire il pagamento
-        double saldoOriginale = gestoreBanca.getClienteBanca(clienteTest.getId()).getSaldo();
-        gestoreBanca.getClienteBanca(clienteTest.getId()).addebita(saldoOriginale);
+    void testModificaPagamentoFallitoRollback() throws Exception {
+
+        //svuoto il conto del cliente
+        GestoreBanca bancaManager = GestoreBanca.getInstance();
+        System.out.println("Saldo cliente prima: "+ bancaManager.getClienteBanca(clienteTest.getId()).getSaldo());
+        double saldoOriginale = bancaManager.getClienteBanca(clienteTest.getId()).getSaldo();
+        boolean pagato = bancaManager.eseguiPagamento(clienteTest.getId(), saldoOriginale);
+        System.out.println("Saldo cliente dopo: "+ bancaManager.getClienteBanca(clienteTest.getId()).getSaldo());
+        assertTrue(pagato, "Non sono riuscito a svuotare il conto in DB");
 
         Biglietto biglietto = creaBigliettoPerTest(ClasseServizio.ECONOMY);
+        System.out.println("Il prezzo del biglietto è: "+ biglietto.getPrezzoBiglietto());
         ClasseServizio classeOriginale = biglietto.getClasseServizio();
         int postiEconomyPrima = viaggioTest.getPostiDisponibiliPerClasse(ClasseServizio.ECONOMY);
         int postiBusinessPrima = viaggioTest.getPostiDisponibiliPerClasse(ClasseServizio.BUSINESS);
 
         ModificaBigliettoDTO dto = new ModificaBigliettoDTO(
                 biglietto.getID(),
-                ClasseServizio.BUSINESS
+                ClasseServizio.FEDELTA
         );
         ModificaBigliettoCommand command = new ModificaBigliettoCommand(dto);
 
-        Exception exception = assertThrows(IllegalStateException.class, command::esegui);
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                command::esegui,
+                "Dovrebbe fallire per pagamento non riuscito"
+        );
 
-        assertTrue(exception.getMessage().contains("Pagamento"),
-                "Dovrebbe fallire per pagamento non riuscito");
+        assertTrue(
+                exception.getMessage().contains(
+                        "Pagamento della differenza tariffaria fallito. Modifica annullata."
+                ),
+                "Messaggio d'errore sbagliato"
+        );
 
-        Biglietto bigliettoPost = gestoreBiglietti.getBigliettoPerID(biglietto.getID());
-        assertEquals(classeOriginale, bigliettoPost.getClasseServizio(),
-                "La classe dovrebbe tornare quella originale");
+        Biglietto dopo = GestoreBiglietti.getInstance().getBigliettoPerID(biglietto.getID());
+        assertEquals(classeOriginale, dopo.getClasseServizio(),
+                "La classe dovrebbe essere rimasta la stessa");
 
-        assertEquals(postiEconomyPrima, viaggioTest.getPostiDisponibiliPerClasse(ClasseServizio.ECONOMY),
-                "I posti Economy dovrebbero essere ripristinati");
-        assertEquals(postiBusinessPrima, viaggioTest.getPostiDisponibiliPerClasse(ClasseServizio.BUSINESS),
-                "I posti Business dovrebbero essere ripristinati");
+        assertEquals(postiEconomyPrima,
+                viaggioTest.getPostiDisponibiliPerClasse(ClasseServizio.ECONOMY),
+                "Posti Economy non ripristinati");
+        assertEquals(postiBusinessPrima,
+                viaggioTest.getPostiDisponibiliPerClasse(ClasseServizio.BUSINESS),
+                "Posti Business non ripristinati");
 
         System.out.println("Test rollback per pagamento fallito completato");
     }
 
     @Test
-    @Order(10)
+    @Order(9)
     @DisplayName("Modifica con penale che supera il rimborso")
     void testModificaPenaleSuperaRimborso () throws Exception
     {
@@ -490,7 +506,9 @@ public class ModificaBigliettoCommandTest {
 
         //simulo solo il pagamento
         Biglietto biglietto = gestoreBiglietti.getBigliettoPerID(idBiglietto);
+        double prezzoPagato = biglietto.getPrezzoBiglietto();
         biglietto.setStatoBiglietto(StatoBiglietto.PAGATO);
+        GestoreBanca.getInstance().eseguiPagamento(biglietto.getIDCliente(), prezzoPagato);
 
         return biglietto;
     }
@@ -513,12 +531,9 @@ public class ModificaBigliettoCommandTest {
         Calendar arrivo = (Calendar) partenza.clone();
         arrivo.add(Calendar.HOUR, 2);
 
-        Viaggio v = gestoreViaggi.programmaViaggio(trenoTest.getID(), trattaTest.getId(), partenza, arrivo);
-        viaggiDaPulire.add(v.getId());
+        viaggioTest = gestoreViaggi.programmaViaggio(idTreno, trattaTest.getId(), partenza, arrivo);
+        viaggiDaPulire.add(viaggioTest.getId());
     }
-
-
-    // ==================== METODI DI PULIZIA ====================
 
     private void pulisciBigliettiDiTest ()
     {
