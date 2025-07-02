@@ -202,7 +202,7 @@ public class MotoreRicercaViaggiTest {
         assertEquals(1, risultati.size(), "Dovrebbe trovare 1 viaggio alta velocità");
         assertEquals(TipoTreno.ITALO, risultati.get(0).getTreno().getTipo());
 
-        System.out.println("✓ Trovato viaggio alta velocità con " +
+        System.out.println("Trovato viaggio alta velocità con " +
                 risultati.get(0).getPostiDisponibiliPerClasse(ClasseServizio.BUSINESS) +
                 " posti disponibili in Business");
     }
@@ -281,7 +281,7 @@ public class MotoreRicercaViaggiTest {
         assertNotNull(risultati);
         assertTrue(risultati.isEmpty(), "Non dovrebbe trovare viaggi per destinazioni non esistenti");
 
-        System.out.println("✓ Correttamente non trovati viaggi per destinazione inesistente");
+        System.out.println("Correttamente non trovati viaggi per destinazione inesistente");
     }
 
     @Test
@@ -291,9 +291,9 @@ public class MotoreRicercaViaggiTest {
         Calendar domani = Calendar.getInstance();
         domani.add(Calendar.DAY_OF_MONTH, 1);
 
-        // Richiedo più posti di quelli disponibili su un treno
+        //Richiedo più posti di quelli disponibili su un treno
         FiltroPasseggeri filtro = new FiltroPasseggeri(
-                300,  // Numero molto alto di passeggeri
+                300,  //Numero molto alto di passeggeri
                 ClasseServizio.ECONOMY,
                 TipoTreno.INTERCITY,
                 domani,
@@ -339,7 +339,7 @@ public class MotoreRicercaViaggiTest {
         System.out.println("✓ Trovato viaggio Roma-Napoli");
     }
 
-    // Metodi di utilità per pulizia database
+    //Metodi di utilità per pulizia database
     private void pulisciDatabaseCompleto() throws SQLException {
         Connection conn = null;
         try {
