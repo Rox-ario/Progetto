@@ -42,21 +42,32 @@ public class GestoreNotifiche
         GestoreClienti gc = GestoreClienti.getInstance();
         Cliente cliente = gc.getClienteById(idCliente);
 
-        if (cliente == null || !cliente.isRiceviNotifiche()) {
+        if (cliente == null || !cliente.isRiceviNotifiche())
+        {
             return;
         }
 
         //Aggiungo alla coda delle notifiche la notifica
         if (!notifichePerCliente.containsKey(cliente))
             notifichePerCliente.put(idCliente, new ArrayList<>());
+        System.out.println("Size prima: "+ notifichePerCliente.get(idCliente).size());
         notifichePerCliente.get(idCliente).add(notifica);
+        System.out.println("La size dopo: "+ notifichePerCliente.size());
+        for(NotificaDTO notificaDTO : notifichePerCliente.get(cliente.getId()))
+        {
+            System.out.println("Notifica "+ notificaDTO.getMessaggio());
+        }
 
         //passo al Listener del cliente e lo/li avviso
         NotificheListener listener = listenerPerCliente.get(idCliente);
-        if (listener != null) {
-            try {
+        if (listener != null)
+        {
+            try
+            {
                 listener.onNuovaNotifica(idCliente, notifica);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 System.err.println("Errore nel listener: " + e.getMessage());
             }
         }

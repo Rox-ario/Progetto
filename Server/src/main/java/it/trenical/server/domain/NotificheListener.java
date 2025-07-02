@@ -6,7 +6,8 @@ public class NotificheListener
 {
     private final boolean mostraIdCliente;
 
-    public NotificheListener(boolean mostraIdCliente) {
+    public NotificheListener(boolean mostraIdCliente)
+    {
         this.mostraIdCliente = mostraIdCliente;
     }
 
@@ -21,7 +22,7 @@ public class NotificheListener
         sb.append("\n");
         sb.append(notifica.getTempoStampato());
 
-        //Spezzo il messaggio tramite split fortissimo
+        //Spezzo il messaggio tramite split
         String[] righe = notifica.getMessaggio().split("\n");
         for (String riga : righe)
         {
