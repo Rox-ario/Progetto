@@ -119,7 +119,7 @@ public class PromozioneTratta implements Promozione
     @Override
     public String toString() {
         return "[" +
-                ", tipo=" + tipo +
+                "tipo=" + tipo +
                 ", statoPromozione=" + statoPromozione +
                 ", ID='" + ID +
                 ", dataInizio=" + dataInizio +

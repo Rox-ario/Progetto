@@ -119,15 +119,15 @@ public class PromozioneTreno implements Promozione
 
     @Override
     public String toString() {
-        return "PromozioneTreno{" +
-                ", tipo=" + tipo +
+        return "[" +
+                "tipo=" + tipo +
                 "statoPromozione=" + statoPromozione +
                 ", ID='" + ID  +
                 ", dataInizio=" + dataInizio +
                 ", dataFine=" + dataFine +
                 ", percentualeSconto=" + percentualeSconto +
                 ", tipoTreno=" + tipoTreno +
-                '}';
+                ']';
     }
 }
 

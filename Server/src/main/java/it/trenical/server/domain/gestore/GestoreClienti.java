@@ -4,6 +4,7 @@ import it.trenical.server.database.ConnessioneADB;
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.cliente.ClienteBanca;
 import it.trenical.server.dto.DatiBancariDTO;
+import it.trenical.server.observer.Promozione.ObserverPromozione;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -126,7 +127,6 @@ public final class GestoreClienti
                         datiBancariCustom.getSaldo()
                 )
         );
-
     }
 
     private void salvaClienteInDB(Cliente c, DatiBancariDTO datiBancariDTO)
@@ -272,13 +272,11 @@ public final class GestoreClienti
 
         for (Cliente cliente : clientiById.values()) {
             if (cliente.haAdesioneFedelta() &&
-                    cliente.isRiceviNotifiche() &&
                     cliente.isRiceviPromozioni())
             {
                 clientiFedelta.add(cliente);
             }
         }
-
         return clientiFedelta;
     }
 }

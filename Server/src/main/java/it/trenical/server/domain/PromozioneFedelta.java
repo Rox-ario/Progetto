@@ -38,6 +38,11 @@ public class PromozioneFedelta extends SoggettoPromozione implements Promozione
         return tipo;
     }
 
+    public List<ObserverPromozione> getObservers()
+    {
+        return osservatori;
+    }
+
     public StatoPromozione getStatoPromozione()
     {
         return statoPromozione;
@@ -137,7 +142,7 @@ public class PromozioneFedelta extends SoggettoPromozione implements Promozione
     @Override
     public String toString() {
         return "[" +
-                ", tipo=" + tipo +
+                "tipo=" + tipo +
                 ", statoPromozione=" + statoPromozione +
                 ", ID='" + ID +
                 ", dataInizio=" + dataInizio +

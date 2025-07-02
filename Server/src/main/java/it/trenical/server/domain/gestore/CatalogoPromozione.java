@@ -191,27 +191,29 @@ public class CatalogoPromozione
     {
         List<Promozione> promozioniStessoTipo = promozioniPerTipo.get(nuovaPromo.getTipo());
 
-        System.out.println("Promo da esaminare = "+ nuovaPromo.getID());
+        System.out.println("Promo da esaminare = "+ nuovaPromo.getID() + ", "+ nuovaPromo.getTipo());
         System.out.println("Tutte le promo create:");
         for (Promozione esistente : promozioniStessoTipo)
         {
-            System.out.println("Promo = " + esistente.getID());
+            System.out.println("Promo = " + esistente.getID() + ", " + esistente.getTipo());
         }
         for (Promozione esistente : promozioniStessoTipo)
         {
-            System.out.println("Promo esistente = "+ esistente.getID());
             if (sovrapponeTemporalmente(nuovaPromo, esistente))
             {
-                // in base al tipo verifico cose
-                if (nuovaPromo.getTipo() == TipoPromozione.FEDELTA) {
-                    // Le promozioni fedeltà non possono sovrapporsi MAI
-                    PromozioneFedelta nuova = (PromozioneFedelta) nuovaPromo;
-                    PromozioneFedelta vecchia = (PromozioneFedelta) esistente;
-                    if(nuova.equals(vecchia))
-                        return true;
+                System.out.println("La promo esistente " + esistente.getID() +
+                        " si sovrappone con nuova promo "+ nuovaPromo.getID());
+                //in base al tipo verifico
+                if (nuovaPromo.getTipo() == TipoPromozione.FEDELTA && nuovaPromo.getTipo() == esistente.getTipo())
+                {
+                    System.out.println("La promo esistente " + esistente.getID() +
+                            " e la nuova promo "+ nuovaPromo.getID() +" sono di tipo Fedelta'");
+                    return true;
                 }
                 else if (nuovaPromo.getTipo() == TipoPromozione.TRATTA)
                 {
+                    System.out.println("Confronto la tratta della promo esistente " + esistente.getID() +
+                            " con quella della nuova promo "+ nuovaPromo.getID());
                     // Le promozioni tratta si sovrappongono solo se hanno la stessa tratta
                     PromozioneTratta nuova = (PromozioneTratta) nuovaPromo;
                     PromozioneTratta vecchia = (PromozioneTratta) esistente;
@@ -219,11 +221,18 @@ public class CatalogoPromozione
                         return true;
                     }
                 }
-                else if (nuovaPromo.getTipo() ==TipoPromozione.TRENO) {
+                else if (nuovaPromo.getTipo() ==TipoPromozione.TRENO)
+                {
+                    System.out.println("Confronto il tipo di treno della promo esistente " + esistente.getID() +
+                            " con quello della nuova promo "+ nuovaPromo.getID());
                     // Le promozioni treno si sovrappongono solo se hanno lo stesso tipo treno
                     PromozioneTreno nuova = (PromozioneTreno) nuovaPromo;
                     PromozioneTreno vecchia = (PromozioneTreno) esistente;
-                    if (nuova.getTipoTreno() == vecchia.getTipoTreno()) {
+                    if (nuova.getTipoTreno() == vecchia.getTipoTreno())
+                    {
+                        System.out.println("Il tipo di treno di " + vecchia.getID() +
+                                " e' "+ vecchia.getTipoTreno()+ " e quello della nuova promo "+ nuova.getID() +
+                        " e' "+ nuova.getTipoTreno());
                         return true;
                     }
                 }
@@ -243,7 +252,23 @@ public class CatalogoPromozione
         //L'inizio di uno è tra l'inizio e la fine dell'altro
         //La fine di uno è tra l'inizio e la fine dell'altro
         //Uno contiene completamente l'altro
-        return !(fineP1.before(inizioP2) || inizioP1.after(fineP2));
+        // 1) Inizio di p1 dentro p2
+        if (inizioP1.compareTo(inizioP2) >= 0 && inizioP1.before(fineP2))
+            return true;
+
+        // 2) Fine di p1 dentro p2
+        if (fineP1.after(inizioP2) && fineP1.compareTo(fineP2) <= 0)
+            return true;
+
+        // 3) p1 contiene completamente p2
+        if (inizioP1.before(inizioP2) && fineP1.after(fineP2))
+            return true;
+
+        // 4) p2 contiene completamente p1  (opzionale, ma copre ogni scenario)
+        if (inizioP2.before(inizioP1) && fineP2.after(fineP1))
+            return true;
+
+        return false;
     }
 
     public void aggiungiPromozione(Promozione p)
@@ -261,6 +286,7 @@ public class CatalogoPromozione
         //Se è una promozione fedeltà, registro tutti i clienti fedeltà come observer
         if (p.getTipo() == TipoPromozione.FEDELTA)
         {
+            System.out.println("Registro gli observers a promozione fedelta': "+ p.getID());
             registraObserverPromozioneFedelta((PromozioneFedelta) p);
         }
         System.out.println("Promozione creata\nDettagli: "+ p.toString());
@@ -436,15 +462,20 @@ public class CatalogoPromozione
         //Ottiengo solo i clienti fedeltà che VOGLIONO ricevere promozioni
         List<Cliente> clientiFedelta = gc.getClientiFedeltaConNotifiche();
 
+        System.out.println("Lista di clienti Fedelta'");
         for (Cliente cliente : clientiFedelta)
         {
+            System.out.println("Cliente Fedelta': "+ cliente.getId());
             ObserverPromozione observer = new ObserverPromozioneFedelta(cliente);
             promozione.attach(observer);
+            System.out.println(""+cliente.getId()+" adesso segue "+ promozione.getID());
         }
 
         //Notifico immediatamente tutti i clienti registrati
-        if (!clientiFedelta.isEmpty()) {
+        if (!clientiFedelta.isEmpty())
+        {
             promozione.notifica();
+            System.out.println("Notifico i clienti sulla promozione "+ promozione.getID());
         }
     }
 

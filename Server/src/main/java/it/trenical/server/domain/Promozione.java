@@ -3,6 +3,7 @@ package it.trenical.server.domain;
 import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.StatoPromozione;
 import it.trenical.server.domain.enumerations.TipoPromozione;
+import it.trenical.server.observer.Promozione.ObserverPromozione;
 
 import java.util.ArrayList;
 import java.util.Calendar;

@@ -84,27 +84,28 @@ class GestoreBigliettiTest {
 
     private void pulisciDatabaseCompleto() throws SQLException {
         Connection conn = null;
-        try {
+        try
+        {
             conn = ConnessioneADB.getConnection();
             Statement stmt = conn.createStatement();
 
             stmt.execute("SET FOREIGN_KEY_CHECKS = 0");
 
-            stmt.execute("DELETE FROM biglietti WHERE cliente_id LIKE 'TEST_%' OR viaggio_id IN " +
-                    "(SELECT id FROM viaggi WHERE treno_id LIKE 'TR_TEST_%')");
-            stmt.execute("DELETE FROM viaggi WHERE treno_id LIKE 'TR_TEST_%'");
-            stmt.execute("DELETE FROM clienti_banca WHERE cliente_id LIKE 'TEST_%'");
-            stmt.execute("DELETE FROM clienti WHERE id LIKE 'TEST_%'");
-            stmt.execute("DELETE FROM treni WHERE id LIKE 'TR_TEST_%'");
-            stmt.execute("DELETE FROM tratte WHERE stazione_partenza_id IN " +
-                    "(SELECT id FROM stazioni WHERE nome LIKE '%TEST%')");
-            stmt.execute("DELETE FROM stazioni WHERE nome LIKE '%TEST%'");
+            stmt.execute("DELETE FROM biglietti");
+            stmt.execute("DELETE FROM clienti_banca");
+            stmt.execute("DELETE FROM viaggi");
+            stmt.execute("DELETE FROM clienti");
+            stmt.execute("DELETE FROM treni");
+            stmt.execute("DELETE FROM tratte");
+            stmt.execute("DELETE FROM stazioni");
 
             stmt.execute("SET FOREIGN_KEY_CHECKS = 1");
 
             System.out.println("Database pulito dai dati di test");
 
-        } finally {
+        }
+        finally
+        {
             ConnessioneADB.closeConnection(conn);
         }
     }
