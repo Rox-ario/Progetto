@@ -254,7 +254,6 @@ class GestoreNotificheTest
                 .anyMatch(n -> n.getMessaggio().equals(messaggio));
         assertTrue(trovato, "Il messaggio dovrebbe essere nello storico");
 
-        // Verifica direttamente nel DB
         assertTrue(verificaNotificaNelDB(clienteConNotifiche.getId(), messaggio),
                 "La notifica dovrebbe essere salvata nel database");
     }
@@ -265,13 +264,11 @@ class GestoreNotificheTest
     void testNotificaClienteNonEsistente() {
         String idClienteFake = "CLIENTE_INESISTENTE_" + System.currentTimeMillis();
 
-        // Non dovrebbe lanciare eccezioni, semplicemente non invia
         assertDoesNotThrow(() -> {
             NotificaDTO notifica = new NotificaDTO("Test");
             gestoreNotifiche.inviaNotifica(idClienteFake, notifica);
         }, "Non dovrebbe lanciare eccezioni per cliente inesistente");
 
-        // Verifica che non ci siano notifiche
         List<NotificaDTO> notifiche = gestoreNotifiche.getNotificheNonLette(idClienteFake);
         assertTrue(notifiche == null || notifiche.isEmpty(),
                 "Non dovrebbero esserci notifiche per cliente inesistente");
@@ -304,7 +301,8 @@ class GestoreNotificheTest
     void testGestioneErroriListener()
     {
         // Crea un listener che lancia eccezione
-        NotificheListener listenerErrore = new NotificheListener(false) {
+        NotificheListener listenerErrore = new NotificheListener(false)
+        {
             @Override
             public void onNuovaNotifica(String idCliente, NotificaDTO notifica) {
                 throw new RuntimeException("Errore simulato nel listener");
@@ -313,13 +311,11 @@ class GestoreNotificheTest
 
         gestoreNotifiche.registraListener(clienteConNotifiche.getId(), listenerErrore);
 
-        // L'invio non dovrebbe fallire anche se il listener lancia eccezione
         assertDoesNotThrow(() -> {
             NotificaDTO notifica = new NotificaDTO("Test con errore");
             gestoreNotifiche.inviaNotifica(clienteConNotifiche.getId(), notifica);
         }, "L'errore nel listener non dovrebbe propagarsi");
 
-        // La notifica dovrebbe comunque essere nella coda
         List<NotificaDTO> notifiche = gestoreNotifiche.getNotificheNonLette(clienteConNotifiche.getId());
         assertEquals(1, notifiche.size(),
                 "La notifica dovrebbe essere stata aggiunta nonostante l'errore del listener");
@@ -328,14 +324,15 @@ class GestoreNotificheTest
     @Test
     @Order(10)
     @DisplayName("Thread safety con accessi concorrenti")
-    void testThreadSafety() throws InterruptedException {
+    void testThreadSafety() throws InterruptedException
+    {
         final int NUM_THREADS = 5;
         final int NOTIFICHE_PER_THREAD = 10;
 
-        // Thread per inviare notifiche
         Thread[] threads = new Thread[NUM_THREADS];
 
-        for (int i = 0; i < NUM_THREADS; i++) {
+        for (int i = 0; i < NUM_THREADS; i++)
+        {
             final int threadNum = i;
             threads[i] = new Thread(() -> {
                 for (int j = 0; j < NOTIFICHE_PER_THREAD; j++) {
@@ -347,25 +344,20 @@ class GestoreNotificheTest
             });
         }
 
-        // Avvia tutti i thread
         for (Thread t : threads) {
             t.start();
         }
 
-        // Attendi che tutti finiscano
         for (Thread t : threads) {
             t.join();
         }
 
-        // Verifica che tutte le notifiche siano state aggiunte
         List<NotificaDTO> tutteNotifiche =
                 gestoreNotifiche.getNotificheNonLette(clienteConNotifiche.getId());
 
         assertEquals(NUM_THREADS * NOTIFICHE_PER_THREAD, tutteNotifiche.size(),
                 "Tutte le notifiche dovrebbero essere state aggiunte correttamente");
     }
-
-    // ===== METODI HELPER =====
 
     private void pulisciDatabaseCompleto() throws SQLException {
         Connection conn = null;

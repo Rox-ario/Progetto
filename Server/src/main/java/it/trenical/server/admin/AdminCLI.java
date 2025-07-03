@@ -75,7 +75,7 @@ public class AdminCLI
         Calendar oggi = Calendar.getInstance();
         int mese = oggi.get(Calendar.MONTH) + 1;
         System.out.println("Data: " + oggi.get(Calendar.DAY_OF_MONTH) +"/"+mese+"/"+oggi.get(Calendar.YEAR));
-        System.out.println("ore: "+ oggi.get(Calendar.HOUR)+":"+oggi.get(Calendar.MINUTE));
+        System.out.println("ore: "+ oggi.get(Calendar.HOUR_OF_DAY)+":"+oggi.get(Calendar.MINUTE));
         System.out.println("=====================================");
     }
 

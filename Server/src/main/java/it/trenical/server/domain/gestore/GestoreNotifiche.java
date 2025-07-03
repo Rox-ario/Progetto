@@ -24,7 +24,7 @@ public class GestoreNotifiche
     {
         notifichePerCliente = new ConcurrentHashMap<>();
         listenerPerCliente = new ConcurrentHashMap<>();
-        listenersGlobali = new ArrayList<NotificheListener>();
+        listenersGlobali = Collections.synchronizedList(new ArrayList<>());
 
         //solo quando è richiesto, carico i dati da DB
     }
@@ -37,7 +37,7 @@ public class GestoreNotifiche
     }
 
     //avverto un cliente
-    public void inviaNotifica(String idCliente, NotificaDTO notifica)
+    public synchronized void inviaNotifica(String idCliente, NotificaDTO notifica)
     {
         GestoreClienti gc = GestoreClienti.getInstance();
         Cliente cliente = gc.getClienteById(idCliente);
@@ -48,11 +48,11 @@ public class GestoreNotifiche
         }
 
         //Aggiungo alla coda delle notifiche la notifica
-        if (!notifichePerCliente.containsKey(cliente))
+        if (!notifichePerCliente.containsKey(idCliente))
             notifichePerCliente.put(idCliente, new ArrayList<>());
         System.out.println("Size prima: "+ notifichePerCliente.get(idCliente).size());
         notifichePerCliente.get(idCliente).add(notifica);
-        System.out.println("La size dopo: "+ notifichePerCliente.size());
+        System.out.println("La size dopo: "+ notifichePerCliente.get(idCliente).size());
         for(NotificaDTO notificaDTO : notifichePerCliente.get(cliente.getId()))
         {
             System.out.println("Notifica "+ notificaDTO.getMessaggio());

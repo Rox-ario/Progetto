@@ -23,16 +23,19 @@ public class TestNotificheListener extends NotificheListener
         clientiNotificati.add(idCliente);
     }
 
-    public List<NotificaDTO> getNotificheRicevute() {
+    public List<NotificaDTO> getNotificheRicevute()
+    {
         return new ArrayList<>(notificheRicevute);
     }
 
-    public void reset() {
+    public void reset()
+    {
         notificheRicevute.clear();
         clientiNotificati.clear();
     }
 
-    public boolean haRicevutoNotifiche() {
+    public boolean haRicevutoNotifiche()
+    {
         return !notificheRicevute.isEmpty();
     }
 }
