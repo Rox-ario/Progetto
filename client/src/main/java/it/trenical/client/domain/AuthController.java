@@ -11,18 +11,16 @@ public class AuthController
 {
 
     private final String regex_email = "^[a-zA-Z0-9._%+-]+@gmail\\.com$";
-    private final String regex_password = "^[a-zA-Z@#$%^&+=](?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}[a-zA-Z0-9]$";
+    private final String regex_password = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])[a-zA-Z0-9@#$%^&+=]{8,}$";
     //regex password indica
     /*
-    ^                 inizio stringa
-[a-zA-Z@#$%^&+=]  il primo carattere deve essere una lettera o un carattere speciale
-(?=.*[0-9])       deve contenere almeno una cifra
-(?=.*[a-z])       deve contenere almeno una lettera minuscols
-(?=.*[A-Z])       deve contenere almeno una lettera maiuscola
-(?=.*[@#$%^&+=])  deve contenere almeno un carattere speciale tra quelli esposti
-.{8,}             la lunghezza deve essere di almeno 8 caratteri
-[a-zA-Z0-9]       l'ultimo carattere deve essere una lettera o una cifra
-$     $           fin
+    ^[a-zA-Z@#$%^&+=]               → Inizia con una lettera (maiuscola o minuscola) o uno di questi simboli: @ # $ % ^ & + =
+(?=.*[0-9])                     → Deve contenere almeno **una cifra** (0–9)
+(?=.*[a-z])                     → Deve contenere almeno **una lettera minuscola** (a–z)
+(?=.*[A-Z])                     → Deve contenere almeno **una lettera maiuscola** (A–Z)
+(?=.*[@#$%^&+=])                → Deve contenere almeno **uno dei simboli speciali** @, #, $, %, ^, &, +, =
+.{8,}                           → Deve essere **lunghezza minima 8** caratteri (può includere tutto)
+[a-zA-Z0-9]$                    → Finisce con **una lettera** (minuscola o maiuscola) o **una cifra**
      */
     private final String regex_carta = "^[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}$";
 
@@ -34,7 +32,7 @@ $     $           fin
                               boolean isFedelta, boolean wantsNotifiche, boolean wantsPromozioni)
     {
         try {
-            if (!validaInputRegistrazione(nome, cognome, email, password, numeroCarta)) // AGGIUNGI numeroCarta
+            if (!validaInputRegistrazione(nome, cognome, email, password, numeroCarta))
             {
                 return false;
             }

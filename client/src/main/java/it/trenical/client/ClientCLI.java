@@ -209,8 +209,35 @@ public class ClientCLI
         System.out.print("Cognome: ");
         String cognome = scanner.nextLine().trim();
 
+        System.out.println("Sono Ammessi per la mail: ");
+        System.out.println("- Lettere maiuscole (A-Z)");
+        System.out.println("- Lettere minuscole (a-z)");
+        System.out.println("- Cifre (0-9)");
+        System.out.println("- Punto (.)");
+        System.out.println("- Underscore (_)");
+        System.out.println("- Percentuale (%)");
+        System.out.println("- Più (+)");
+        System.out.println("- Trattino (-)\n");
+        System.out.println("Non sono Ammessi per la mail");
+        System.out.println("- Spazi o tabulazioni");
+        System.out.println("- Accenti o lettere straniere (es: à, è, ñ, ü)");
+        System.out.println("- Simboli non standard come: ! # & * = ? : ; / \\ \" ' < > ~ ^ | { } [ ]");
+        System.out.println("- Domini diversi da @gmail.com (es: @yahoo.it, @hotmail.com ecc.)");
         System.out.print("Email: ");
         String email = scanner.nextLine().trim();
+
+        System.out.println("""
+        La password deve rispettare queste regole:
+        
+        1. Deve iniziare con una **lettera** (a-z, A-Z) oppure uno dei simboli: @ # $ % ^ & + =
+        2. Deve contenere almeno:
+           - Una **lettera maiuscola** (es: A-Z)
+           - Una **lettera minuscola** (es: a-z)
+           - Un **numero** (es: 0-9)
+           - Un **simbolo speciale** tra: @ # $ % ^ & + =
+        3. Deve essere lunga almeno **8 caratteri**
+        4. Deve **finire** con una **lettera o un numero** (non un simbolo)
+        """);
 
         System.out.print("Password: ");
         String password = scanner.nextLine().trim();

@@ -17,8 +17,8 @@ public class AdminCLI
     private boolean running = true;
 
     //credenziali admin ( che in produzione andrebbero nel DB)
-    private static final String ADMIN_USER = "admin";
-    private static final String ADMIN_PASS = "TreniCal2024!";
+    private static final String ADMIN_USER = "Rosario";
+    private static final String ADMIN_PASS = "trenical!";
 
     public AdminCLI()
     {
@@ -118,6 +118,7 @@ public class AdminCLI
             System.out.println("1. Aggiungi nuovo treno");
             System.out.println("2. Visualizza tutti i treni");
             System.out.println("3. Cerca treno per ID");
+            System.out.println("4. Elimina treno");
             System.out.println("0. Torna indietro");
             System.out.print("\nScelta: ");
 
@@ -128,6 +129,7 @@ public class AdminCLI
                 case 1: aggiungiTreno(); break;
                 case 2: visualizzaTuttiITreni(); break;
                 case 3: cercaTreno(); break;
+                case 4: rimuoviTreno(); break;
                 case 0: return;
                 default: System.out.println("Scelta non valida");
             }
@@ -138,7 +140,8 @@ public class AdminCLI
     {
         System.out.println("\nAGGIUNGI NUOVO TRENO");
 
-        String id = scanner.nextLine().trim().toUpperCase();
+        System.out.println("Inserisci un id: ");
+        String id = scanner.nextLine().trim().toLowerCase();
 
         System.out.println("Tipo treno:");
         System.out.println("1. ITALO");
@@ -163,6 +166,30 @@ public class AdminCLI
         {
             System.out.println("Recap specifiche: id="+id+", tipo="+tipo.name());
             controllerGRPC.aggiungiTreno(id, tipo);
+            System.out.println("Treno " + id + " aggiunto con successo!");
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore: " + e.getMessage());
+        }
+    }
+
+    private void rimuoviTreno()
+    {
+        System.out.println("\nRIMUOVI UN TRENO");
+        System.out.println("Vuoi vedere i treni disponibili? Premi 1 per farlo");
+        int scelta = leggiScelta();
+        if(scelta == 1)
+        {
+            visualizzaTuttiITreni();
+        }
+        System.out.println("Inserisci l'id del treno da rimuovere: ");
+        String id = scanner.nextLine().trim().toLowerCase();
+
+        try
+        {
+            System.out.println("Recap specifiche\n: id treno da eliminare="+id);
+            controllerGRPC.rimuoviTreno(id);
             System.out.println("Treno " + id + " aggiunto con successo!");
         }
         catch (Exception e)
@@ -225,6 +252,12 @@ public class AdminCLI
     {
         System.out.println("\nAGGIUNGI NUOVA TRATTA");
 
+        System.out.println("Vuoi vedere le stazioni disponibili? Premi 1 per farlo");
+        int scelta = leggiScelta();
+        if(scelta == 1)
+        {
+            visualizzaStazioni();
+        }
         // Stazione partenza
         System.out.println("\nSTAZIONE DI PARTENZA");
         System.out.println("ID Stazione di Partenza: ");
@@ -234,7 +267,7 @@ public class AdminCLI
         while(partenza == null)
         {
             System.out.println("Spiacente, stazione "+ idStazionePartenza+" non trovata.\nPer riprovare prema 1");
-            int scelta = leggiScelta();
+            scelta = leggiScelta();
             if(scelta == 1)
             {
                 idStazionePartenza = scanner.nextLine();
@@ -255,7 +288,7 @@ public class AdminCLI
         while(arrivo == null)
         {
             System.out.println("Spiacente, stazione "+ idStazioneArrivo+" non trovata.\nPer riprovare prema 1");
-            int scelta = leggiScelta();
+            scelta = leggiScelta();
             if(scelta == 1)
             {
                 idStazioneArrivo = scanner.nextLine();
@@ -289,12 +322,11 @@ public class AdminCLI
         sb.append("[\n");
         for(Tratta t : tratte)
         {
-            sb.append(t);
+            String stringa = t+"\n";
+            sb.append(stringa);
         }
         sb.append("\n]");
         System.out.println(sb.toString());
-
-        System.out.println("Funzionalità in sviluppo...");
     }
 
     private void menuStazioni()
@@ -304,7 +336,8 @@ public class AdminCLI
             System.out.println("\nGESTIONE STAZIONI");
             System.out.println("==================");
             System.out.println("1. Aggiungi una nuova stazione");
-            System.out.println("2. Prendi tutte le stazioni");
+            System.out.println("2. Rimuovi una stazione");
+            System.out.println("3. Prendi tutte le stazioni");
             System.out.println("0. Torna indietro");
             System.out.print("\nScelta: ");
 
@@ -313,10 +346,35 @@ public class AdminCLI
             switch (scelta)
             {
                 case 1: aggiungiStazione(); break;
-                case 2: visualizzaStazioni(); break;
+                case 2: rimuoviStazione(); break;
+                case 3: visualizzaStazioni(); break;
                 case 0: return;
                 default: System.out.println("Scelta non valida");
             }
+        }
+    }
+
+    private void rimuoviStazione()
+    {
+        System.out.println("\nRIMUOVI UNA STAZIONE");
+        System.out.println("Vuoi vedere le stazioni disponibili? Premi 1 per farlo");
+        int scelta = leggiScelta();
+        if(scelta == 1)
+        {
+            visualizzaStazioni();
+        }
+        System.out.println("Inserisci l'id della stazione da rimuovere: ");
+        String id = scanner.nextLine().trim().toLowerCase();
+
+        try
+        {
+            System.out.println("Recap specifiche\n: id stazione da eliminare="+id);
+            controllerGRPC.rimuoviStazione(id);
+            System.out.println("Stazione " + id + " rimossa con successo!");
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore: " + e.getMessage());
         }
     }
 
@@ -423,7 +481,8 @@ public class AdminCLI
         sb.append("[\n");
         for(Stazione s : stazioni)
         {
-            sb.append(s);
+            String stringa = s+"\n";
+            sb.append(stringa);
         }
         sb.append("\n]");
         System.out.println(sb.toString());
@@ -717,6 +776,7 @@ public class AdminCLI
             }
             sb.append("\n]");
             System.out.println(sb.toString());
+            menuPromozioni();
         }
         catch (Exception e)
         {
@@ -918,9 +978,7 @@ public class AdminCLI
         pausa();
     }
 
-    // ==================== METODI UTILITY ====================
-
-    private int leggiScelta() {
+   private int leggiScelta() {
         try {
             return Integer.parseInt(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
@@ -964,9 +1022,6 @@ public class AdminCLI
         scanner.nextLine();
     }
 
-    /**
-     * Main per avviare la GUI admin
-     */
     public static void main(String[] args) {
         AdminCLI admin = new AdminCLI();
         admin.avvia();

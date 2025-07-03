@@ -9,7 +9,10 @@ import java.sql.Statement;
 
 public class ConnessioneADB
 {
-    private static final String URL = "jdbc:mysql://localhost:3306/trenical";
+    //per il funzionamento vero
+    private static final String URL = "jdbc:mysql://localhost:3306/trenical_dev";
+    //per i test
+    //private static final String URL = "jdbc:mysql://localhost:3306/trenical";
     private static final String USER = "root";
     private static final String PASSWORD = "Trenical2024!"; // Inserisci la tua password
 

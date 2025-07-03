@@ -46,7 +46,7 @@ public class ServerProxy
                     .setIsFedelta(dto.isFedelta())
                     .setRiceviNotifiche(dto.isRiceviNotifiche())
                     .setRiceviPromozioni(dto.isRiceviPromozioni())
-                    .setNumeroCarta(numeroCarta)  // AGGIUNGI NUMERO CARTA
+                    .setNumeroCarta(numeroCarta)
                     .build();
 
             RegistraResponse response = getInstance().grpcClient.getAuthStub().registra(request);

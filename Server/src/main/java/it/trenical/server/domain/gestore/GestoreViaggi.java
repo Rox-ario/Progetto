@@ -36,7 +36,7 @@ public final class GestoreViaggi {
         caricaViaggi();
 
         System.out.println("GestoreViaggi: caricati " + treni.size() + " treni, " +
-                tratte.size() + " tratte, " + viaggi.size() + " viaggi dal database");
+                tratte.size() + " tratte, " + viaggi.size() + " viaggi, "+ stazioni.size()+" stazioni dal database");
     }
 
     private void caricaStazioni()
@@ -315,6 +315,7 @@ public final class GestoreViaggi {
                 pstmtInsert.setString(6, binariToString(s.getBinari()));
 
                 pstmtInsert.executeUpdate();
+                stazioni.put(s.getId(), s);
             }
 
         }
@@ -730,7 +731,7 @@ public final class GestoreViaggi {
 
     public List<Treno> getTuttiITreni()
     {
-        return (List<Treno>) treni.values();
+        return new ArrayList<>(treni.values());
     }
 
     public Treno getTreno(String id)
@@ -756,7 +757,7 @@ public final class GestoreViaggi {
 
     public List<Stazione> getTutteLeStazioni()
     {
-        return (List<Stazione>) stazioni.values();
+        return new ArrayList<>(stazioni.values());
     }
 
     public List<Viaggio> getViaggiPerStato(StatoViaggio statoViaggio)
@@ -794,4 +795,94 @@ public final class GestoreViaggi {
             return null;
         return tratte.get(id);
     }
+
+    public void rimuoviTreno(String id)
+    {
+        if (!treni.containsKey(id))
+            throw new IllegalArgumentException("Treno " + id + " non trovato");
+
+        //verifico se il treno è utilizzato in almeno un viaggio
+        for (Viaggio v : viaggi.values())
+        {
+            Treno t = v.getTreno();
+            if (t != null && t.getID().equals(id))
+            {
+                throw new IllegalStateException("Il treno " + id + " è utilizzato nel viaggio " + v.getId() + " e non può essere rimosso");
+            }
+        }
+
+        rimuoviTrenoDaDB(id);
+        treni.remove(id);
+        System.out.println("Treno " + id + " rimosso correttamente");
+    }
+
+    private void rimuoviTrenoDaDB(String idTreno)
+    {
+        String sql = "DELETE FROM treni WHERE id = ?";
+        Connection conn = null;
+
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, idTreno);
+            pstmt.executeUpdate();
+
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore rimozione treno dal DB: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
+    public void rimuoviStazione(String idStazione)
+    {
+        if (!stazioni.containsKey(idStazione))
+            throw new IllegalArgumentException("Stazione a" + idStazione + " non trovata");
+
+        for (Tratta tratta : tratte.values())
+        {
+            Stazione partenza = tratta.getStazionePartenza();
+            Stazione arrivo = tratta.getStazioneArrivo();
+
+            if ((partenza != null && partenza.getId().equals(idStazione)) ||
+                    (arrivo != null && arrivo.getId().equals(idStazione)))
+            {
+                throw new IllegalStateException("La stazione " + idStazione + " è utilizzata nella tratta " + tratta.getId() + " e non può essere rimossa");
+            }
+        }
+
+        rimuoviStazioneDaDB(idStazione);
+
+        System.out.println("Stazione " + idStazione + " rimossa correttamente");
+    }
+
+    private void rimuoviStazioneDaDB(String idStazione)
+    {
+        String sql = "DELETE FROM stazioni WHERE id = ?";
+        Connection conn = null;
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, idStazione);
+            pstmt.executeUpdate();
+            stazioni.remove(idStazione);
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore rimozione stazione dal DB: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
 }

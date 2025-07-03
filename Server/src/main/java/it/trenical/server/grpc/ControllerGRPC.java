@@ -586,7 +586,7 @@ public class ControllerGRPC
 
     public List<Tratta> getTutteLeTratte()
     {
-        return (List<Tratta>) GestoreViaggi.getInstance().getTratte();
+        return new ArrayList<>(GestoreViaggi.getInstance().getTratte());
     }
 
     public void aggiungiStazione(Stazione stazione)
@@ -651,5 +651,12 @@ public class ControllerGRPC
         eseguiComandoCliente(command);
         return command.getRisultato();
     }
+
+    public void rimuoviTreno(String id)
+    {
+        GestoreViaggi.getInstance().rimuoviTreno(id);
+    }
+
+    public void rimuoviStazione(String id){GestoreViaggi.getInstance().rimuoviStazione(id);}
 }
 
