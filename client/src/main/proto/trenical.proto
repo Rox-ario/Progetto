@@ -240,7 +240,6 @@ message BaseResponse
   int32 error_code = 3;  //per una gestione più dettagliata degli errori
 }
 
-// Miglioramento di ViaggioInfo esistente
 message ViaggioDettagliato
 {
   string id = 1;
@@ -408,6 +407,8 @@ message ClienteInfo
   string cognome = 3;
   string email = 4;
   bool is_fedelta = 5;
+  bool wants_notifichePromo = 6;
+  bool wants_notificheViaggi = 7;
 }
 
 message BigliettoInfo

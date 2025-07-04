@@ -80,5 +80,16 @@ public class ClienteDTO
         isFedelta = fedelta;
     }
 
-
+    @Override
+    public String toString() {
+        return
+                "id= " + id + '\'' +
+                ", nome= " + nome + '\'' +
+                ", cognome= " + cognome + '\'' +
+                ", email= " + email + '\'' +
+                ", password= " + password + '\'' +
+                ", isFedelta= " + isFedelta +
+                ", riceviNotifiche= " + riceviNotifiche +
+                ", riceviPromozioni= " + riceviPromozioni;
+    }
 }

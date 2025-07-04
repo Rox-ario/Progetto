@@ -48,6 +48,7 @@ public class ServerProxy
                     .setRiceviPromozioni(dto.isRiceviPromozioni())
                     .setNumeroCarta(numeroCarta)
                     .build();
+            System.out.println("Richiesta: "+ request);
 
             RegistraResponse response = getInstance().grpcClient.getAuthStub().registra(request);
 
@@ -78,7 +79,6 @@ public class ServerProxy
                 throw new Exception(response.getMessage());
             }
 
-            //converto ClienteInfo (protobuf) in ClienteDTO
             ClienteInfo info = response.getCliente();
             return new ClienteDTO(
                     info.getId(),
@@ -87,8 +87,8 @@ public class ServerProxy
                     info.getEmail(),
                     password,
                     info.getIsFedelta(),
-                    true,
-                    false
+                    info.getWantsNotificheViaggi(),
+                    info.getWantsNotifichePromo()
             );
         }
         catch (Exception e)
@@ -279,6 +279,9 @@ public class ServerProxy
         {
             ModificaProfiloRequest request = ModificaProfiloRequest.newBuilder()
                     .setClienteId(dto.getId())
+                    .setNome(dto.getNome())
+                    .setCognome(dto.getCognome())
+                    .setPassword(dto.getPassword())
                     .build();
 
             ModificaProfiloResponse response = getInstance().grpcClient.getClienteStub().modificaProfilo(request);

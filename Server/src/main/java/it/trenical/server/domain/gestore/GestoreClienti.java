@@ -112,10 +112,9 @@ public final class GestoreClienti
         String id = c.getId();
         String email = c.getEmail();
 
+        salvaClienteInDB(c, datiBancariCustom);
         clientiById.putIfAbsent(id, c);
         clientiByEmail.putIfAbsent(email, c);
-
-        salvaClienteInDB(c, datiBancariCustom);
 
         System.out.println("Dati bancari = " + datiBancariCustom.toString());
         GestoreBanca.getInstance().registraClienteBanca(

@@ -36,48 +36,24 @@ public class ControllerGRPC
         return instance;
     }
 
-    private void eseguiComandoCliente(ComandoCliente cmd)
+    private void eseguiComandoCliente(ComandoCliente cmd) throws Exception
     {
-        try
-        {
-            cmd.esegui();
-        }catch (Exception e)
-        {
-            System.out.println(e.getMessage());
-        }
+        cmd.esegui();
     }
 
-    private void eseguiComandoViaggio(ComandoViaggio cmd)
+    private void eseguiComandoViaggio(ComandoViaggio cmd) throws Exception
     {
-        try
-        {
-            cmd.esegui();
-        }catch (Exception e)
-        {
-            System.out.println(e.getMessage());
-        }
+        cmd.esegui();
     }
 
     private void eseguiComandoPromozione(PromozioneCommand cmd)
     {
-        try
-        {
-            cmd.esegui();
-        }catch (Exception e)
-        {
-            System.out.println(e.getMessage());
-        }
+        cmd.esegui();
     }
 
     private void eseguiComandoBiglietto(ComandoBiglietto cmd)
     {
-        try
-        {
-            cmd.esegui();
-        }catch (Exception e)
-        {
-            System.out.println(e.getMessage());
-        }
+        cmd.esegui();
     }
 
     public void registraCliente(ClienteDTO clienteDTO, DatiBancariDTO datiBancari) throws Exception {
@@ -601,21 +577,18 @@ public class ControllerGRPC
     }
 
 
-    public Viaggio programmaViaggio(String idTreno, String idTratta, Calendar partenza, Calendar arrivo)
-    {
+    public Viaggio programmaViaggio(String idTreno, String idTratta, Calendar partenza, Calendar arrivo) throws Exception {
         ProgrammaViaggio command = new ProgrammaViaggio(idTreno, idTratta, partenza, arrivo);
         eseguiComandoViaggio(command);
         return command.getViaggio();
     }
 
-    public void aggiornaStatoViaggio(String idViaggio, StatoViaggio nuovoStato)
-    {
+    public void aggiornaStatoViaggio(String idViaggio, StatoViaggio nuovoStato) throws Exception {
         AggiornaViaggio command = new AggiornaViaggio(idViaggio, nuovoStato);
         eseguiComandoViaggio(command);
     }
 
-    public void aggiornaRitardoViaggio(String id, int ritardo)
-    {
+    public void aggiornaRitardoViaggio(String id, int ritardo) throws Exception {
         AggiornaRitardoViaggio commando = new AggiornaRitardoViaggio(id, ritardo);
         eseguiComandoViaggio(commando);
     }
@@ -645,8 +618,7 @@ public class ControllerGRPC
         return GestoreViaggi.getInstance().getTratta(id);
     }
 
-    public NotificheClienteDTO getNotificheClienteDTO(String id)
-    {
+    public NotificheClienteDTO getNotificheClienteDTO(String id) throws Exception {
         RecuperaNotificheCommand command = new RecuperaNotificheCommand(id, true);
         eseguiComandoCliente(command);
         return command.getRisultato();

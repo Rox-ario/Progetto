@@ -31,7 +31,8 @@ public class AuthController
                               String numeroCarta,
                               boolean isFedelta, boolean wantsNotifiche, boolean wantsPromozioni)
     {
-        try {
+        try
+        {
             if (!validaInputRegistrazione(nome, cognome, email, password, numeroCarta))
             {
                 return false;
@@ -41,11 +42,14 @@ public class AuthController
             nuovoCliente.setId(UUID.randomUUID().toString());
             nuovoCliente.setNome(nome.trim());
             nuovoCliente.setCognome(cognome.trim());
-            nuovoCliente.setEmail(email.trim().toLowerCase());
+            nuovoCliente.setEmail(email.trim());
+            nuovoCliente.setPassword(password);
             nuovoCliente.setFedelta(isFedelta);
             nuovoCliente.setRiceviNotifiche(wantsNotifiche);
             nuovoCliente.setRiceviPromozioni(wantsPromozioni);
 
+            System.out.println("Registrazione cliente: \n"
+            + nuovoCliente.toString());
             ServerProxy.registraCliente(nuovoCliente, numeroCarta);
 
             System.out.println("Registrazione completata con successo, benvenut*!");
@@ -126,8 +130,8 @@ public class AuthController
                 return true;
             }
 
-            //chiamo il server per l'autenticazione del povero cristo
-            ClienteDTO cliente = ServerProxy.login(email.trim().toLowerCase(), password);
+            //chiamo il server per l'autenticazione del cliente
+            ClienteDTO cliente = ServerProxy.login(email.trim(), password);
 
             //avvio la sessione
             SessioneCliente.getInstance().login(cliente);

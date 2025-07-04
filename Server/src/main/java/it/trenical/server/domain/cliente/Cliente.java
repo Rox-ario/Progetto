@@ -81,4 +81,17 @@ public class Cliente
     public int hashCode() {
         return Objects.hash(id, nome, cognome, email, password, isFedelta, riceviNotificheFedelta, riceviPromozioni);
     }
+
+    @Override
+    public String toString() {
+        return
+                "id= " + id + '\'' +
+                ", nome= " + nome + '\'' +
+                ", cognome= " + cognome + '\'' +
+                ", email= " + email + '\'' +
+                ", password= " + password + '\'' +
+                ", isFedelta= " + isFedelta +
+                ", riceviNotificheFedelta= " + riceviNotificheFedelta +
+                ", riceviPromozioni= " + riceviPromozioni;
+    }
 }

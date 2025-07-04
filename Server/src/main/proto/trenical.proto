@@ -408,6 +408,8 @@ message ClienteInfo
   string cognome = 3;
   string email = 4;
   bool is_fedelta = 5;
+  bool wants_notifichePromo = 6;
+  bool wants_notificheViaggi = 7;
 }
 
 message BigliettoInfo

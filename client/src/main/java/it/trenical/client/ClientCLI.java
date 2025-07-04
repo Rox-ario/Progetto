@@ -7,6 +7,7 @@ import it.trenical.client.domain.ViaggioController;
 import it.trenical.client.singleton.SessioneCliente;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.TipoTreno;
+import it.trenical.server.domain.gestore.GestoreClienti;
 import it.trenical.server.dto.BigliettoDTO;
 import it.trenical.server.dto.ClienteDTO;
 import it.trenical.server.dto.ModificaClienteDTO;
@@ -248,7 +249,7 @@ public class ClientCLI
         System.out.print("Vuoi aderire al programma FedeltàTreno? (s/n): ");
         boolean wantsFedelta = scanner.nextLine().trim().toLowerCase().startsWith("s");
 
-        boolean wantsNotifiche = true; //Default a true
+        boolean wantsNotifiche = true;
         boolean wantsPromozioni = false;
 
         if (wantsFedelta)

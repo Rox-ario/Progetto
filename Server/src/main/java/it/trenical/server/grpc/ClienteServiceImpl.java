@@ -64,11 +64,14 @@ public class ClienteServiceImpl extends ClienteServiceGrpc.ClienteServiceImplBas
 
         try
         {
+            ClienteDTO clienteAttuale = controllerGRPC.getProfiloCliente(request.getClienteId());
+
             ModificaClienteDTO dto = new ModificaClienteDTO();
             dto.setId(request.getClienteId());
             dto.setNome(request.getNome());
             dto.setCognome(request.getCognome());
             dto.setPassword(request.getPassword());
+            dto.setFedelta(clienteAttuale.isFedelta());
 
             controllerGRPC.modificaProfiloCliente(dto);
 
