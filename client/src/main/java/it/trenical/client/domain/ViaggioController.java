@@ -6,7 +6,6 @@ import it.trenical.server.domain.FiltroPasseggeri;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.TipoTreno;
 import it.trenical.server.dto.ViaggioDTO;
-import it.trenical.server.grpc.ControllerGRPC;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -51,7 +50,7 @@ public class ViaggioController
             else
             {
                 System.out.println("Trovati " + risultati.size() + " viaggi disponibili:");
-                mostraRiepilogoRisultati(risultati);
+                mostraRiepilogoRisultati(risultati, classePreferita);
             }
             return risultati;
         }
@@ -105,14 +104,13 @@ public class ViaggioController
         }
     }
 
-
     public boolean acquistaBiglietto(String idViaggio, ClasseServizio classeScelta)
     {
         return acquistaBiglietto(idViaggio, classeScelta, 1);
     }
 
 
-    public void mostraDettagliViaggio(ViaggioDTO viaggio)
+    public void mostraDettagliViaggio(ViaggioDTO viaggio, double prezzoBase)
     {
         if (viaggio == null)
         {
@@ -120,16 +118,16 @@ public class ViaggioController
             return;
         }
 
-        System.out.println("DETTAGLI VIAGGIO");
         System.out.println("-------------------");
         System.out.println("ID: " + viaggio.getID());
-        System.out.println("Treno: " + viaggio.getTreno().getTipo() + " (" + viaggio.getTreno().getID() + ")");
+        System.out.println("Treno di tipo: " + viaggio.getTipo().name());
         System.out.println("Da: " + viaggio.getCittaPartenza());
         System.out.println("A: " + viaggio.getCittaArrivo());
         System.out.println("Partenza: " + formatCalendar(viaggio.getInizio()));
         System.out.println("Arrivo: " + formatCalendar(viaggio.getFine()));
         System.out.println("Stato: " + viaggio.getStato());
         System.out.println("Posti disponibili: " + viaggio.getPostiDisponibili());
+        System.out.printf("Prezzo base: €%.2f%n", prezzoBase);
 
         //mostro le info fedeltà se cliente è loggato
         if (SessioneCliente.getInstance().isLoggato() &&
@@ -195,19 +193,18 @@ public class ViaggioController
         return true;
     }
 
-    private void mostraRiepilogoRisultati(List<ViaggioDTO> viaggi)
+    private void mostraRiepilogoRisultati(List<ViaggioDTO> viaggi, ClasseServizio classePreferita)
     {
         System.out.println("Risultati ricerca viaggio:\n");
 
-        for (int i = 0; i < viaggi.size() - 1; i++)
+        for (ViaggioDTO v : viaggi)
         {
-            ViaggioDTO v = viaggi.get(i);
-            System.out.printf("%s → %s | %s | Posti: %d%n",
-                    v.getCittaPartenza(),
-                    v.getCittaArrivo(),
-                    formatCalendar(v.getInizio()),
-                    v.getPostiDisponibili()
-            );
+            double kilometri = v.getKilometri();
+            double aggiuntaTipo = v.getTreno().getTipo().getAumentoPrezzo();
+            double aggiuntaServizio = classePreferita.getCoefficienteAumentoPrezzo();
+
+            double prezzoBase = kilometri * aggiuntaServizio * aggiuntaTipo;
+            mostraDettagliViaggio(v, prezzoBase);
         }
 
         System.out.println("Seleziona un viaggio per vedere i dettagli completi");
@@ -217,7 +214,7 @@ public class ViaggioController
     {
         if (cal == null) return "N/A";
 
-        return cal.get(Calendar.DAY_OF_MONTH)+"/"+cal.get(Calendar.MONTH) + 1+"/"+ cal.get(Calendar.YEAR)+
+        return cal.get(Calendar.DAY_OF_MONTH)+"/"+(cal.get(Calendar.MONTH) + 1)+"/"+ cal.get(Calendar.YEAR)+
                 " "+ cal.get(Calendar.HOUR_OF_DAY) + ":"+cal.get(Calendar.MINUTE);
     }
 }

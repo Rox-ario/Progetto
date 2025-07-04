@@ -3,13 +3,16 @@ package it.trenical.client.grpc;
 import io.grpc.StatusRuntimeException;
 import it.trenical.grpc.*;
 import it.trenical.server.domain.FiltroPasseggeri;
+import it.trenical.server.domain.Treno;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.StatoBiglietto;
+import it.trenical.server.domain.enumerations.TipoTreno;
 import it.trenical.server.dto.*;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 //E' un proxy di tipo remoto che serve per nascondere la complessità delle chiamate grpc al client
 
@@ -101,7 +104,6 @@ public class ServerProxy
     {
         try
         {
-            System.out.println("ServerProxy: FiltroPasseggeri "+ filtro.toString());
             CercaViaggiRequest request = CercaViaggiRequest.newBuilder()
                     .setCittaPartenza(filtro.getCittaDiAndata())
                     .setCittaArrivo(filtro.getCittaDiArrivo())
@@ -398,10 +400,13 @@ public class ServerProxy
 
     private static ViaggioDTO convertiViaggioInfoToDTO(ViaggioInfo info)
     {
+        it.trenical.server.domain.enumerations.TipoTreno tipoTreno =
+                it.trenical.server.domain.enumerations.TipoTreno.valueOf(info.getTipoTreno().name());
         ViaggioDTO dto = new ViaggioDTO();
         dto.setID(info.getId());
         dto.setCittaPartenza(info.getCittaPartenza());
         dto.setCittaArrivo(info.getCittaArrivo());
+        dto.setTipo(tipoTreno);
 
         Calendar partenza = Calendar.getInstance();
         partenza.setTimeInMillis(info.getOrarioPartenza());

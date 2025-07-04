@@ -108,7 +108,8 @@ public class Assembler
                 v.getStato(),
                 postiTotali,
                 cittaPartenza,
-                cittaArrivo
+                cittaArrivo,
+                v.getKilometri()
         );
     }
 }

@@ -3,6 +3,8 @@ package it.trenical.server.dto;
 import it.trenical.server.domain.Treno;
 import it.trenical.server.domain.Tratta;
 import it.trenical.server.domain.enumerations.StatoViaggio;
+import it.trenical.server.domain.enumerations.TipoTreno;
+
 import java.util.Calendar;
 
 public class ViaggioDTO
@@ -11,16 +13,18 @@ public class ViaggioDTO
     private Calendar inizio;
     private Calendar fine;
     private Treno treno;
+    private TipoTreno tipo;
     private Tratta tratta;
     private StatoViaggio stato;
     private int postiDisponibili;
     private String cittaPartenza;
     private String cittaArrivo;
+    private double kilometri;
 
     public ViaggioDTO() {}
 
     public ViaggioDTO(String ID, Calendar inizio, Calendar fine, Treno treno, Tratta tratta,
-                      StatoViaggio stato, int postiDisponibili, String cittaPartenza, String cittaArrivo) {
+                      StatoViaggio stato, int postiDisponibili, String cittaPartenza, String cittaArrivo, double kilometri) {
         this.ID = ID;
         this.inizio = inizio;
         this.fine = fine;
@@ -30,6 +34,7 @@ public class ViaggioDTO
         this.postiDisponibili = postiDisponibili;
         this.cittaPartenza = cittaPartenza;
         this.cittaArrivo = cittaArrivo;
+        this.kilometri = kilometri;
     }
 
 
@@ -124,6 +129,19 @@ public class ViaggioDTO
                 ", cittaPartenza='" + cittaPartenza + '\'' +
                 ", cittaArrivo='" + cittaArrivo + '\'' +
                 ", postiDisponibili=" + postiDisponibili +
+                ", kilometri = "+ kilometri+
                 '}';
+    }
+
+    public double getKilometri() {
+        return kilometri;
+    }
+
+    public void setTipo(TipoTreno tipo) {
+        this.tipo = tipo;
+    }
+
+    public TipoTreno getTipo() {
+        return tipo;
     }
 }

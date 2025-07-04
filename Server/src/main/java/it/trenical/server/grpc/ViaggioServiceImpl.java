@@ -107,6 +107,14 @@ public class ViaggioServiceImpl extends ViaggioServiceGrpc.ViaggioServiceImplBas
                 viaggio.getPostiDisponibiliPerClasse(ClasseServizio.BUSINESS) +
                 viaggio.getPostiDisponibiliPerClasse(ClasseServizio.FEDELTA);
 
+
+        it.trenical.grpc.TipoTreno grpcTipo =
+                it.trenical.grpc.TipoTreno.valueOf(
+                viaggio.getTreno()
+                        .getTipo()
+                        .name()
+        );
+
         return ViaggioInfo.newBuilder()
                 .setId(viaggio.getId())
                 .setCittaPartenza(viaggio.getTratta().getStazionePartenza().getCitta())
@@ -115,7 +123,7 @@ public class ViaggioServiceImpl extends ViaggioServiceGrpc.ViaggioServiceImplBas
                 .setOrarioArrivo(viaggio.getFineReale().getTimeInMillis())
                 .setStato(viaggio.getStato().toString())
                 .setPostiDisponibili(postiDisponibili)
-                .setTipoTreno(viaggio.getTreno().getTipo().toString())
+                .setTipoTreno(grpcTipo)
                 .build();
     }
 
@@ -123,6 +131,12 @@ public class ViaggioServiceImpl extends ViaggioServiceGrpc.ViaggioServiceImplBas
     {
         int postiDisponibili = viaggio.getPostiDisponibiliPerClasse(classeServizio);
 
+        it.trenical.grpc.TipoTreno grpcTipo =
+                it.trenical.grpc.TipoTreno.valueOf(
+                        viaggio.getTreno()
+                                .getTipo()
+                                .name()
+                );
         return ViaggioInfo.newBuilder()
                 .setId(viaggio.getId())
                 .setCittaPartenza(viaggio.getTratta().getStazionePartenza().getCitta())
@@ -131,7 +145,7 @@ public class ViaggioServiceImpl extends ViaggioServiceGrpc.ViaggioServiceImplBas
                 .setOrarioArrivo(viaggio.getFineReale().getTimeInMillis())
                 .setStato(viaggio.getStato().toString())
                 .setPostiDisponibili(postiDisponibili)
-                .setTipoTreno(viaggio.getTreno().getTipo().toString())
+                .setTipoTreno(grpcTipo)
                 .build();
     }
 }

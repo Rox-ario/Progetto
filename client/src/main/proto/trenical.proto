@@ -59,6 +59,13 @@ message GetProfiloResponse
   ClienteCompleto cliente = 3;
 }
 
+enum TipoTreno
+{
+  ITALO = 0;
+  INTERCITY = 1;
+  COMFORT = 2;
+}
+
 message ClienteCompleto {
   string id = 1;
   string nome = 2;
@@ -259,7 +266,7 @@ message ViaggioDettagliato
 message TrenoInfo
 {
   string id = 1;
-  string tipo = 2;
+  TipoTreno tipo = 2;
   int32 posti_totali = 3;
 }
 
@@ -350,7 +357,7 @@ message ViaggioInfo
   int64 orario_arrivo = 5;
   string stato = 6;
   int32 posti_disponibili = 7;
-  string tipo_treno = 8;
+  TipoTreno tipo_treno = 8;
 }
 
 message AcquistaBigliettoRequest
