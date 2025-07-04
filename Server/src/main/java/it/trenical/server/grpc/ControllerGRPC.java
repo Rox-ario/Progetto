@@ -46,7 +46,7 @@ public class ControllerGRPC
         cmd.esegui();
     }
 
-    private void eseguiComandoPromozione(PromozioneCommand cmd)
+    private void eseguiComandoPromozione(PromozioneCommand cmd) throws Exception
     {
         cmd.esegui();
     }
@@ -529,22 +529,14 @@ public class ControllerGRPC
 
     public void creaPromozione(TipoPromozione tipo, Calendar dataInizio,
                                Calendar dataFine, double sconto,
-                               Tratta tratta, Treno treno)
+                               Tratta tratta, Treno treno) throws Exception
     {
-        try
-        {
-            CreaPromozioneCommand command = new CreaPromozioneCommand(
+        CreaPromozioneCommand command = new CreaPromozioneCommand(
                     tipo, dataInizio, dataFine, sconto, tratta, treno
             );
             eseguiComandoPromozione(command);
 
             System.out.println("Promozione creata: " + tipo);
-
-        }
-        catch (Exception e)
-        {
-            System.err.println("Errore: "+ e.getMessage());
-        }
     }
 
     public List<Treno> getTuttiITreni()

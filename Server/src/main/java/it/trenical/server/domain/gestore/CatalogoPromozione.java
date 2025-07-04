@@ -212,8 +212,6 @@ public class CatalogoPromozione
                 }
                 else if (nuovaPromo.getTipo() == TipoPromozione.TRATTA)
                 {
-                    System.out.println("Confronto la tratta della promo esistente " + esistente.getID() +
-                            " con quella della nuova promo "+ nuovaPromo.getID());
                     // Le promozioni tratta si sovrappongono solo se hanno la stessa tratta
                     PromozioneTratta nuova = (PromozioneTratta) nuovaPromo;
                     PromozioneTratta vecchia = (PromozioneTratta) esistente;
@@ -223,8 +221,6 @@ public class CatalogoPromozione
                 }
                 else if (nuovaPromo.getTipo() ==TipoPromozione.TRENO)
                 {
-                    System.out.println("Confronto il tipo di treno della promo esistente " + esistente.getID() +
-                            " con quello della nuova promo "+ nuovaPromo.getID());
                     // Le promozioni treno si sovrappongono solo se hanno lo stesso tipo treno
                     PromozioneTreno nuova = (PromozioneTreno) nuovaPromo;
                     PromozioneTreno vecchia = (PromozioneTreno) esistente;
@@ -281,7 +277,9 @@ public class CatalogoPromozione
                     "-"+p.getDataInizio().get(Calendar.DAY_OF_MONTH)+"/"+(p.getDataFine().get(Calendar.MONTH)+1)+"/"+p.getDataFine().get(Calendar.YEAR));
 
         salvaPromozioneInDB(p);
+        System.out.println("Promozione "+ p.getID()+" salvata nel db");
         promozioniPerTipo.get(p.getTipo()).add(p);
+        System.out.println("Promozione "+ p.getID()+" salvata in promoPerTipo");
 
         //Se è una promozione fedeltà, registro tutti i clienti fedeltà come observer
         if (p.getTipo() == TipoPromozione.FEDELTA)

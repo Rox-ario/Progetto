@@ -101,6 +101,7 @@ public class ServerProxy
     {
         try
         {
+            System.out.println("ServerProxy: FiltroPasseggeri "+ filtro.toString());
             CercaViaggiRequest request = CercaViaggiRequest.newBuilder()
                     .setCittaPartenza(filtro.getCittaDiAndata())
                     .setCittaArrivo(filtro.getCittaDiArrivo())

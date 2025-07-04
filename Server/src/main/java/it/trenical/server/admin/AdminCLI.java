@@ -24,6 +24,7 @@ public class AdminCLI
     {
         this.controllerGRPC = ControllerGRPC.getInstance();
         this.scanner = new Scanner(System.in);
+        this.scanner.useLocale(Locale.US); //i numeri decimali li leggiamo col .
     }
 
     public void avvia()
@@ -518,9 +519,19 @@ public class AdminCLI
     private void programmaViaggio() {
         System.out.println("\nPROGRAMMA NUOVO VIAGGIO");
 
+        System.out.println("Premi 1 per vedere tutti i treni, 0 altrimenti");
+        if(leggiScelta() == 1)
+        {
+            visualizzaTuttiITreni();
+        }
         System.out.print("ID Treno: ");
         String idTreno = scanner.nextLine().trim();
 
+        System.out.println("Premi 1 per vedere tutte le tratte, 0 altrimenti");
+        if(leggiScelta() == 1)
+        {
+            visualizzaTratte();
+        }
         System.out.print("ID Tratta: ");
         String idTratta = scanner.nextLine().trim();
 
@@ -530,12 +541,15 @@ public class AdminCLI
         System.out.print("Ora partenza (HH:mm): ");
         String oraPartenzaStr = scanner.nextLine();
 
+        System.out.println("Data arrivo (dd/mm/yyyy):");
+        String dataArr = scanner.nextLine();
+
         System.out.print("Ora arrivo (HH:mm): ");
         String oraArrivoStr = scanner.nextLine();
 
         try {
             Calendar partenza = parseDataOra(dataStr, oraPartenzaStr);
-            Calendar arrivo = parseDataOra(dataStr, oraArrivoStr);
+            Calendar arrivo = parseDataOra(dataArr, oraArrivoStr);
 
             Viaggio v = controllerGRPC.programmaViaggio(idTreno, idTratta, partenza, arrivo);
             System.out.println("Viaggio programmato con successo!");
@@ -772,7 +786,7 @@ public class AdminCLI
             sb.append("[\n");
             for(Promozione p : promozioni)
             {
-                sb.append(p);
+                sb.append(p).append("\n");
             }
             sb.append("\n]");
             System.out.println(sb.toString());
@@ -808,8 +822,7 @@ public class AdminCLI
         }
     }
 
-    private void creaPromozioneTreno()
-    {
+    private void creaPromozioneTreno() throws Exception {
         System.out.println("Hai scelto di creare una promozione basata su un treno");
         System.out.println("Premi 1 per vedere tutti i treni disponibili, 0 se hai già un id in mente: ");
         int vedere = leggiIntero();
@@ -887,6 +900,7 @@ public class AdminCLI
         }
         System.out.println("Inserisci lo sconto da applicare: ");
         double sconto = scanner.nextDouble();
+        scanner.nextLine();
 
         controllerGRPC.creaPromozione(TipoPromozione.TRENO, inizio, fine, sconto, null, treno);
         System.out.println("Promozione creata con successo!");
@@ -894,29 +908,35 @@ public class AdminCLI
 
     private void creaPromozioneFedelta()
     {
-        System.out.println("Hai scelto di creare una promozione fedelta");
-        System.out.println("Premi 1 per vedere tutte le promozioni fedelta disponibili, 0 altrimenti");
-        int vedere = leggiIntero();
-        if(vedere == 1)
+        try
         {
-            visualizzaPromoPerCategoria(TipoPromozione.FEDELTA);
+            System.out.println("Hai scelto di creare una promozione fedelta");
+            System.out.println("Premi 1 per vedere tutte le promozioni fedelta disponibili, 0 altrimenti");
+            int vedere = leggiIntero();
+            if(vedere == 1)
+            {
+                visualizzaPromoPerCategoria(TipoPromozione.FEDELTA);
+            }
+            System.out.println("Digita la data di inizio promozione nel formato dd/MM/yyyy: ");
+            String dataInizio = scanner.nextLine();
+            System.out.println("Digita la data di fine promozione nel formato dd/MM/yyyy: ");
+            String dataFine= scanner.nextLine();
+            System.out.println("Inserisci lo sconto da applicare: ");
+            double sconto = scanner.nextDouble();
+            scanner.nextLine();
+
+            Calendar inizio = parseDataOra(dataInizio, "00:00");
+            Calendar fine = parseDataOra(dataFine, "23:59");
+
+            controllerGRPC.creaPromozione(TipoPromozione.FEDELTA, inizio, fine, sconto, null, null);
+            System.out.println("Promozione creata con successo!");
+        }catch(Exception e)
+        {
+            e.printStackTrace();
         }
-        System.out.println("Digita la data di inizio promozione nel formato dd/MM/yyyy: ");
-        String dataInizio = scanner.nextLine();
-        System.out.println("Digita la data di fine promozione nel formato dd/MM/yyyy: ");
-        String dataFine= scanner.nextLine();
-        System.out.println("Inserisci lo sconto da applicare: ");
-        double sconto = scanner.nextDouble();
-
-        Calendar inizio = parseDataOra(dataInizio, "00:00");
-        Calendar fine = parseDataOra(dataFine, "23:59");
-
-        controllerGRPC.creaPromozione(TipoPromozione.FEDELTA, inizio, fine, sconto, null, null);
-        System.out.println("Promozione creata con successo!");
     }
 
-    private void creaPromozioneTratta()
-    {
+    private void creaPromozioneTratta() throws Exception {
         System.out.println("Hai scelto di creare una promozione basata su una tratta");
         System.out.println("Premi 1 per vedere tutti le tratte disponibili, 0 se hai già un id in mente: ");
         int vedere = leggiIntero();
@@ -955,6 +975,7 @@ public class AdminCLI
         String dataFine= scanner.nextLine();
         System.out.println("Inserisci lo sconto da applicare: ");
         double sconto = scanner.nextDouble();
+        scanner.nextLine();
 
         Calendar inizio = parseDataOra(dataInizio, "00:00");
         Calendar fine = parseDataOra(dataFine, "23:59");

@@ -626,7 +626,7 @@ public class ClientCLI
 
                 if (authController.aderisciAFedelta(notifiche))
                 {
-                    System.out.println("✅ Benvenuto in FedeltàTreno!");
+                    System.out.println("Benvenuto in FedeltàTreno!");
                 }
             }
         }

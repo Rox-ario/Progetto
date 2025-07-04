@@ -29,7 +29,10 @@ public class Assembler
         return new Cliente.Builder().ID(dto.getId())
                 .Nome(dto.getNome()).Cognome(dto.getCognome())
                 .Email(dto.getEmail()).Password(password)
-                .isFedelta(dto.isFedelta()).build();
+                .isFedelta(dto.isFedelta())
+                .riceviNotifiche(dto.isRiceviNotifiche())
+                .riceviPromozioni(dto.isRiceviPromozioni())
+                .build();
     }
 
     public static ClienteBanca daDatiBancariDTO(DatiBancariDTO dto)
@@ -65,6 +68,8 @@ public class Assembler
                 .Cognome(dto.getCognome())
                 .Password(dto.getPassword())
                 .isFedelta(dto.isFedelta())
+                .riceviNotifiche(vecchio.isRiceviNotifiche())
+                .riceviPromozioni(vecchio.isRiceviPromozioni())
                 .build();
     }
 

@@ -120,13 +120,13 @@ public class PromozioneTreno implements Promozione
     @Override
     public String toString() {
         return "[" +
-                "tipo=" + tipo +
-                "statoPromozione=" + statoPromozione +
-                ", ID='" + ID  +
-                ", dataInizio=" + dataInizio +
-                ", dataFine=" + dataFine +
-                ", percentualeSconto=" + percentualeSconto +
-                ", tipoTreno=" + tipoTreno +
+                "tipo= " + tipo +
+                ", tipoTreno= " + tipoTreno +
+                ", statoPromozione= " + statoPromozione +
+                ", ID= " + ID  +
+                ", dataInizio= " + dataInizio.get(Calendar.DAY_OF_MONTH) +"/"+(dataInizio.get(Calendar.MONTH)+1)+"/"+dataInizio.get(Calendar.YEAR)+
+                ", dataFine= " + dataFine.get(Calendar.DAY_OF_MONTH) +"/"+(dataFine.get(Calendar.MONTH)+1)+"/"+dataFine.get(Calendar.YEAR) +
+                ", percentualeSconto= " + percentualeSconto +
                 ']';
     }
 }

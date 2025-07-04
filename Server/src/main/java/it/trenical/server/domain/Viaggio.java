@@ -215,7 +215,8 @@ public class Viaggio extends SoggettoViaggio
                 ", binario di Partenza=" + getBinario(TipoBinario.PARTENZA) +
                 ", binario di Arrivo=" + getBinario(TipoBinario.ARRIVO)+
                 ", ritardoMinuti=" + ritardoMinuti +
-                ", Tratta" + tratta.toString()+
+                ", \nTratta " + tratta.toString()+
+                ", \nTreno " + treno.toString() +
                 ']';
     }
 

@@ -66,9 +66,12 @@ public class Treno
 
     @Override
     public String toString() {
-        return "[ ID='" + ID + '\'' +
-                ", tipo=" + tipo +
-                ", postiPerClasse=" + postiPerClasse +
+        return "[ ID= " + ID +
+                ", tipo= " + tipo +
+                "\n, posti ECONOMY = " + postiPerClasse.get(ClasseServizio.ECONOMY) +
+                "\n, posti BUSINESS = "+ postiPerClasse.get(ClasseServizio.BUSINESS) +
+                "\n, posti FEDELTA' = "+ postiPerClasse.get(ClasseServizio.FEDELTA) +
+                "\n, posti LOW COST = "+ postiPerClasse.get(ClasseServizio.LOW_COST) +
                 ']';
     }
 

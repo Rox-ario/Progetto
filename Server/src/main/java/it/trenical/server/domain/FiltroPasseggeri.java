@@ -65,5 +65,17 @@ public class FiltroPasseggeri
         return soloAndata;
     }
 
-
+    @Override
+    public String toString() {
+        return "[" +
+                "numero=" + numero +
+                ", classeServizio=" + classeServizio +
+                ", tipoTreno=" + tipoTreno +
+                ", dataInizio=" + dataInizio +
+                ", dataRitorno=" + dataRitorno +
+                ", soloAndata=" + soloAndata +
+                ", cittaDiAndata='" + cittaDiAndata + '\'' +
+                ", cittaDiArrivo='" + cittaDiArrivo + '\'' +
+                ']';
+    }
 }

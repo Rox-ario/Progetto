@@ -38,8 +38,10 @@ public class CreaPromozioneCommand implements PromozioneCommand
         CatalogoPromozione cp = CatalogoPromozione.getInstance();
         if(tipo == TipoPromozione.FEDELTA)
         {
+            System.out.println("CreaPromozioneCommand: Creazione promozione fedelta'");
             PromozioneFactory pm = new PromozioneFactoryFedelta();
             Promozione pf = pm.creaPromozione(dataInizio, dataFine, sconto);
+            System.out.println("Creata promozione fedelta': "+ pf.toString());
             cp.aggiungiPromozione(pf);
         }
         if(tipo == TipoPromozione.TRATTA)
