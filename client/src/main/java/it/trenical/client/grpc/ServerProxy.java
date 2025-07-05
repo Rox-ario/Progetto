@@ -407,11 +407,11 @@ public class ServerProxy
         dto.setCittaPartenza(info.getCittaPartenza());
         dto.setCittaArrivo(info.getCittaArrivo());
         dto.setTipo(tipoTreno);
-
+        dto.setStato(it.trenical.server.domain.enumerations.StatoViaggio.valueOf(info.getStato()));
         Calendar partenza = Calendar.getInstance();
         partenza.setTimeInMillis(info.getOrarioPartenza());
         dto.setInizio(partenza);
-
+        dto.setKilometri(info.getKilometri());
         Calendar arrivo = Calendar.getInstance();
         arrivo.setTimeInMillis(info.getOrarioArrivo());
         dto.setFine(arrivo);

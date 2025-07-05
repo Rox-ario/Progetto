@@ -94,7 +94,12 @@ public class BigliettoDTO
                 ", IDViaggio='" + IDViaggio + '\'' +
                 ", classeServizio=" + classeServizio +
                 ", IDCliente='" + IDCliente + '\'' +
-                ", dataAcquisto=" + dataAcquisto +
+                ", dataAcquisto=" + dataAcquisto.get(Calendar.DAY_OF_MONTH)
+                +"/"+(dataAcquisto.get(Calendar.MONTH)+1)+
+                "/"+dataAcquisto.get(Calendar.YEAR)+
+                " "+Calendar.HOUR_OF_DAY+
+                ":"+Calendar.MINUTE+
+                ":"+Calendar.SECOND+
                 ", statoBiglietto=" + statoBiglietto +
                 ", prezzo=" + prezzo;
     }

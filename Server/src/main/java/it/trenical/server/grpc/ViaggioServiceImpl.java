@@ -146,6 +146,7 @@ public class ViaggioServiceImpl extends ViaggioServiceGrpc.ViaggioServiceImplBas
                 .setStato(viaggio.getStato().toString())
                 .setPostiDisponibili(postiDisponibili)
                 .setTipoTreno(grpcTipo)
+                .setKilometri(viaggio.getKilometri())
                 .build();
     }
 }

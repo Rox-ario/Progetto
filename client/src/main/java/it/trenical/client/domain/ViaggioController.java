@@ -117,24 +117,22 @@ public class ViaggioController
             System.err.println("Viaggio non valido");
             return;
         }
+        System.out.println("---------------------\n");
 
-        System.out.println("-------------------");
-        System.out.println("ID: " + viaggio.getID());
-        System.out.println("Treno di tipo: " + viaggio.getTipo().name());
-        System.out.println("Da: " + viaggio.getCittaPartenza());
-        System.out.println("A: " + viaggio.getCittaArrivo());
-        System.out.println("Partenza: " + formatCalendar(viaggio.getInizio()));
-        System.out.println("Arrivo: " + formatCalendar(viaggio.getFine()));
-        System.out.println("Stato: " + viaggio.getStato());
-        System.out.println("Posti disponibili: " + viaggio.getPostiDisponibili());
-        System.out.printf("Prezzo base: €%.2f%n", prezzoBase);
+        System.out.printf("id: %s |%s → %s | partenza: %s | arrivo: %s | posti: %d%n",
+                viaggio.getID(),
+                viaggio.getCittaPartenza(),
+                viaggio.getCittaArrivo(),
+                formatCalendar(viaggio.getInizio()),
+                formatCalendar(viaggio.getFine()),
+                viaggio.getPostiDisponibili());
+        System.out.printf("\nPrezzo sulla base della classe scelta: €%.2f%n", prezzoBase);
 
         //mostro le info fedeltà se cliente è loggato
         if (SessioneCliente.getInstance().isLoggato() &&
                 SessioneCliente.getInstance().getClienteCorrente().isFedelta()) {
             System.out.println("Come cliente FedeltàTreno potresti avere sconti speciali!");
         }
-
         System.out.println("---------------------\n");
     }
 
@@ -200,7 +198,7 @@ public class ViaggioController
         for (ViaggioDTO v : viaggi)
         {
             double kilometri = v.getKilometri();
-            double aggiuntaTipo = v.getTreno().getTipo().getAumentoPrezzo();
+            double aggiuntaTipo = v.getTipo().getAumentoPrezzo();
             double aggiuntaServizio = classePreferita.getCoefficienteAumentoPrezzo();
 
             double prezzoBase = kilometri * aggiuntaServizio * aggiuntaTipo;

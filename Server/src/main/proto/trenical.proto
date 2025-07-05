@@ -359,6 +359,7 @@ message ViaggioInfo
   string stato = 6;
   int32 posti_disponibili = 7;
   TipoTreno tipo_treno = 8;
+  double kilometri = 9;
 }
 
 message AcquistaBigliettoRequest

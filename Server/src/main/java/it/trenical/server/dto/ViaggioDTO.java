@@ -137,6 +137,11 @@ public class ViaggioDTO
         return kilometri;
     }
 
+    public void setKilometri(double k)
+    {
+        this.kilometri = k;
+    }
+
     public void setTipo(TipoTreno tipo) {
         this.tipo = tipo;
     }

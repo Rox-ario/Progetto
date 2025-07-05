@@ -403,12 +403,12 @@ public class ClientCLI
         for (int i = 0; i < Math.min(viaggi.size(), 5); i++)
         {
             ViaggioDTO v = viaggi.get(i);
-            System.out.printf("%d. %s → %s | %s | €%.2f stimato%n",
+            System.out.printf("%d. %s → %s | %s | €%.2f di aumento prezzo stimato in base al tipo di treno%n",
                     i + 1,
                     v.getCittaPartenza(),
                     v.getCittaArrivo(),
                     formatCalendar(v.getInizio()),
-                    25.0 * v.getTreno().getTipo().getAumentoPrezzo() // Stima prezzo
+                    v.getTipo().getAumentoPrezzo() // Stima prezzo
             );
         }
 
@@ -418,9 +418,21 @@ public class ClientCLI
         if (scelta > 0 && scelta <= viaggi.size())
         {
             ViaggioDTO viaggioSelezionato = viaggi.get(scelta - 1);
+            double kilometri = viaggioSelezionato.getKilometri();
+            double aggiuntaTipo = viaggioSelezionato.getTipo().getAumentoPrezzo();
+            double aggiuntaServizio1 = ClasseServizio.ECONOMY.getCoefficienteAumentoPrezzo();
+            double aggiuntaServizio2 = ClasseServizio.BUSINESS.getCoefficienteAumentoPrezzo();
+            double aggiuntaServizio3 = ClasseServizio.LOW_COST.getCoefficienteAumentoPrezzo();
+            double aggiuntaServizio4 = ClasseServizio.FEDELTA.getCoefficienteAumentoPrezzo();
 
+            double prezzo1 = kilometri * aggiuntaServizio1 * aggiuntaTipo;
+            double prezzo2 = kilometri * aggiuntaServizio2 * aggiuntaTipo;
+            double prezzo3 = kilometri * aggiuntaServizio3 * aggiuntaTipo;
+            double prezzo4 = kilometri * aggiuntaServizio4 * aggiuntaTipo;
             System.out.println("\nClasse di servizio:");
-            System.out.println("1. Economy  2. Business  3. Low Cost  4. Fedeltà");
+            System.out.printf("1. Economy (%.2f%n) \n2. Business (%.2f%n) \n3. Low Cost (%.2f%n) \n4. Fedeltà (%.2f%n)"
+            , prezzo1, prezzo2, prezzo3, prezzo4);
+
             System.out.print("Scelta: ");
             int classeChoice = leggiScelta();
             ClasseServizio classe = scegliClasse(classeChoice);
