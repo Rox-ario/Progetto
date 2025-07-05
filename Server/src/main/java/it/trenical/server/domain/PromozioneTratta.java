@@ -31,6 +31,20 @@ public class PromozioneTratta implements Promozione
         this.ID = UUID.randomUUID().toString();
     }
 
+    public PromozioneTratta(String id, Tratta tratta, Calendar dataInizio, Calendar dataFine, double percentualeSconto)
+    {
+        if(dataInizio.after(dataFine))
+            throw new IllegalArgumentException("Errore: La fine della promozione non può precedere l'inizio.");
+        if(tratta == null)
+            throw new IllegalArgumentException("Errore: la tratta non esiste");
+        this.tratta = tratta;
+        this.dataInizio = dataInizio;
+        this.dataFine = dataFine;
+        this.statoPromozione = StatoPromozione.PROGRAMMATA;
+        this.percentualeSconto = percentualeSconto;
+        this.ID = id;
+    }
+
     public TipoPromozione getTipo() {
         return tipo;
     }

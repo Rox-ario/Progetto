@@ -355,7 +355,7 @@ public class ControllerGRPC
                 throw new IllegalArgumentException("ID cliente non può essere vuoto");
             }
 
-            System.out.println("🔍 Recupero biglietti per cliente: " + idCliente);
+            System.out.println("Recupero biglietti per cliente: " + idCliente);
 
             GestoreBiglietti gb = GestoreBiglietti.getInstance();
             List<Biglietto> biglietti = gb.getBigliettiUtente(idCliente);
@@ -622,5 +622,10 @@ public class ControllerGRPC
     }
 
     public void rimuoviStazione(String id){GestoreViaggi.getInstance().rimuoviStazione(id);}
+
+    public void aggiornaStatoPromozioni()
+    {
+        CatalogoPromozione.getInstance().aggiornaStatoPromozioni();
+    }
 }
 

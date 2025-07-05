@@ -31,6 +31,19 @@ public class PromozioneTreno implements Promozione
         this.tipoTreno = tipoTreno;
     }
 
+    //per ritiro da DB
+    public PromozioneTreno(String id, Calendar dataInizio, Calendar dataFine, double percentualeSconto, TipoTreno tipoTreno)
+    {
+        if(dataInizio.after(dataFine))
+            throw new IllegalArgumentException("Errore: La fine della promozione non può precedere l'inizio.");
+        this.dataInizio = dataInizio;
+        this.dataFine = dataFine;
+        this.percentualeSconto = percentualeSconto;
+        this.ID = id;
+        this.statoPromozione = StatoPromozione.PROGRAMMATA;
+        this.tipoTreno = tipoTreno;
+    }
+
     public TipoPromozione getTipo() {
         return tipo;
     }

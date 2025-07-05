@@ -1,6 +1,7 @@
 package it.trenical.server.admin;
 
 import it.trenical.server.domain.*;
+import it.trenical.server.domain.enumerations.StatoPromozione;
 import it.trenical.server.domain.enumerations.StatoViaggio;
 import it.trenical.server.domain.enumerations.TipoPromozione;
 import it.trenical.server.domain.enumerations.TipoTreno;
@@ -103,7 +104,7 @@ public class AdminCLI
             case 3: menuViaggi(); break;
             case 4: menuPromozioni(); break;
             case 5: menuClienti(); break;
-            case 6 : menuStazioni(); break;
+            case 6: menuStazioni(); break;
             case 7: menuDatabase(); break;
             case 0: running = false; break;
             default: System.out.println("Scelta non valida");
@@ -715,6 +716,7 @@ public class AdminCLI
         System.out.println("1. Crea Promozione");
         System.out.println("2. Visualizza tutte le promozioni");
         System.out.println("3. Visualizza promo per categoria");
+        System.out.println("4. Aggiorna lo stato di tutte le promozioni");
         System.out.println("0. torna indietro");
 
         int scelta = leggiScelta();
@@ -723,10 +725,16 @@ public class AdminCLI
             case 1: creaPromozione(); break;
             case 2: visualizzaPromozioni(); break;
             case 3: visualizzaPromoPerCategoria(); break;
+            case 4: aggiornaStatoPromozioni(); break;
             case 0: System.out.println("Tornando indietro..."); return;
             default: System.out.println("Scelta non valida"); return;
         }
         pausa();
+    }
+
+    private void aggiornaStatoPromozioni()
+    {
+        controllerGRPC.aggiornaStatoPromozioni();
     }
 
     private void visualizzaPromoPerCategoria()

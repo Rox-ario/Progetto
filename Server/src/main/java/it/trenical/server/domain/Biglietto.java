@@ -69,6 +69,7 @@ public class Biglietto
         if (prezzoBiglietto != null)
         {
             prezzoBiglietto.ricalcolaPrezzo();
+            this.prezzo = prezzoBiglietto.getPrezzo();
         }
     }
 

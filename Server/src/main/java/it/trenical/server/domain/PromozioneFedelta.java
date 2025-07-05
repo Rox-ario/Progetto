@@ -34,6 +34,19 @@ public class PromozioneFedelta extends SoggettoPromozione implements Promozione
         osservatori = new ArrayList<ObserverPromozione>();
     }
 
+    //per il ritiro da DB
+    public PromozioneFedelta(String id, Calendar dataInizio, Calendar dataFine, double percentualeSconto)
+    {
+        if(dataInizio.after(dataFine))
+            throw new IllegalArgumentException("Errore: La fine della promozione non può precedere l'inizio.");
+        this.dataInizio = dataInizio;
+        this.dataFine = dataFine;
+        this.percentualeSconto = percentualeSconto;
+        this.ID = id;
+        this.statoPromozione = StatoPromozione.PROGRAMMATA;
+        osservatori = new ArrayList<ObserverPromozione>();
+    }
+
     public TipoPromozione getTipo() {
         return tipo;
     }

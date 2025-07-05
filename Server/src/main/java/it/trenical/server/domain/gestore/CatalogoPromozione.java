@@ -80,7 +80,7 @@ public class CatalogoPromozione
         switch (TipoPromozione.valueOf(tipo))
         {
             case FEDELTA:
-                promozione = new PromozioneFedelta(calInizio, calFine, percentualeSconto);
+                promozione = new PromozioneFedelta(id, calInizio, calFine, percentualeSconto);
                 break;
 
             case TRATTA:
@@ -88,7 +88,7 @@ public class CatalogoPromozione
                 Tratta tratta = recuperaTratta(trattaId);
                 if (tratta != null)
                 {
-                    promozione = new PromozioneTratta(tratta, calInizio, calFine, percentualeSconto);
+                    promozione = new PromozioneTratta(id, tratta, calInizio, calFine, percentualeSconto);
                 }
                 break;
 
@@ -96,7 +96,7 @@ public class CatalogoPromozione
                 String tipoTreno = rs.getString("tipo_treno");
                 if (tipoTreno != null)
                 {
-                    promozione = new PromozioneTreno(calInizio, calFine, percentualeSconto,
+                    promozione = new PromozioneTreno(id, calInizio, calFine, percentualeSconto,
                             TipoTreno.valueOf(tipoTreno));
                 }
                 break;
@@ -417,6 +417,7 @@ public class CatalogoPromozione
         for(Promozione promozione : promozioniPerTipo.get(TipoPromozione.FEDELTA))
         {
             PromozioneFedelta promozioneFedelta = (PromozioneFedelta) promozione;
+            System.out.println("Esamino promozione Fedelta': "+ promozioneFedelta);
             if(promozioneFedelta.isAttiva())
             {
                 return promozioneFedelta;
@@ -491,5 +492,32 @@ public class CatalogoPromozione
             promo.addAll(promozioniPerTipo.get(tipo));
         }
         return promo;
+    }
+
+    public void aggiornaStatoPromozioni()
+    {
+        Calendar oggi = Calendar.getInstance();
+
+        for(Promozione p : getTutteLePromozioni())
+        {
+            //se la promozione è terminata (data fine passata)
+            if(p.getDataFine().before(oggi))
+            {
+                rimuoviPromozioneDaDB(p.getID());
+                rimuoviPromozione(p);
+                System.out.println("Promozione "+ p.toString()+ " rimossa da Promozioni in quanto TERMINATA");
+            }
+            //se la promozione dovrebbe essere attiva (iniziata ma non finita)
+            else if(p.getDataInizio().before(oggi) || p.getDataInizio().equals(oggi))
+            {
+                if(p.getStatoPromozione() == StatoPromozione.PROGRAMMATA)
+                {
+                    StatoPromozione statoVecchio = p.getStatoPromozione();
+                    p.setStatoPromozioneATTIVA();
+                    aggiornaStatoPromozioneInDB(p.getID(), p.getStatoPromozione());
+                    System.out.println("Stato della promozione "+ p.getID() + " aggiornato da "+statoVecchio +" a "+ p.getStatoPromozione());
+                }
+            }
+        }
     }
 }
