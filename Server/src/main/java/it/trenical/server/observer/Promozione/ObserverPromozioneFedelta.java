@@ -20,4 +20,8 @@ public class ObserverPromozioneFedelta implements ObserverPromozione
 
         GestoreNotifiche.getInstance().inviaNotificaPromozionale(cliente.getId(), notifica);
     }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
 }

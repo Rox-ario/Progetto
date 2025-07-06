@@ -35,8 +35,8 @@ public class PromozioneDTO
                 ", tipo=" + tipo +
                 ", descrizione='" + descrizione +
                 ", percentuale_sconto=" + percentuale_sconto +
-                ", data_inizio=" + data_inizio +
-                ", data_fine=" + data_fine+
+                ", dataInizio= " + data_inizio.get(Calendar.DAY_OF_MONTH) +"/"+(data_inizio.get(Calendar.MONTH)+1)+"/"+data_inizio.get(Calendar.YEAR)+
+                ", dataFine= " + data_fine.get(Calendar.DAY_OF_MONTH) +"/"+(data_fine.get(Calendar.MONTH)+1)+"/"+data_fine.get(Calendar.YEAR) +
                 "]";
         else if (tipo == TipoPromozione.TRENO)
         {
@@ -45,8 +45,8 @@ public class PromozioneDTO
                     ", tipo=" + tipo +
                     ", descrizione='" + descrizione +
                     ", percentuale_sconto=" + percentuale_sconto +
-                    ", data_inizio=" + data_inizio +
-                    ", data_fine=" + data_fine+
+                    ", dataInizio= " + data_inizio.get(Calendar.DAY_OF_MONTH) +"/"+(data_inizio.get(Calendar.MONTH)+1)+"/"+data_inizio.get(Calendar.YEAR)+
+                    ", dataFine= " + data_fine.get(Calendar.DAY_OF_MONTH) +"/"+(data_fine.get(Calendar.MONTH)+1)+"/"+data_fine.get(Calendar.YEAR) +
                     ", idTreno = " + tipo_treno+
                     "]";
         }
@@ -56,8 +56,8 @@ public class PromozioneDTO
                     ", tipo=" + tipo +
                     ", descrizione='" + descrizione +
                     ", percentuale_sconto=" + percentuale_sconto +
-                    ", data_inizio=" + data_inizio +
-                    ", data_fine=" + data_fine+
+                    ", dataInizio= " + data_inizio.get(Calendar.DAY_OF_MONTH) +"/"+(data_inizio.get(Calendar.MONTH)+1)+"/"+data_inizio.get(Calendar.YEAR)+
+                    ", dataFine= " + data_fine.get(Calendar.DAY_OF_MONTH) +"/"+(data_fine.get(Calendar.MONTH)+1)+"/"+data_fine.get(Calendar.YEAR) +
                     ", idTratta = " + tratta_id+
                     "]";
     }

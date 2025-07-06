@@ -5,6 +5,7 @@ import it.trenical.server.domain.enumerations.StatoPromozione;
 import it.trenical.server.domain.enumerations.TipoPromozione;
 import it.trenical.server.dto.NotificaDTO;
 import it.trenical.server.observer.Promozione.ObserverPromozione;
+import it.trenical.server.observer.Promozione.ObserverPromozioneFedelta;
 import it.trenical.server.observer.Promozione.SoggettoPromozione;
 
 import java.util.ArrayList;
@@ -129,6 +130,25 @@ public class PromozioneFedelta extends SoggettoPromozione implements Promozione
     @Override
     public void attach(ObserverPromozione observerPromozione)
     {
+        // Verifica se l'observer è già presente per evitare duplicati
+        if (observerPromozione instanceof ObserverPromozioneFedelta newObs)
+        {
+            String clienteId = newObs.getCliente().getId();
+
+            // Controlla se esiste già un observer per questo cliente
+            for (ObserverPromozione obs : osservatori)
+            {
+                if (obs instanceof ObserverPromozioneFedelta existingObs)
+                {
+                    if (existingObs.getCliente().getId().equals(clienteId))
+                    {
+                        System.out.println("Observer già registrato per cliente: " + clienteId);
+                        return; //Non aggiungo duplicati
+                    }
+                }
+            }
+        }
+
         osservatori.add(observerPromozione);
     }
 
@@ -147,9 +167,8 @@ public class PromozioneFedelta extends SoggettoPromozione implements Promozione
 
     public NotificaDTO getNotifica()
     {
-        String messaggio = "Nuova promozione Fedelà!!: "+toString();
-        NotificaDTO dto = new NotificaDTO(messaggio);
-        return dto;
+        String messaggio = "Nuova promozione Fedeltà!!: "+toString();
+        return new NotificaDTO(messaggio);
     }
 
     @Override

@@ -187,9 +187,9 @@ message PromozioneDettagliata
 
 enum TipoPromozione
 {
-  PROMO_FEDELTA = 0;
-  PROMO_TRATTA = 1;
-  PROMO_TRENO = 2;
+  FEDELTA = 0;
+  TRATTA = 1;
+  TRENO = 2;
 }
 
 enum TipoTreno
