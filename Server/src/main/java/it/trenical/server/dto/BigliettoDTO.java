@@ -93,11 +93,10 @@ public class BigliettoDTO
         return "ID='" + ID + '\'' +
                 ", IDViaggio='" + IDViaggio + '\'' +
                 ", classeServizio=" + classeServizio +
-                ", IDCliente='" + IDCliente + '\'' +
                 ", dataAcquisto=" + dataAcquisto.get(Calendar.DAY_OF_MONTH)
                 +"/"+(dataAcquisto.get(Calendar.MONTH)+1)+
                 "/"+dataAcquisto.get(Calendar.YEAR)+
-                " "+Calendar.HOUR_OF_DAY+
+                " "+Calendar.HOUR+
                 ":"+Calendar.MINUTE+
                 ":"+Calendar.SECOND+
                 ", statoBiglietto=" + statoBiglietto +

@@ -446,67 +446,39 @@ public class ControllerGRPC
         }
     }
 
-    public List<String> getPromozioniAttive(String idCliente) throws Exception
+    public List<Promozione> getPromozioniAttive(String idCliente) throws Exception
     {
-        try
-        {
-            if (idCliente == null || idCliente.trim().isEmpty())
-            {
+        try {
+            if (idCliente == null || idCliente.trim().isEmpty()) {
                 throw new IllegalArgumentException("ID cliente non può essere vuoto");
             }
 
             GestoreClienti gc = GestoreClienti.getInstance();
             Cliente cliente = gc.getClienteById(idCliente);
 
-            if (cliente == null)
-            {
+            if (cliente == null) {
                 throw new IllegalArgumentException("Cliente non trovato: " + idCliente);
             }
 
             CatalogoPromozione cp = CatalogoPromozione.getInstance();
             List<Promozione> promozioniAttive = cp.getPromozioniAttive();
 
-            List<String> descrizioni = new ArrayList<>();
-
-            for (Promozione promo : promozioniAttive)
-            {
-                StringBuilder desc = new StringBuilder();
-                desc.append("Sconto: ").append(String.format("%.0f%%", promo.getPercentualeSconto() * 100));
-
-                if (promo.getTipo().name().equals("FEDELTA"))
-                {
-                    if (cliente.haAdesioneFedelta())
-                    {
-                        desc.append(" (Applicabile - sei cliente fedeltà!)");
+            // Filtra solo quelle applicabili al cliente
+            List<Promozione> promozioniApplicabili = new ArrayList<>();
+            for (Promozione promo : promozioniAttive) {
+                if (promo.getTipo() == TipoPromozione.FEDELTA) {
+                    if (cliente.haAdesioneFedelta()) {
+                        promozioniApplicabili.add(promo);
                     }
-                    else
-                    {
-                        desc.append(" (Non applicabile - richiede fedeltà)");
-                    }
+                } else {
+                    promozioniApplicabili.add(promo);
                 }
-                else if (promo.getTipo().name().equals("TRATTA"))
-                {
-                    PromozioneTratta pt = (PromozioneTratta) promo;
-                    desc.append(" su ").append(pt.getTratta().getStazionePartenza().getCitta())
-                            .append(" -> ").append(pt.getTratta().getStazioneArrivo().getCitta());
-                }
-                else if (promo.getTipo().name().equals("TRENO"))
-                {
-                    PromozioneTreno pt = (PromozioneTreno) promo;
-                    desc.append(" per treni ").append(pt.getTipoTreno());
-                }
-
-                desc.append(" (fino al ").append(formatCalendar(promo.getDataFine())).append(")");
-
-                descrizioni.add(desc.toString());
             }
 
-            System.out.println("Recuperate " + descrizioni.size() + " promozioni attive");
-            return descrizioni;
+            System.out.println("Recuperate " + promozioniApplicabili.size() + " promozioni attive per cliente " + idCliente);
+            return promozioniApplicabili;
 
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.err.println("Errore nel recupero promozioni: " + e.getMessage());
             throw new Exception("Impossibile recuperare le promozioni: " + e.getMessage());
         }

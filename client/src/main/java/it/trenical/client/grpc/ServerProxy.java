@@ -429,7 +429,7 @@ public class ServerProxy
                 info.getId(),
                 info.getViaggioId(),
                 ClasseServizio.valueOf(info.getClasseServizio()),
-                "", // ID cliente non è nel proto
+                "",
                 dataAcquisto,
                 StatoBiglietto.valueOf(info.getStato()),
                 info.getPrezzo()

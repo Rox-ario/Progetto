@@ -37,21 +37,27 @@ public class CatalogoPromozione
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
 
-            while (rs.next()) {
+            while (rs.next())
+            {
                 Promozione promozione = creaPromozioneDaResultSet(rs);
-                if (promozione != null) {
+                if (promozione != null)
+                {
                     promozioniPerTipo.get(promozione.getTipo()).add(promozione);
 
+                    //registo observer SOLO all'avvio e non notifico
                     if (promozione.getTipo() == TipoPromozione.FEDELTA && promozione.isAttiva())
                     {
-                        // IMPORTANTE: Rimuovi la chiamata a promozione.notifica() da registraObserverPromozioneFedelta
                         registraObserverPromozioneFedeltaSenzaNotifica((PromozioneFedelta) promozione);
                     }
                 }
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             System.err.println(e.getMessage());
-        } finally {
+        }
+        finally
+        {
             ConnessioneADB.closeConnection(conn);
         }
     }
@@ -268,27 +274,16 @@ public class CatalogoPromozione
         if(p == null)
             throw new IllegalArgumentException("Errore: la promozione inserita è null");
         if (verificaSovrapposizione(p))
-            throw new IllegalArgumentException("Errore: la promozione si sovrappone con altre nel periodo: "+
-                    p.getDataInizio().get(Calendar.DAY_OF_MONTH)+"/"+(p.getDataInizio().get(Calendar.MONTH)+1)+"/"+p.getDataInizio().get(Calendar.YEAR)+
-                    "-"+p.getDataInizio().get(Calendar.DAY_OF_MONTH)+"/"+(p.getDataFine().get(Calendar.MONTH)+1)+"/"+p.getDataFine().get(Calendar.YEAR));
+            throw new IllegalArgumentException("Errore: la promozione si sovrappone con altre");
 
         salvaPromozioneInDB(p);
         System.out.println("Promozione "+ p.getID()+" salvata nel db");
         promozioniPerTipo.get(p.getTipo()).add(p);
-        System.out.println("Promozione "+ p.getID()+" salvata in promoPerTipo");
 
-        //se è una promozione fedeltà, registro tutti i clienti fedeltà come observer
         if (p.getTipo() == TipoPromozione.FEDELTA)
         {
             System.out.println("Registro gli observers a promozione fedelta': "+ p.getID());
             registraObserverPromozioneFedelta((PromozioneFedelta) p);
-
-            //notifica solo per nuove promozioni
-            if (p.isAttiva())
-            {
-                ((PromozioneFedelta) p).notifica();
-                System.out.println("Notifico i clienti sulla NUOVA promozione " + p.getID());
-            }
         }
         System.out.println("Promozione creata\nDettagli: "+ p.toString());
     }
@@ -402,19 +397,33 @@ public class CatalogoPromozione
         }
     }
 
-    public PromozioneTratta getPromozioneAttivaTratta(Tratta t)
-    {
-        ricaricaPromozioniTrattaDaDB();
+    public PromozioneTratta getPromozioneAttivaTratta(Tratta t) {
+        String sql = "SELECT * FROM promozioni WHERE tipo = 'TRATTA' AND stato = 'ATTIVA' AND tratta_id = ?";
+        Connection conn = null;
 
-        List<Promozione> promoTratte = promozioniPerTipo.get(TipoPromozione.TRATTA);
-        for(Promozione p : promoTratte)
-        {
-            PromozioneTratta promo = (PromozioneTratta) p;
-            if(promo.getTratta().equals(t) && promo.isAttiva())
+        try {
+            conn = ConnessioneADB.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, t.getId());
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next())
             {
+                PromozioneTratta promo = (PromozioneTratta) creaPromozioneDaResultSet(rs);
+                System.out.println("Trovata promozione Tratta attiva: " + promo);
                 return promo;
             }
+
         }
+        catch (SQLException e)
+        {
+            System.err.println("Errore recupero promozione tratta attiva: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
+
         return null;
     }
 
@@ -452,47 +461,32 @@ public class CatalogoPromozione
 
     public PromozioneFedelta getPromozioneAttivaFedelta()
     {
-        // Ricarica le promozioni fedeltà dal database per avere i dati aggiornati
-        ricaricaPromozioniFedeltaDaDB();
-
-        for(Promozione promozione : promozioniPerTipo.get(TipoPromozione.FEDELTA))
-        {
-            PromozioneFedelta promozioneFedelta = (PromozioneFedelta) promozione;
-            System.out.println("Esamino promozione Fedelta': "+ promozioneFedelta);
-            if(promozioneFedelta.isAttiva())
-            {
-                return promozioneFedelta;
-            }
-        }
-        return null;
-    }
-
-    private void ricaricaPromozioniFedeltaDaDB() {
-        String sql = "SELECT * FROM promozioni WHERE tipo = 'FEDELTA' AND stato = 'ATTIVA'";
+        String sql = "SELECT * FROM promozioni WHERE tipo = 'FEDELTA' AND stato = 'ATTIVA' LIMIT 1";
         Connection conn = null;
+
         try {
             conn = ConnessioneADB.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery();
 
-            promozioniPerTipo.get(TipoPromozione.FEDELTA).clear();
-
-            while (rs.next()) {
-                Promozione promozione = creaPromozioneDaResultSet(rs);
-                if (promozione != null) {
-                    promozioniPerTipo.get(TipoPromozione.FEDELTA).add(promozione);
-
-                    if (promozione.isAttiva())
-                    {
-                        registraObserverPromozioneFedeltaSenzaNotifica((PromozioneFedelta) promozione);
-                    }
-                }
+            if (rs.next())
+            {
+                PromozioneFedelta promo = (PromozioneFedelta) creaPromozioneDaResultSet(rs);
+                System.out.println("Trovata promozione Fedelta' attiva: " + promo);
+                return promo;
             }
-        } catch (SQLException e) {
-            System.err.println("Errore ricaricamento promozioni fedeltà: " + e.getMessage());
-        } finally {
+
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Errore recupero promozione fedeltà attiva: " + e.getMessage());
+        }
+        finally
+        {
             ConnessioneADB.closeConnection(conn);
         }
+
+        return null;
     }
 
     public List<Promozione> getPromozioniAttive()
@@ -509,18 +503,33 @@ public class CatalogoPromozione
         return promozioni;
     }
 
-    public PromozioneTreno getPromozioneAttivaPerTipoTreno(TipoTreno t)
-    {
-        ricaricaPromozioniTrenoDaDB();
-        List<Promozione> promoTratte = promozioniPerTipo.get(TipoPromozione.TRENO);
-        for(Promozione p : promoTratte)
-        {
-            PromozioneTreno promo = (PromozioneTreno) p;
-            if(promo.getTipoTreno() == t && promo.isAttiva())
+    public PromozioneTreno getPromozioneAttivaPerTipoTreno(TipoTreno tipoTreno) {
+        String sql = "SELECT * FROM promozioni WHERE tipo = 'TRENO' AND stato = 'ATTIVA' AND tipo_treno = ?";
+        Connection conn = null;
+
+        try {
+            conn = ConnessioneADB.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, tipoTreno.name());
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next())
             {
+                PromozioneTreno promo = (PromozioneTreno) creaPromozioneDaResultSet(rs);
+                System.out.println("Trovata promozione Treno attiva: " + promo);
                 return promo;
             }
+
         }
+        catch (SQLException e)
+        {
+            System.err.println("Errore recupero promozione treno attiva: " + e.getMessage());
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
+
         return null;
     }
 
@@ -559,16 +568,20 @@ public class CatalogoPromozione
     private void registraObserverPromozioneFedelta(PromozioneFedelta promozione)
     {
         GestoreClienti gc = GestoreClienti.getInstance();
-
-        //Ottiengo solo i clienti fedeltà che VOGLIONO ricevere promozioni
         List<Cliente> clientiFedelta = gc.getClientiFedeltaConNotifiche();
 
-        System.out.println("Lista di clienti Fedelta'");
-        for (Cliente cliente : clientiFedelta) {
+        System.out.println("Registro observer per NUOVA promozione: " + promozione.getID());
+        for (Cliente cliente : clientiFedelta)
+        {
             System.out.println("Cliente Fedelta': " + cliente.getId());
             ObserverPromozione observer = new ObserverPromozioneFedelta(cliente);
             promozione.attach(observer);
-            System.out.println(cliente.getId() + " adesso segue " + promozione.getID());
+        }
+
+        if (!clientiFedelta.isEmpty() && promozione.isAttiva())
+        {
+            promozione.notifica();
+            System.out.println("Notifico i clienti sulla NUOVA promozione " + promozione.getID());
         }
     }
 
@@ -623,17 +636,17 @@ public class CatalogoPromozione
         }
     }
 
-    private void registraObserverPromozioneFedeltaSenzaNotifica(PromozioneFedelta promozione) {
+    private void registraObserverPromozioneFedeltaSenzaNotifica(PromozioneFedelta promozione)
+    {
         GestoreClienti gc = GestoreClienti.getInstance();
         List<Cliente> clientiFedelta = gc.getClientiFedeltaConNotifiche();
 
-        System.out.println("Registro observer senza notificare per promozione: " + promozione.getID());
+        System.out.println("Registro observer senza notificare per promozione esistente: " + promozione.getID());
         for (Cliente cliente : clientiFedelta)
         {
             System.out.println("Cliente Fedelta': " + cliente.getId());
             ObserverPromozione observer = new ObserverPromozioneFedelta(cliente);
             promozione.attach(observer);
-            System.out.println(cliente.getId() + " adesso segue " + promozione.getID());
         }
     }
 }
