@@ -16,6 +16,9 @@ service ViaggioService
 {
   rpc CercaViaggi(CercaViaggiRequest) returns (CercaViaggiResponse);
   rpc GetDettagliViaggio(GetViaggioRequest) returns (ViaggioInfo);
+  rpc SeguiTreno(SeguiTrenoRequest) returns (SeguiTrenoResponse);
+  rpc SmettiDiSeguireTreno(SmettiDiSeguireTrenoRequest) returns (SmettiDiSeguireTrenoResponse);
+  rpc GetTreniSeguiti(GetTreniSeguitiRequest) returns (GetTreniSeguitiResponse);
 }
 
 service BigliettoService
@@ -429,3 +432,40 @@ message BigliettoInfo
   int64 data_acquisto = 6;
 }
 
+//Per seguire un treno
+message SeguiTrenoRequest
+{
+  string cliente_id = 1;
+  string treno_id = 2;
+}
+
+message SeguiTrenoResponse
+{
+  bool success = 1;
+  string message = 2;
+}
+
+//Per smettere di seguire
+message SmettiDiSeguireTrenoRequest
+{
+  string cliente_id = 1;
+  string treno_id = 2;
+}
+
+message SmettiDiSeguireTrenoResponse
+{
+  bool success = 1;
+  string message = 2;
+}
+
+//Per vedere i treni seguiti
+message GetTreniSeguitiRequest
+{
+  string cliente_id = 1;
+}
+
+message GetTreniSeguitiResponse
+{
+  repeated string treni_ids = 1;
+  repeated TipoTreno treni_tipi = 2;
+}

@@ -11,7 +11,7 @@ public class Cliente
     private final String password;
     private final boolean isFedelta;
     private final boolean riceviNotificheFedelta; //per le notifiche di fedelta
-    private final boolean riceviPromozioni; //per le notifiche sulle promozioni
+    private final boolean riceviPromozioni; //per le notifiche sulle promozioniz
 
     public static class Builder
     {

@@ -599,5 +599,50 @@ public class ControllerGRPC
     {
         CatalogoPromozione.getInstance().aggiornaStatoPromozioni();
     }
+
+    public void seguiTreno(String clienteId, String trenoId) throws Exception
+    {
+        try
+        {
+            GestoreViaggi.getInstance().iscriviClienteATreno(clienteId, trenoId);
+            System.out.println("Cliente " + clienteId + " ora segue il treno " + trenoId);
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore nell'iscrizione al treno: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public void smettiDiSeguireTreno(String clienteId, String trenoId) throws Exception
+    {
+        try
+        {
+            GestoreViaggi.getInstance().rimuoviIscrizioneTreno(clienteId, trenoId);
+            System.out.println("Cliente " + clienteId + " ha smesso di seguire il treno " + trenoId);
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore nella cancellazione iscrizione: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public List<String> getTreniSeguiti(String clienteId)
+    {
+        List<String> treniIds = GestoreViaggi.getInstance().getTreniSeguitiDaCliente(clienteId);
+        List<String> risultato = new ArrayList<>();
+
+        for (String trenoId : treniIds)
+        {
+            Treno treno = getTreno(trenoId);
+            if (treno != null)
+            {
+                risultato.add(trenoId + "|" + treno.getTipo().toString());
+            }
+        }
+
+        return risultato;
+    }
 }
 

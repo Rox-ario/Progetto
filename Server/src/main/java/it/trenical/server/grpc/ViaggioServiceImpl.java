@@ -1,5 +1,6 @@
 package it.trenical.server.grpc;
 
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import it.trenical.grpc.*;
 import it.trenical.server.domain.*;
@@ -97,6 +98,103 @@ public class ViaggioServiceImpl extends ViaggioServiceGrpc.ViaggioServiceImplBas
         {
             System.err.println("Errore recupero viaggio: " + e.getMessage());
             responseObserver.onError(e);
+        }
+    }
+
+    @Override
+    public void seguiTreno(SeguiTrenoRequest request,
+                           StreamObserver<SeguiTrenoResponse> responseObserver) {
+        System.out.println("Richiesta seguiTreno da cliente " + request.getClienteId() +
+                " per treno " + request.getTrenoId());
+
+        try
+        {
+            controllerGRPC.seguiTreno(request.getClienteId(), request.getTrenoId());
+
+            SeguiTrenoResponse response = SeguiTrenoResponse.newBuilder()
+                    .setSuccess(true)
+                    .setMessage("Ti sei iscritto con successo al treno " + request.getTrenoId())
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+
+        }
+        catch (Exception e)
+        {
+            SeguiTrenoResponse response = SeguiTrenoResponse.newBuilder()
+                    .setSuccess(false)
+                    .setMessage(e.getMessage())
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        }
+    }
+
+    @Override
+    public void smettiDiSeguireTreno(SmettiDiSeguireTrenoRequest request,
+                                     StreamObserver<SmettiDiSeguireTrenoResponse> responseObserver)
+    {
+        System.out.println("Richiesta smettiDiSeguireTreno da cliente " + request.getClienteId());
+
+        try
+        {
+            controllerGRPC.smettiDiSeguireTreno(request.getClienteId(), request.getTrenoId());
+
+            SmettiDiSeguireTrenoResponse response = SmettiDiSeguireTrenoResponse.newBuilder()
+                    .setSuccess(true)
+                    .setMessage("Hai smesso di seguire il treno " + request.getTrenoId())
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+
+        }
+        catch (Exception e)
+        {
+            SmettiDiSeguireTrenoResponse response = SmettiDiSeguireTrenoResponse.newBuilder()
+                    .setSuccess(false)
+                    .setMessage(e.getMessage())
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        }
+    }
+
+    @Override
+    public void getTreniSeguiti(GetTreniSeguitiRequest request,
+                                StreamObserver<GetTreniSeguitiResponse> responseObserver)
+    {
+        System.out.println("Richiesta getTreniSeguiti per cliente " + request.getClienteId());
+
+        try
+        {
+            List<String> treniInfo = controllerGRPC.getTreniSeguiti(request.getClienteId());
+
+            GetTreniSeguitiResponse.Builder responseBuilder = GetTreniSeguitiResponse.newBuilder();
+
+            for (String info : treniInfo)
+            {
+                String[] parti = info.split("\\|");
+                if (parti.length == 2)
+                {
+                    responseBuilder.addTreniIds(parti[0]);
+                    responseBuilder.addTreniTipi(it.trenical.grpc.TipoTreno.valueOf(parti[1]));
+                }
+            }
+
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore in getTreniSeguiti: " + e.getMessage());
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription(e.getMessage())
+                    .asRuntimeException());
         }
     }
 

@@ -1,11 +1,14 @@
 package it.trenical.client.domain;
 
+import io.grpc.StatusRuntimeException;
 import it.trenical.client.grpc.ServerProxy;
 import it.trenical.client.singleton.SessioneCliente;
+import it.trenical.grpc.*;
 import it.trenical.server.domain.FiltroPasseggeri;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.TipoTreno;
 import it.trenical.server.dto.ViaggioDTO;
+import it.trenical.server.grpc.ViaggioServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -204,7 +207,83 @@ public class ViaggioController
             double prezzoBase = kilometri * aggiuntaServizio * aggiuntaTipo;
             mostraDettagliViaggio(v, prezzoBase);
         }
+    }
 
+    public boolean seguiTreno(String trenoId)
+    {
+        try
+        {
+            String clienteId = SessioneCliente.getInstance().getClienteCorrente().getId();
+
+            SeguiTrenoRequest request = SeguiTrenoRequest.newBuilder()
+                    .setClienteId(clienteId)
+                    .setTrenoId(trenoId)
+                    .build();
+
+            SeguiTrenoResponse response = stub.seguiTreno(request);
+
+            if (response.getSuccess()) {
+                System.out.println("\n" + response.getMessage());
+                return true;
+            } else {
+                System.err.println("\nErrore: " + response.getMessage());
+                return false;
+            }
+        } catch (StatusRuntimeException e) {
+            System.err.println("\nErrore di comunicazione: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean smettiDiSeguireTreno(String trenoId) {
+        try {
+            String clienteId = SessioneCliente.getInstance().getClienteCorrente().getId();
+
+            SmettiDiSeguireTrenoRequest request = SmettiDiSeguireTrenoRequest.newBuilder()
+                    .setClienteId(clienteId)
+                    .setTrenoId(trenoId)
+                    .build();
+
+            SmettiDiSeguireTrenoResponse response = stub.smettiDiSeguireTreno(request);
+
+            if (response.getSuccess()) {
+                System.out.println("\n" + response.getMessage());
+                return true;
+            } else {
+                System.err.println("\nErrore: " + response.getMessage());
+                return false;
+            }
+        } catch (StatusRuntimeException e) {
+            System.err.println("\nErrore di comunicazione: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public List<TrenoSeguitoInfo> getTreniSeguiti()
+    {
+        List<TrenoSeguitoInfo> treniSeguiti = new ArrayList<>();
+
+        try {
+            String clienteId = SessioneCliente.getInstance().getClienteCorrente().getId();
+
+            GetTreniSeguitiRequest request = GetTreniSeguitiRequest.newBuilder()
+                    .setClienteId(clienteId)
+                    .build();
+
+            GetTreniSeguitiResponse response = stub.getTreniSeguiti(request);
+
+            for (int i = 0; i < response.getTreniIdsCount(); i++) {
+                treniSeguiti.add(new TrenoSeguitoInfo(
+                        response.getTreniIds(i),
+                        i < response.getTreniTipiCount() ? response.getTreniTipi(i) : "Treno"
+                ));
+            }
+        } catch (StatusRuntimeException e)
+        {
+            System.err.println("Errore nel recupero dei treni seguiti: " + e.getMessage());
+        }
+
+        return treniSeguiti;
     }
 
     private String formatCalendar(Calendar cal)

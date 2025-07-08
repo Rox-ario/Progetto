@@ -430,7 +430,7 @@ public class ClientCLI
             double prezzo3 = kilometri * aggiuntaServizio3 * aggiuntaTipo;
             double prezzo4 = kilometri * aggiuntaServizio4 * aggiuntaTipo;
             System.out.println("\nClasse di servizio:");
-            System.out.printf("1. Economy (%.2f%n) \n2. Business (%.2f%n) \n3. Low Cost (%.2f%n) \n4. Fedeltà (%.2f%n)"
+            System.out.printf("1. Economy: %.2f%n \n2. Business %.2f%n \n3. Low Cost %.2f%n \n4. Fedeltà %.2f%n"
             , prezzo1, prezzo2, prezzo3, prezzo4);
 
             System.out.print("Scelta: ");

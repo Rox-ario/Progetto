@@ -2,13 +2,18 @@ package it.trenical.server.domain.gestore;
 
 import it.trenical.server.database.ConnessioneADB;
 import it.trenical.server.domain.*;
+import it.trenical.server.domain.cliente.Cliente;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.StatoViaggio;
 import it.trenical.server.domain.enumerations.TipoBinario;
 import it.trenical.server.domain.enumerations.TipoTreno;
+import it.trenical.server.dto.NotificaDTO;
+import it.trenical.server.observer.ViaggioETreno.NotificatoreClienteViaggio;
+import it.trenical.server.observer.ViaggioETreno.ObserverViaggio;
 import org.checkerframework.checker.units.qual.C;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public final class GestoreViaggi {
@@ -18,12 +23,14 @@ public final class GestoreViaggi {
     private final Map<String, Tratta> tratte;
     private final Map<String, Viaggio> viaggi;
     private Map<String, Stazione> stazioni = new HashMap<>();
+    private Map<String, Set<String>> clientiPerTreno;
 
     private GestoreViaggi()
     {
         this.treni = new HashMap<>();
         this.tratte = new HashMap<>();
         this.viaggi = new HashMap<>();
+        this.clientiPerTreno = new HashMap<>();
 
         caricaDatiDaDB();
     }
@@ -34,16 +41,43 @@ public final class GestoreViaggi {
         caricaTreni();
         caricaTratte();
         caricaViaggi();
+        caricaIscrizioniTreniDaDB();
 
         System.out.println("GestoreViaggi: caricati " + treni.size() + " treni, " +
                 tratte.size() + " tratte, " + viaggi.size() + " viaggi, "+ stazioni.size()+" stazioni dal database");
+    }
+
+    private void caricaIscrizioniTreniDaDB()
+    {
+        String sql = "SELECT * FROM stazioni";
+        Connection conn = null;
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            while (rs.next())
+            {
+                String clienteId = rs.getString("cliente_id");
+                String trenoId = rs.getString("treno_id");
+
+                if(!clientiPerTreno.containsKey(trenoId))
+                {
+                    clientiPerTreno.put(trenoId, new HashSet<String>());
+                }
+                clientiPerTreno.get(trenoId).add(clienteId);
+            }
+            System.out.println("Caricate iscrizioni treni dal database");
+        } catch (SQLException e) {
+            System.err.println("Errore nel caricamento iscrizioni treni: " + e.getMessage());
+        }
     }
 
     private void caricaStazioni()
     {
         String sql = "SELECT * FROM stazioni";
         Connection conn = null;
-
         try
         {
             conn = ConnessioneADB.getConnection();
@@ -394,8 +428,8 @@ public final class GestoreViaggi {
         return false;
     }
 
-    public Viaggio programmaViaggio(String trenoId, String trattaId, Calendar inizio, Calendar fine) {
-
+    public Viaggio programmaViaggio(String trenoId, String trattaId, Calendar inizio, Calendar fine)
+    {
         if (!treni.containsKey(trenoId) || !tratte.containsKey(trattaId))
         {
             throw new IllegalArgumentException("Treno o tratta non trovati");
@@ -426,6 +460,37 @@ public final class GestoreViaggi {
 
         GestoreBiglietti gb = GestoreBiglietti.getInstance();
         gb.aggiungiViaggio(v.getId());
+
+        if (clientiPerTreno.containsKey(trenoId))
+        {
+            int clientiNotificati = 0;
+
+            for (String clienteId : clientiPerTreno.get(trenoId))
+            {
+                Cliente cliente = GestoreClienti.getInstance().getClienteById(clienteId);
+
+                if (cliente != null && cliente.isRiceviNotifiche())
+                {
+                    //registro come observer
+                    ObserverViaggio notificatore = new NotificatoreClienteViaggio(cliente);
+                    v.attach(notificatore);
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                    NotificaDTO notifica = new NotificaDTO(
+                            "Nuovo viaggio programmato per il treno che segui!\n" +
+                                    "Treno: " + v.getTreno().getTipo() + " (ID: " + trenoId + ")\n" +
+                                    "Tratta: " + v.getTratta().getStazionePartenza().getCitta() +
+                                    " -> " + v.getTratta().getStazioneArrivo().getCitta() + "\n" +
+                                    "Partenza: " + sdf.format(v.getInizioReale()) + "\n" +
+                                    "Arrivo: " + sdf.format(v.getFineReale())
+                    );
+                    GestoreNotifiche.getInstance().inviaNotifica(clienteId, notifica);
+                    clientiNotificati++;
+                }
+            }
+
+            System.out.println("Notificati " + clientiNotificati + " clienti per il nuovo viaggio del treno " + trenoId);
+        }
         return v;
     }
 
@@ -885,4 +950,134 @@ public final class GestoreViaggi {
         }
     }
 
+    public void iscriviClienteATreno(String clienteId, String trenoId) throws Exception
+    {
+        Cliente cliente = GestoreClienti.getInstance().getClienteById(clienteId);
+        if (cliente == null)
+        {
+            throw new Exception("Spiacente, cliente "+clienteId+" non trovato");
+        }
+
+        Treno treno = treni.get(trenoId);
+        if (treno == null)
+        {
+            throw new Exception("Spiacente, treno "+trenoId+" non trovato");
+        }
+
+        //sono già iscritto al treno quindi è inutile riscrivermi
+        if (clientiPerTreno.containsKey(trenoId) && clientiPerTreno.get(trenoId).contains(clienteId))
+        {
+            throw new Exception("Sei già iscritto a questo treno");
+        }
+
+        salvaRegistrazioneClienteATrenoNelDB(clienteId, trenoId);
+        if(!clientiPerTreno.containsKey(trenoId))
+        {
+            clientiPerTreno.put(trenoId, new HashSet<String>());
+        }
+        clientiPerTreno.get(trenoId).add(clienteId);
+
+        //registro per viaggi attuali programmati
+        int viaggiRegistrati = 0;
+        for (Viaggio viaggio : viaggi.values())
+        {
+            if (viaggio.getTreno().getID().equals(trenoId) &&
+                    viaggio.getInizioReale().after(Calendar.getInstance()))
+            {
+                if (cliente.isRiceviNotifiche())
+                {
+                    ObserverViaggio notificatore = new NotificatoreClienteViaggio(cliente);
+                    viaggio.attach(notificatore);
+                    viaggiRegistrati++;
+                }
+            }
+        }
+
+        //notifico con una conferma
+        if (cliente.isRiceviNotifiche())
+        {
+            NotificaDTO conferma = new NotificaDTO(
+                    "Ti sei iscritto al treno " + treno.getTipo() + " (ID: " + trenoId + ").\n" +
+                            "Sei stato registrato per " + viaggiRegistrati + " viaggi futuri.\n" +
+                            "Riceverai aggiornamenti per tutti i viaggi di questo treno."
+            );
+            GestoreNotifiche.getInstance().inviaNotifica(clienteId, conferma);
+        }
+    }
+
+    private void salvaRegistrazioneClienteATrenoNelDB(String clienteId, String trenoId)
+    {
+        //salvo nel DB
+        String sql = "INSERT INTO iscrizioni_treni (cliente_id, treno_id) VALUES (?, ?)";
+        Connection conn = null;
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, clienteId);
+            pstmt.setString(2, trenoId);
+            pstmt.executeUpdate();
+        }
+        catch (Exception e)
+        {
+            System.err.println("E' stato impossibile salvare nel DB la regiostrazione del cliente "+ clienteId +" al treno " + trenoId);
+        }
+        finally {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
+    public void rimuoviIscrizioneTreno(String clienteId, String trenoId) throws Exception
+    {
+        if (!clientiPerTreno.containsKey(trenoId) || !clientiPerTreno.get(trenoId).contains(clienteId))
+        {
+            throw new Exception("Caro cliente "+ clienteId+" ci duole informarti che non sei iscritto al treno scelto "+ trenoId);
+        }
+
+        rimuoviRegistrazioneClienteATrenoNelDB(clienteId, trenoId);
+
+        clientiPerTreno.get(trenoId).remove(clienteId);
+        if (clientiPerTreno.get(trenoId).isEmpty())
+        {
+            clientiPerTreno.remove(trenoId);
+        }
+    }
+
+    private void rimuoviRegistrazioneClienteATrenoNelDB(String clienteId, String trenoId)
+    {
+        // Rimuovi dal database
+        String sql = "DELETE FROM iscrizioni_treni WHERE cliente_id = ? AND treno_id = ?";
+        Connection conn = null;
+        try
+        {
+            conn = ConnessioneADB.getConnection();
+
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, clienteId);
+            pstmt.setString(2, trenoId);
+            pstmt.executeUpdate();
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore: non è stato possibile rimuovere l'iscrizione del cliente "+clienteId+" al treno "+ trenoId);
+        }
+        finally
+        {
+            ConnessioneADB.closeConnection(conn);
+        }
+    }
+
+    public List<String> getTreniSeguitiDaCliente(String clienteId)
+    {
+        List<String> treniSeguiti = new ArrayList<>();
+
+        for (Map.Entry<String, Set<String>> entry : clientiPerTreno.entrySet())
+        {
+            if (entry.getValue().contains(clienteId))
+            {
+                treniSeguiti.add(entry.getKey());
+            }
+        }
+        return treniSeguiti;
+    }
 }
