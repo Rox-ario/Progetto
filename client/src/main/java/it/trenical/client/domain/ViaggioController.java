@@ -205,7 +205,6 @@ public class ViaggioController
             mostraDettagliViaggio(v, prezzoBase);
         }
 
-        System.out.println("Seleziona un viaggio per vedere i dettagli completi");
     }
 
     private String formatCalendar(Calendar cal)

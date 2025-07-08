@@ -1,5 +1,4 @@
 package it.trenical.server.command.biglietto;
-
 import it.trenical.server.domain.Biglietto;
 import it.trenical.server.domain.CalcolatorePenali;
 import it.trenical.server.domain.Viaggio;
@@ -15,7 +14,6 @@ import it.trenical.server.dto.ModificaBigliettoDTO;
 import it.trenical.server.dto.RimborsoDTO;
 
 import java.util.Calendar;
-
 public class ModificaBigliettoCommand implements ComandoBiglietto
 {
     private final ModificaBigliettoDTO modificaBigliettoDTO;
@@ -72,6 +70,8 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
         GestoreClienti gc = GestoreClienti.getInstance();
         Cliente cliente = gc.getClienteById(idCliente);
         b.applicaPromozione(cliente);
+
+        b.aggiornaPrezzo();
 
         //Calcolo la differenza tariffaria
         double nuovoPrezzo = b.getPrezzoBiglietto();
@@ -151,3 +151,4 @@ public class ModificaBigliettoCommand implements ComandoBiglietto
         System.out.println("Modifica biglietto completata con successo");
     }
 }
+
