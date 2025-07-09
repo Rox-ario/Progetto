@@ -7,16 +7,18 @@ public class ModificaClienteDTO
     private String cognome;
     private String password;
     private boolean isFedelta;
+    private boolean wantsNotifiche;
 
     public ModificaClienteDTO() {}
 
-    public ModificaClienteDTO(String id, String nome, String cognome, String password, boolean isFedelta)
+    public ModificaClienteDTO(String id, String nome, String cognome, String password, boolean isFedelta, boolean wantsNotifiche)
     {
         this.id = id;
         this.nome = nome;
         this.cognome = cognome;
         this.password = password;
         this.isFedelta = isFedelta;
+        this.wantsNotifiche = wantsNotifiche;
     }
 
     public String getId() {

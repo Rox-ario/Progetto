@@ -1,6 +1,7 @@
 package it.trenical.client.grpc;
 
 import io.grpc.StatusRuntimeException;
+import it.trenical.client.domain.ViaggioController;
 import it.trenical.grpc.*;
 import it.trenical.server.domain.FiltroPasseggeri;
 import it.trenical.server.domain.Treno;
@@ -395,6 +396,85 @@ public class ServerProxy
         catch (StatusRuntimeException e)
         {
             throw new Exception("Errore nella modifica biglietto: " + e.getMessage());
+        }
+    }
+
+    public static boolean seguiTreno(String clienteId, String trenoId) throws Exception
+    {
+        try
+        {
+            SeguiTrenoRequest request = SeguiTrenoRequest.newBuilder()
+                    .setClienteId(clienteId)
+                    .setTrenoId(trenoId)
+                    .build();
+
+            SeguiTrenoResponse response = getInstance().grpcClient.getViaggioStub().seguiTreno(request);
+
+            if (!response.getSuccess())
+            {
+                throw new Exception(response.getMessage());
+            }
+
+            return true;
+        }
+        catch (StatusRuntimeException e)
+        {
+            throw new Exception("Errore di comunicazione: " + e.getMessage());
+        }
+    }
+
+    public static boolean smettiDiSeguireTreno(String clienteId, String trenoId) throws Exception
+    {
+        try
+        {
+            SmettiDiSeguireTrenoRequest request = SmettiDiSeguireTrenoRequest.newBuilder()
+                    .setClienteId(clienteId)
+                    .setTrenoId(trenoId)
+                    .build();
+
+            SmettiDiSeguireTrenoResponse response = getInstance().grpcClient.getViaggioStub()
+                    .smettiDiSeguireTreno(request);
+
+            if (!response.getSuccess())
+            {
+                throw new Exception(response.getMessage());
+            }
+
+            return true;
+        }
+        catch (StatusRuntimeException e)
+        {
+            throw new Exception("Errore di comunicazione: " + e.getMessage());
+        }
+    }
+
+    public static List<ViaggioController.TrenoSeguitoInfo> getTreniSeguiti(String clienteId) throws Exception
+    {
+        try
+        {
+            GetTreniSeguitiRequest request = GetTreniSeguitiRequest.newBuilder()
+                    .setClienteId(clienteId)
+                    .build();
+
+            GetTreniSeguitiResponse response = getInstance().grpcClient.getViaggioStub()
+                    .getTreniSeguiti(request);
+
+            List<ViaggioController.TrenoSeguitoInfo> treniSeguiti = new ArrayList<>();
+
+            for (int i = 0; i < response.getTreniIdsCount(); i++)
+            {
+                String id = response.getTreniIds(i);
+                String tipo = i < response.getTreniTipiCount() ?
+                        response.getTreniTipi(i).toString() : "UNKNOWN";
+
+                treniSeguiti.add(new ViaggioController.TrenoSeguitoInfo(id, tipo));
+            }
+
+            return treniSeguiti;
+        }
+        catch (StatusRuntimeException e)
+        {
+            throw new Exception("Errore nel recupero treni seguiti: " + e.getMessage());
         }
     }
 

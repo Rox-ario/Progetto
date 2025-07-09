@@ -223,6 +223,43 @@ public class ProfiloController
         System.out.println("Sessione locale aggiornata");
     }
 
+    public boolean aggiornaPreferenze(boolean riceviNotifiche, boolean riceviPromozioni)
+    {
+        try
+        {
+            if (!Loggato())
+            {
+                return false;
+            }
+
+            String idCliente = SessioneCliente.getInstance().getIdClienteLoggato();
+            ClienteDTO clienteCorrente = SessioneCliente.getInstance().getClienteCorrente();
+
+            ModificaClienteDTO dto = new ModificaClienteDTO(
+                    idCliente,
+                    clienteCorrente.getNome(),
+                    clienteCorrente.getCognome(),
+                    clienteCorrente.getPassword(),
+                    clienteCorrente.isFedelta(),
+                    riceviNotifiche
+            );
+
+            ServerProxy.modificaProfiloCliente(dto);
+
+            clienteCorrente.setRiceviNotifiche(riceviNotifiche);
+            clienteCorrente.setRiceviPromozioni(riceviPromozioni);
+
+            System.out.println("Preferenze aggiornate con successo!");
+            return true;
+
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore nell'aggiornamento preferenze: " + e.getMessage());
+            return false;
+        }
+    }
+
 
     private void mostraDettagliProfilo(ClienteDTO profilo)
     {

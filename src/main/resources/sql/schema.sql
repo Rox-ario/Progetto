@@ -99,7 +99,7 @@ CREATE TABLE notifiche
     FOREIGN KEY (cliente_id) REFERENCES clienti(id)
 );
 
-CREATE TABLE iscrizioni_treni (
+CREATE TABLE IF NOT EXISTS iscrizioni_treni (
     cliente_id VARCHAR(255) NOT NULL,
     treno_id VARCHAR(255) NOT NULL,
     data_iscrizione TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

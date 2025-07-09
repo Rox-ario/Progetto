@@ -108,7 +108,8 @@ public class ClientCLI
         System.out.println("3. Il mio profilo");
         System.out.println("4. Notifiche");
         System.out.println("5. Promozioni attive");
-        System.out.println("6. Logout");
+        System.out.println("6. Treni Seguiti");
+        System.out.println("7. Logout");
         System.out.println("0. Esci");
         System.out.print("\nScegli un'opzione: ");
     }
@@ -166,6 +167,9 @@ public class ClientCLI
                 menuPromozioni();
                 break;
             case 6:
+                menuTreniSeguiti();
+                break;
+            case 7:
                 logout();
                 break;
             case 0:
@@ -588,7 +592,7 @@ public class ClientCLI
             password = clienteCorrente.getPassword();
 
         ModificaClienteDTO dto = new ModificaClienteDTO(
-                clienteCorrente.getId(), nome, cognome, password, clienteCorrente.isFedelta()
+                clienteCorrente.getId(), nome, cognome, password, clienteCorrente.isFedelta(), clienteCorrente.isRiceviNotifiche()
         );
 
         if (profiloController.modificaProfilo(dto))
@@ -721,6 +725,190 @@ public class ClientCLI
             //meglio se non blocco il menu...
         }
     }
+
+    private void menuTreniSeguiti() {
+        while (true) {
+            System.out.println("\n=== TRENI SEGUITI ===");
+            System.out.println("1. Segui un nuovo treno");
+            System.out.println("2. Visualizza treni seguiti");
+            System.out.println("3. Smetti di seguire un treno");
+            System.out.println("0. Torna al menu principale");
+            System.out.print("\nScegli un'opzione: ");
+
+            int scelta = leggiScelta();
+
+            switch (scelta) {
+                case 1:
+                    seguiNuovoTreno();
+                    break;
+                case 2:
+                    visualizzaTreniSeguiti();
+                    break;
+                case 3:
+                    smettiDiSeguireTreno();
+                    break;
+                case 0:
+                    return;
+                default:
+                    System.out.println("Opzione non valida.");
+            }
+        }
+    }
+
+    private void seguiNuovoTreno()
+    {
+        System.out.println("\n=== SEGUI UN NUOVO TRENO ===");
+        System.out.println("Riceverai notifiche per tutti i viaggi di questo treno.");
+
+        ClienteDTO cliente = SessioneCliente.getInstance().getClienteCorrente();
+        if (!cliente.isRiceviNotifiche())
+        {
+            System.out.println("\nLe tue notifiche viaggi sono disattivate.");
+            System.out.println("Vuoi attivarle?" +
+                    "\n1. Attiva" +
+                    "\n0. Torna indietro");
+            if(leggiScelta() == 1)
+            {
+                System.out.println("\nAttivazione notifiche in corso...");
+                if (profiloController.aggiornaPreferenze(true, cliente.isRiceviPromozioni()))
+                {
+                    System.out.println("Notifiche attivate con successo!");
+                }
+                else
+                {
+                    System.err.println("Errore nell'attivazione delle notifiche.");
+                    pausa();
+                    return;
+                }
+            }
+            else
+            {
+                System.out.println("Operazione annullata.");
+                return;
+            }
+        }
+
+
+
+        System.out.println("\nTreni disponibili nel sistema:");
+        System.out.println("- ITALO");
+        System.out.println("- INTERCITY");
+        System.out.println("- COMFORT");
+        System.out.println();
+
+        System.out.print("Inserisci l'ID del treno da seguire (0 per annullare): ");
+        String trenoId = scanner.nextLine().trim().toUpperCase();
+
+        if (trenoId.equals("0")) {
+            System.out.println("Operazione annullata.");
+            return;
+        }
+
+        if (trenoId.isEmpty()) {
+            System.err.println("ID treno non valido.");
+            pausa();
+            return;
+        }
+
+        System.out.print("Vuoi seguire il treno " + trenoId +" ? (s/n): ");
+        String conferma = scanner.nextLine().trim().toLowerCase();
+
+        if (conferma.startsWith("s"))
+        {
+            if (viaggioController.seguiTreno(trenoId))
+            {
+                System.out.println("Operazione effettuata con successo!");
+            }
+        }
+        else
+        {
+            System.out.println("Operazione annullata.");
+        }
+        pausa();
+    }
+
+    private void visualizzaTreniSeguiti()
+    {
+        System.out.println("\n=== I TUOI TRENI SEGUITI ===");
+
+        List<ViaggioController.TrenoSeguitoInfo> treniSeguiti = viaggioController.getTreniSeguiti();
+
+        if (treniSeguiti.isEmpty())
+        {
+            System.out.println("Non stai seguendo nessun treno.");
+            System.out.println("Usa l'opzione 'Segui un nuovo treno' per iniziare!");
+        }
+        else
+        {
+            if(treniSeguiti.size() == 1)
+            {
+                System.out.println("Stai seguendo " + treniSeguiti.size() + " treno:\n");
+            }
+            else
+            {
+                System.out.println("Stai seguendo " + treniSeguiti.size() + " treni:\n");
+            }
+            for (int i = 0; i < treniSeguiti.size(); i++)
+            {
+                System.out.println((i + 1) + ". " + treniSeguiti.get(i));
+            }
+            System.out.println();
+        }
+        pausa();
+    }
+
+    private void smettiDiSeguireTreno()
+    {
+        System.out.println("\n=== SMETTI DI SEGUIRE UN TRENO ===");
+
+        List<ViaggioController.TrenoSeguitoInfo> treniSeguiti = viaggioController.getTreniSeguiti();
+
+        if (treniSeguiti.isEmpty())
+        {
+            System.out.println("Non stai seguendo nessun treno.");
+            pausa();
+            return;
+        }
+
+        System.out.println("Quale treno vuoi smettere di seguire?\n");
+
+        visualizzaTreniSeguiti();
+        System.out.println("0. Annulla");
+
+        System.out.print("\nScegli: ");
+        int scelta = leggiScelta();
+
+        if (scelta == 0)
+        {
+            return;
+        }
+
+        if (scelta < 1 || scelta > treniSeguiti.size())
+        {
+            System.err.println("Scelta non valida.");
+            pausa();
+            return;
+        }
+
+        ViaggioController.TrenoSeguitoInfo trenoScelto = treniSeguiti.get(scelta - 1);
+
+        System.out.print("Vuoi davvero smettere di seguire " + trenoScelto + "? (s/n): ");
+        String conferma = scanner.nextLine().trim().toLowerCase();
+
+        if (conferma.startsWith("s"))
+        {
+            if (viaggioController.smettiDiSeguireTreno(trenoScelto.getId()))
+            {
+                System.out.println("Non segui più il treno " + trenoScelto.getTipo() + ".");
+            }
+        }
+        else
+        {
+            System.out.println("Operazione annullata.");
+        }
+        pausa();
+    }
+
 
     private int leggiScelta()
     {

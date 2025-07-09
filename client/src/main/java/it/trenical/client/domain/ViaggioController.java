@@ -209,51 +209,52 @@ public class ViaggioController
         }
     }
 
-    public boolean seguiTreno(String trenoId)
-    {
+    public boolean seguiTreno(String trenoId) {
         try
         {
             String clienteId = SessioneCliente.getInstance().getClienteCorrente().getId();
 
-            SeguiTrenoRequest request = SeguiTrenoRequest.newBuilder()
-                    .setClienteId(clienteId)
-                    .setTrenoId(trenoId)
-                    .build();
+            boolean risultato = ServerProxy.seguiTreno(clienteId, trenoId);
 
-            SeguiTrenoResponse response = stub.seguiTreno(request);
-
-            if (response.getSuccess()) {
-                System.out.println("\n" + response.getMessage());
+            if (risultato)
+            {
+                System.out.println("\nTi sei iscritto con successo al treno " + trenoId);
                 return true;
-            } else {
-                System.err.println("\nErrore: " + response.getMessage());
+            }
+            else
+            {
+                System.err.println("\nErrore nell'iscrizione al treno");
                 return false;
             }
-        } catch (StatusRuntimeException e) {
+        }
+        catch (Exception e)
+        {
             System.err.println("\nErrore di comunicazione: " + e.getMessage());
             return false;
         }
     }
 
-    public boolean smettiDiSeguireTreno(String trenoId) {
-        try {
+    public boolean smettiDiSeguireTreno(String trenoId)
+    {
+        try
+        {
             String clienteId = SessioneCliente.getInstance().getClienteCorrente().getId();
 
-            SmettiDiSeguireTrenoRequest request = SmettiDiSeguireTrenoRequest.newBuilder()
-                    .setClienteId(clienteId)
-                    .setTrenoId(trenoId)
-                    .build();
+            boolean risultato = ServerProxy.smettiDiSeguireTreno(clienteId, trenoId);
 
-            SmettiDiSeguireTrenoResponse response = stub.smettiDiSeguireTreno(request);
-
-            if (response.getSuccess()) {
-                System.out.println("\n" + response.getMessage());
+            if (risultato)
+            {
+                System.out.println("\nHai smesso di seguire il treno " + trenoId);
                 return true;
-            } else {
-                System.err.println("\nErrore: " + response.getMessage());
+            }
+            else
+            {
+                System.err.println("\nErrore nella cancellazione iscrizione");
                 return false;
             }
-        } catch (StatusRuntimeException e) {
+        }
+        catch (Exception e)
+        {
             System.err.println("\nErrore di comunicazione: " + e.getMessage());
             return false;
         }
@@ -261,29 +262,16 @@ public class ViaggioController
 
     public List<TrenoSeguitoInfo> getTreniSeguiti()
     {
-        List<TrenoSeguitoInfo> treniSeguiti = new ArrayList<>();
-
-        try {
+        try
+        {
             String clienteId = SessioneCliente.getInstance().getClienteCorrente().getId();
-
-            GetTreniSeguitiRequest request = GetTreniSeguitiRequest.newBuilder()
-                    .setClienteId(clienteId)
-                    .build();
-
-            GetTreniSeguitiResponse response = stub.getTreniSeguiti(request);
-
-            for (int i = 0; i < response.getTreniIdsCount(); i++) {
-                treniSeguiti.add(new TrenoSeguitoInfo(
-                        response.getTreniIds(i),
-                        i < response.getTreniTipiCount() ? response.getTreniTipi(i) : "Treno"
-                ));
-            }
-        } catch (StatusRuntimeException e)
+            return ServerProxy.getTreniSeguiti(clienteId);
+        }
+        catch (Exception e)
         {
             System.err.println("Errore nel recupero dei treni seguiti: " + e.getMessage());
+            return new ArrayList<>();
         }
-
-        return treniSeguiti;
     }
 
     private String formatCalendar(Calendar cal)
@@ -292,5 +280,24 @@ public class ViaggioController
 
         return cal.get(Calendar.DAY_OF_MONTH)+"/"+(cal.get(Calendar.MONTH) + 1)+"/"+ cal.get(Calendar.YEAR)+
                 " "+ cal.get(Calendar.HOUR_OF_DAY) + ":"+cal.get(Calendar.MINUTE);
+    }
+
+    public static class TrenoSeguitoInfo
+    {
+        private final String id;
+        private final String tipo;
+
+        public TrenoSeguitoInfo(String id, String tipo) {
+            this.id = id;
+            this.tipo = tipo;
+        }
+
+        public String getId() { return id; }
+        public String getTipo() { return tipo; }
+
+        @Override
+        public String toString() {
+            return tipo + " (ID: " + id + ")";
+        }
     }
 }
