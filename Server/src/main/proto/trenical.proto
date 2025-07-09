@@ -19,6 +19,7 @@ service ViaggioService
   rpc SeguiTreno(SeguiTrenoRequest) returns (SeguiTrenoResponse);
   rpc SmettiDiSeguireTreno(SmettiDiSeguireTrenoRequest) returns (SmettiDiSeguireTrenoResponse);
   rpc GetTreniSeguiti(GetTreniSeguitiRequest) returns (GetTreniSeguitiResponse);
+  rpc GetTreniDisponibili(GetTreniDisponibiliRequest) returns (GetTreniDisponibiliResponse);
 }
 
 service BigliettoService
@@ -469,4 +470,14 @@ message GetTreniSeguitiResponse
 {
   repeated string treni_ids = 1;
   repeated TipoTreno treni_tipi = 2;
+}
+
+message GetTreniDisponibiliRequest
+{
+  //senza parametri perché è semplicemente una richiesta
+}
+
+message GetTreniDisponibiliResponse
+{
+  repeated TrenoInfo treni = 1;
 }

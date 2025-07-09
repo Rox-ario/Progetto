@@ -274,6 +274,17 @@ public class ViaggioController
         }
     }
 
+    public List<TrenoSeguitoInfo> getTreniDisponibili()
+    {
+        try
+        {
+            return ServerProxy.getTreniDisponibili();
+        } catch (Exception e) {
+            System.err.println("Errore nel recupero dei treni disponibili: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
     private String formatCalendar(Calendar cal)
     {
         if (cal == null) return "N/A";

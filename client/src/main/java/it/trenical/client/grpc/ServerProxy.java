@@ -478,6 +478,28 @@ public class ServerProxy
         }
     }
 
+    public static List<ViaggioController.TrenoSeguitoInfo> getTreniDisponibili() throws Exception {
+        try {
+            GetTreniDisponibiliRequest request = GetTreniDisponibiliRequest.newBuilder().build();
+
+            GetTreniDisponibiliResponse response = getInstance().grpcClient.getViaggioStub()
+                    .getTreniDisponibili(request);
+
+            List<ViaggioController.TrenoSeguitoInfo> treni = new ArrayList<>();
+
+            for (TrenoInfo trenoProto : response.getTreniList()) {
+                treni.add(new ViaggioController.TrenoSeguitoInfo(
+                        trenoProto.getId(),
+                        trenoProto.getTipo().toString()
+                ));
+            }
+
+            return treni;
+        } catch (StatusRuntimeException e) {
+            throw new Exception("Errore nel recupero dei treni disponibili: " + e.getMessage());
+        }
+    }
+
     private static ViaggioDTO convertiViaggioInfoToDTO(ViaggioInfo info)
     {
         it.trenical.server.domain.enumerations.TipoTreno tipoTreno =

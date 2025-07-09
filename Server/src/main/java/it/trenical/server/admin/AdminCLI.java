@@ -210,7 +210,7 @@ public class AdminCLI
         sb.append("[\n");
         for(Treno t : lista)
         {
-            sb.append(t);
+            sb.append(t).append("\n");
         }
         sb.append("\n]");
         System.out.println(sb.toString());
@@ -324,8 +324,7 @@ public class AdminCLI
         sb.append("[\n");
         for(Tratta t : tratte)
         {
-            String stringa = t+"\n";
-            sb.append(stringa);
+            sb.append(t).append("\n");
         }
         sb.append("\n]");
         System.out.println(sb.toString());
@@ -654,7 +653,7 @@ public class AdminCLI
             sb.append("[\n");
             for(Viaggio v : viaggi)
             {
-                sb.append(v);
+                sb.append(v).append("\n");
             }
             sb.append("\n]");
             System.out.println(sb.toString());

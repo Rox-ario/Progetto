@@ -49,7 +49,7 @@ public final class GestoreViaggi {
 
     private void caricaIscrizioniTreniDaDB()
     {
-        String sql = "SELECT * FROM stazioni";
+        String sql = "SELECT * FROM iscrizioni_treni";
         Connection conn = null;
         try
         {
@@ -481,8 +481,8 @@ public final class GestoreViaggi {
                                     "Treno: " + v.getTreno().getTipo() + " (ID: " + trenoId + ")\n" +
                                     "Tratta: " + v.getTratta().getStazionePartenza().getCitta() +
                                     " -> " + v.getTratta().getStazioneArrivo().getCitta() + "\n" +
-                                    "Partenza: " + sdf.format(v.getInizioReale()) + "\n" +
-                                    "Arrivo: " + sdf.format(v.getFineReale())
+                                    "Partenza: " + sdf.format(v.getInizioReale().getTime()) + "\n" +
+                                    "Arrivo: " + sdf.format(v.getFineReale().getTime())
                     );
                     GestoreNotifiche.getInstance().inviaNotifica(clienteId, notifica);
                     clientiNotificati++;

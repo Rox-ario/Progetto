@@ -198,6 +198,41 @@ public class ViaggioServiceImpl extends ViaggioServiceGrpc.ViaggioServiceImplBas
         }
     }
 
+    @Override
+    public void getTreniDisponibili(GetTreniDisponibiliRequest request,
+                                    StreamObserver<GetTreniDisponibiliResponse> responseObserver)
+    {
+        try
+        {
+            List<Treno> treni = controllerGRPC.getTuttiITreni();
+
+            GetTreniDisponibiliResponse.Builder responseBuilder = GetTreniDisponibiliResponse.newBuilder();
+
+            for (Treno treno : treni)
+            {
+                TrenoInfo trenoInfo = TrenoInfo.newBuilder()
+                        .setId(treno.getID())
+                        .setTipo(it.trenical.grpc.TipoTreno.valueOf(treno.getTipo().name()))
+                        .build();
+
+                responseBuilder.addTreni(trenoInfo);
+            }
+
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+
+            System.out.println("Inviati " + treni.size() + " treni disponibili");
+
+        }
+        catch (Exception e)
+        {
+            System.err.println("Errore in getTreniDisponibili: " + e.getMessage());
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription(e.getMessage())
+                    .asRuntimeException());
+        }
+    }
+
     private ViaggioInfo convertiViaggioGenericoToProto(Viaggio viaggio)
     {
         int postiDisponibili = viaggio.getPostiDisponibiliPerClasse(ClasseServizio.LOW_COST) +

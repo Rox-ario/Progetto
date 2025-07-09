@@ -755,62 +755,84 @@ public class ClientCLI
         }
     }
 
-    private void seguiNuovoTreno()
-    {
+    private void seguiNuovoTreno() {
         System.out.println("\n=== SEGUI UN NUOVO TRENO ===");
         System.out.println("Riceverai notifiche per tutti i viaggi di questo treno.");
 
         ClienteDTO cliente = SessioneCliente.getInstance().getClienteCorrente();
-        if (!cliente.isRiceviNotifiche())
-        {
+        if (!cliente.isRiceviNotifiche()) {
             System.out.println("\nLe tue notifiche viaggi sono disattivate.");
             System.out.println("Vuoi attivarle?" +
                     "\n1. Attiva" +
                     "\n0. Torna indietro");
-            if(leggiScelta() == 1)
-            {
+            if (leggiScelta() == 1) {
                 System.out.println("\nAttivazione notifiche in corso...");
-                if (profiloController.aggiornaPreferenze(true, cliente.isRiceviPromozioni()))
-                {
+                if (profiloController.aggiornaPreferenze(true, cliente.isRiceviPromozioni())) {
                     System.out.println("Notifiche attivate con successo!");
-                }
-                else
-                {
+                } else {
                     System.err.println("Errore nell'attivazione delle notifiche.");
                     pausa();
                     return;
                 }
-            }
-            else
-            {
+            } else {
                 System.out.println("Operazione annullata.");
                 return;
             }
         }
 
+        System.out.println("\nRecupero treni disponibili...");
+        List<ViaggioController.TrenoSeguitoInfo> treniDisponibili = viaggioController.getTreniDisponibili();
 
-
-        System.out.println("\nTreni disponibili nel sistema:");
-        System.out.println("- ITALO");
-        System.out.println("- INTERCITY");
-        System.out.println("- COMFORT");
-        System.out.println();
-
-        System.out.print("Inserisci l'ID del treno da seguire (0 per annullare): ");
-        String trenoId = scanner.nextLine().trim().toUpperCase();
-
-        if (trenoId.equals("0")) {
-            System.out.println("Operazione annullata.");
-            return;
-        }
-
-        if (trenoId.isEmpty()) {
-            System.err.println("ID treno non valido.");
+        if (treniDisponibili.isEmpty()) {
+            System.err.println("Spiacenti, nessun treno disponibile nel sistema.");
             pausa();
             return;
         }
 
-        System.out.print("Vuoi seguire il treno " + trenoId +" ? (s/n): ");
+        System.out.println("\nTreni disponibili nel sistema:");
+        System.out.println("----------------------------------------");
+        for (int i = 0; i < treniDisponibili.size(); i++) {
+            ViaggioController.TrenoSeguitoInfo treno = treniDisponibili.get(i);
+            System.out.printf("%d. %s (ID: %s)\n", i + 1, treno.getTipo(), treno.getId());
+        }
+        System.out.println("----------------------------------------");
+
+        System.out.println("\nOpzioni:");
+        System.out.println("- Inserisci il numero del treno da seguire (1-" + treniDisponibili.size() + ")");
+        System.out.println("- Inserisci 0 per annullare");
+
+        System.out.print("\nScelta: ");
+        String input = scanner.nextLine().trim();
+
+        if (input.equals("0")) {
+            System.out.println("Operazione annullata.");
+            return;
+        }
+
+        String trenoId = null;
+
+        // Verifica se è un numero (selezione dalla lista)
+        try {
+            int scelta = Integer.parseInt(input);
+            if (scelta >= 1 && scelta <= treniDisponibili.size())
+            {
+                trenoId = treniDisponibili.get(scelta - 1).getId();
+            }
+            else
+            {
+                System.err.println("Numero non valido.");
+                pausa();
+                return;
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            System.err.println("Numero non valido.");
+            pausa();
+            return;
+        }
+
+        System.out.print("Sicuro di voler seguire il treno " + trenoId +" ? (s/n): ");
         String conferma = scanner.nextLine().trim().toLowerCase();
 
         if (conferma.startsWith("s"))
