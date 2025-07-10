@@ -20,7 +20,7 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase
 
         try
         {
-            ClienteDTO clienteDTO = controllerGRPC.login(request.getEmail(), request.getPassword());
+            ClienteDTO clienteDTO = controllerGRPC.login(request.getEmail().trim(), request.getPassword().trim());
 
             ClienteInfo clienteInfo = ClienteInfo.newBuilder()
                     .setId(clienteDTO.getId())

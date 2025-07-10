@@ -206,17 +206,19 @@ public class Viaggio extends SoggettoViaggio
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "[" +
-                "id='" + id +
-                ", inizio=" + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +
-                ", fine=" + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +
-                ", stato=" + stato +
-                ", binario di Partenza=" + getBinario(TipoBinario.PARTENZA) +
-                ", binario di Arrivo=" + getBinario(TipoBinario.ARRIVO)+
-                ", ritardoMinuti=" + ritardoMinuti +
-                ", \nTratta " + tratta.toString()+
-                ", \nTreno " + treno.toString() +
+                "id= " + id +
+                ", inizio= " + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +
+                ", fine= " + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +
+                ", stato= " + stato +
+                ", binario di Partenza= " + getBinario(TipoBinario.PARTENZA) +
+                ", binario di Arrivo= " + getBinario(TipoBinario.ARRIVO)+
+                ", ritardoMinuti= " + ritardoMinuti +
+                ", \nTratta: [ " + tratta.getStazionePartenza().getCitta()+", stazione: "+ tratta.getStazionePartenza()
+                +" ] -> "+ "[ "+ tratta.getStazioneArrivo().getCitta()+", stazione: "+  tratta.getStazioneArrivo()+" ]"+
+                ", \nTreno: [ " + treno.getID() +", "+ treno.getTipo()+
                 ']';
     }
 

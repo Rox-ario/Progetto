@@ -17,10 +17,11 @@ public class PromozioniServiceImpl extends PromozioniServiceGrpc.PromozioniServi
 
     @Override
     public void getPromozioniAttive(GetPromozioniRequest request,
-                                    StreamObserver<GetPromozioniResponse> responseObserver) {
+                                    StreamObserver<GetPromozioniResponse> responseObserver)
+    {
         System.out.println("Richiesta promozioni attive per cliente: " + request.getClienteId());
-
-        try {
+        try
+        {
             // Ora restituisce List<Promozione> invece di List<String>
             List<Promozione> promozioni = controllerGRPC.getPromozioniAttive(request.getClienteId());
 

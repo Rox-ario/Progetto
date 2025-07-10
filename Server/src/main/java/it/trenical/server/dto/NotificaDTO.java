@@ -33,7 +33,7 @@ public class NotificaDTO {
 
     public String getTempoStampato()
     {
-        return timestamp.get(Calendar.DAY_OF_MONTH)+"/"+timestamp.get(Calendar.MONTH)+"/"+timestamp.get(Calendar.YEAR)
+        return timestamp.get(Calendar.DAY_OF_MONTH)+"/"+(timestamp.get(Calendar.MONTH)+1)+"/"+timestamp.get(Calendar.YEAR)
                 +" "+timestamp.get(Calendar.HOUR)+":"+timestamp.get(Calendar.MINUTE);
         //esempio 16/06/2025 17:51
     }

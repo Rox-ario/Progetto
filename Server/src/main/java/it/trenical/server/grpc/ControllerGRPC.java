@@ -465,12 +465,17 @@ public class ControllerGRPC
 
             // Filtra solo quelle applicabili al cliente
             List<Promozione> promozioniApplicabili = new ArrayList<>();
-            for (Promozione promo : promozioniAttive) {
-                if (promo.getTipo() == TipoPromozione.FEDELTA) {
-                    if (cliente.haAdesioneFedelta()) {
+            for (Promozione promo : promozioniAttive)
+            {
+                if (promo.getTipo() == TipoPromozione.FEDELTA)
+                {
+                    if (cliente.haAdesioneFedelta())
+                    {
                         promozioniApplicabili.add(promo);
                     }
-                } else {
+                }
+                else
+                {
                     promozioniApplicabili.add(promo);
                 }
             }

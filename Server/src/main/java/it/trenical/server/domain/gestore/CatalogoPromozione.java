@@ -496,8 +496,12 @@ public class CatalogoPromozione
         {
             for(Promozione p : lista)
             {
+                System.out.println("Controllo promozione "+ p.getID()+", "+p.getTipo()+" sia attiva");
                 if(p.isAttiva())
+                {
+                    System.out.println("Promozione "+ p.getID()+", "+p.getTipo()+" e' attiva");
                     promozioni.add(p);
+                }
             }
         }
         return promozioni;
