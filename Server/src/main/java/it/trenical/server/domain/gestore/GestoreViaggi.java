@@ -725,7 +725,9 @@ public final class GestoreViaggi {
         throw new IllegalArgumentException("Nessun viaggio in corso per il treno " + id);
     }
 
-    public List<Viaggio> getViaggiPerFiltro(FiltroPasseggeri filtroPasseggeri) {
+    public List<Viaggio> getViaggiPerFiltro(FiltroPasseggeri filtroPasseggeri)
+    {
+        refreshDatiDaDB();
         if (filtroPasseggeri.isSoloAndata())
             return getViaggiSoloAndata(filtroPasseggeri);
         else
@@ -796,11 +798,13 @@ public final class GestoreViaggi {
 
     public List<Treno> getTuttiITreni()
     {
+        refreshDatiDaDB();
         return new ArrayList<>(treni.values());
     }
 
     public Treno getTreno(String id)
     {
+        refreshTreniDaDB();
         if(id != null && treni.containsKey(id))
             return treni.get(id);
         else
@@ -809,6 +813,7 @@ public final class GestoreViaggi {
 
     public Stazione getStazione(String id)
     {
+        refreshStazioneDaDB();
         if(id == null || !stazioni.containsKey(id))
             return null;
         else
@@ -822,6 +827,7 @@ public final class GestoreViaggi {
 
     public List<Stazione> getTutteLeStazioni()
     {
+        refreshDatiDaDB();
         return new ArrayList<>(stazioni.values());
     }
 
@@ -838,6 +844,7 @@ public final class GestoreViaggi {
 
     public List<Viaggio> getViaggiPerData(Calendar da, Calendar a)
     {
+        refreshDatiDaDB();
         List<Viaggio> res = new ArrayList<>();
         for(Viaggio v : viaggi.values())
         {
@@ -856,6 +863,7 @@ public final class GestoreViaggi {
 
     public Tratta getTratta(String id)
     {
+        refreshTratteDaDB();
         if(id == null || !tratte.containsKey(id))
             return null;
         return tratte.get(id);
@@ -1079,5 +1087,37 @@ public final class GestoreViaggi {
             }
         }
         return treniSeguiti;
+    }
+
+    public synchronized void refreshDatiDaDB()
+    {
+        this.viaggi.clear();
+        this.treni.clear();
+        this.tratte.clear();
+        this.stazioni.clear();
+        this.clientiPerTreno.clear();
+        caricaDatiDaDB();
+        System.out.println("GestoreViaggi: dati ricaricati dal database");
+    }
+
+    public synchronized void refreshTreniDaDB()
+    {
+        this.treni.clear();
+        caricaTreni();
+        System.out.println("GestoreViaggi: treni ricaricati dal database");
+    }
+
+    public synchronized void refreshTratteDaDB()
+    {
+        this.tratte.clear();
+        caricaTratte();
+        System.out.println("GestoreViaggi: tratte ricaricate dal database");
+    }
+
+    public synchronized void refreshStazioneDaDB()
+    {
+        this.stazioni.clear();
+        caricaStazioni();
+        System.out.println("GestoreViaggi: stazioni ricaricate dal database");
     }
 }

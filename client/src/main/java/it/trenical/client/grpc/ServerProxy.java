@@ -4,16 +4,13 @@ import io.grpc.StatusRuntimeException;
 import it.trenical.client.domain.ViaggioController;
 import it.trenical.grpc.*;
 import it.trenical.server.domain.FiltroPasseggeri;
-import it.trenical.server.domain.Treno;
 import it.trenical.server.domain.enumerations.ClasseServizio;
 import it.trenical.server.domain.enumerations.StatoBiglietto;
-import it.trenical.server.domain.enumerations.TipoTreno;
 import it.trenical.server.dto.*;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 
 //E' un proxy di tipo remoto che serve per nascondere la complessità delle chiamate grpc al client
 
@@ -131,7 +128,7 @@ public class ServerProxy
         }
     }
 
-    public static String acquistaBiglietto(String idViaggio, String idCliente, ClasseServizio classe) throws Exception
+    public static void acquistaBiglietto(String idViaggio, String idCliente, ClasseServizio classe) throws Exception
     {
         try
         {
@@ -149,7 +146,7 @@ public class ServerProxy
                 throw new Exception(response.getMessage());
             }
 
-            return response.getBigliettoId();
+            response.getBigliettoId();
         }
         catch (Exception e)
         {
