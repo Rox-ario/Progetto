@@ -10,7 +10,7 @@ public class CalcolatorePenali
     private static final double PENALE_OLTRE_7_GIORNI = 0.0;
     private static final double PENALE_3_7_GIORNI = 0.10;
     private static final double PENALE_1_3_GIORNI = 0.25;
-    private static final double PENALE_MENO_24_ORE = 0.50;
+    private static final double PENALE_MENO_24_ORE = 0.90;
 
 
     public static double calcolaPenale(Calendar dataModifica, Calendar dataPartenza, double differenzaTariffaria)
@@ -29,15 +29,19 @@ public class CalcolatorePenali
 
         if (giorniMancanti > 7)
         {
+            System.out.println("Modifica a piu' di 7 giorni dal viaggio -> nessuna penale");
             percentualePenale = PENALE_OLTRE_7_GIORNI;
         } else if (giorniMancanti >= 3)
         {
+            System.out.println("Modifica a meno di 7 ma a piu' di 3 giorni dal viaggio -> applico penale di "+ PENALE_3_7_GIORNI);
             percentualePenale = PENALE_3_7_GIORNI;
         } else if (giorniMancanti >= 1)
         {
+            System.out.println("Modifica a piu' di 1 giorno dal viaggio ma a meno di 3 -> applico penale di "+ PENALE_1_3_GIORNI);
             percentualePenale = PENALE_1_3_GIORNI;
         } else
         {
+            System.out.println("APPLICO UNA PENALE DI MENO DI 24 ORE: "+ PENALE_MENO_24_ORE);
             percentualePenale = PENALE_MENO_24_ORE;
         }
 

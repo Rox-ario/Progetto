@@ -183,9 +183,16 @@ public class Viaggio extends SoggettoViaggio
 
     public NotificaDTO getNotificaViaggio()
     {
-        String messaggio = toString();
-        NotificaDTO notificaDTO = new NotificaDTO(messaggio);
-        return notificaDTO;
+        String messaggio = "Viaggio [ id = "+getId()+"\n"+ getTratta().getStazionePartenza().getCitta()+" -> " +
+                getTratta().getStazioneArrivo().getCitta() + "\nSTATO: "+ getStato()+"\n";
+        if(Calendar.getInstance().before(getInizio()))
+        {
+            messaggio += "PARTENZA: "+getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) + " "+getInizioReale().get(Calendar.HOUR_OF_DAY)+":"+getInizioReale().get(Calendar.MINUTE);
+
+        }
+        messaggio += "ARRIVO: "+getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +" "+getFineReale().get(Calendar.HOUR_OF_DAY)+":"+getFineReale().get(Calendar.MINUTE)
+            +"\nTRENO: "+getTreno().getID()+", TIPO: "+ getTreno().getTipo()+"\n]";
+        return new NotificaDTO(messaggio);
     }
 
     public double getKilometri() {
@@ -210,14 +217,14 @@ public class Viaggio extends SoggettoViaggio
     {
         return "[" +
                 "id= " + id +
-                ", inizio= " + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +
-                ", fine= " + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +
+                ", inizio= " + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) + " "+getInizioReale().get(Calendar.HOUR_OF_DAY)+":"+getInizioReale().get(Calendar.MINUTE)+
+                ", fine= " + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +" "+getFineReale().get(Calendar.HOUR_OF_DAY)+":"+getFineReale().get(Calendar.MINUTE)+
                 ", stato= " + stato +
                 ", binario di Partenza= " + getBinario(TipoBinario.PARTENZA) +
                 ", binario di Arrivo= " + getBinario(TipoBinario.ARRIVO)+
                 ", ritardoMinuti= " + ritardoMinuti +
-                ", \nTratta: [ " + tratta.getStazionePartenza().getCitta()+", stazione: "+ tratta.getStazionePartenza()
-                +" ] -> "+ "[ "+ tratta.getStazioneArrivo().getCitta()+", stazione: "+  tratta.getStazioneArrivo()+" ]"+
+                ", \nTratta: [ " + tratta.getStazionePartenza().getCitta()+", stazione: "+ tratta.getStazionePartenza().getNome()
+                +" ] -> "+ "[ "+ tratta.getStazioneArrivo().getCitta()+", stazione: "+  tratta.getStazioneArrivo().getNome()+" ]"+
                 ", \nTreno: [ " + treno.getID() +", "+ treno.getTipo()+
                 ']';
     }
@@ -238,5 +245,10 @@ public class Viaggio extends SoggettoViaggio
     public void setBinarioDiArrivo(int i)
     {
         binari.put(TipoBinario.ARRIVO, i);
+    }
+
+    public void setRitardoMinuti(int ritardo)
+    {
+        this.ritardoMinuti = ritardo;
     }
 }

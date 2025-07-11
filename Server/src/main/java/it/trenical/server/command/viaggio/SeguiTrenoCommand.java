@@ -21,10 +21,6 @@ public class SeguiTrenoCommand implements ComandoViaggio
     public void esegui() throws Exception
     {
         GestoreViaggi gv = GestoreViaggi.getInstance();
-        Viaggio v = gv.getViaggioPerTreno(idTreno);
-
-        Cliente cliente = GestoreClienti.getInstance().getClienteById(idCliente);
-        ObserverViaggio obs = new NotificatoreClienteTreno(cliente);
-        v.attach(obs);
+        gv.iscriviClienteATreno(idCliente, idTreno);
     }
 }

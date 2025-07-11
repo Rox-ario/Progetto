@@ -3,10 +3,7 @@ package it.trenical.server.domain.gestore;
 import it.trenical.server.database.ConnessioneADB;
 import it.trenical.server.domain.*;
 import it.trenical.server.domain.cliente.Cliente;
-import it.trenical.server.domain.enumerations.ClasseServizio;
-import it.trenical.server.domain.enumerations.StatoViaggio;
-import it.trenical.server.domain.enumerations.TipoBinario;
-import it.trenical.server.domain.enumerations.TipoTreno;
+import it.trenical.server.domain.enumerations.*;
 import it.trenical.server.dto.NotificaDTO;
 import it.trenical.server.observer.ViaggioETreno.NotificatoreClienteViaggio;
 import it.trenical.server.observer.ViaggioETreno.ObserverViaggio;
@@ -42,6 +39,8 @@ public final class GestoreViaggi {
         caricaTratte();
         caricaViaggi();
         caricaIscrizioniTreniDaDB();
+
+        riattaccaObserverAiViaggi();
 
         System.out.println("GestoreViaggi: caricati " + treni.size() + " treni, " +
                 tratte.size() + " tratte, " + viaggi.size() + " viaggi, "+ stazioni.size()+" stazioni dal database");
@@ -201,14 +200,14 @@ public final class GestoreViaggi {
     {
         String sql = "SELECT * FROM viaggi";
         Connection conn = null;
-
         try
         {
             conn = ConnessioneADB.getConnection();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
 
-            while (rs.next()) {
+            while (rs.next())
+            {
                 String id = rs.getString("id");
                 String trenoId = rs.getString("treno_id");
                 String trattaId = rs.getString("tratta_id");
@@ -231,24 +230,31 @@ public final class GestoreViaggi {
                 {
                     Viaggio v = new Viaggio(id, calPartenza, calArrivo, treno, tratta);
 
-                    //imposto il maledetto stato e il ritardo
                     if (stato != null)
                     {
                         v.setStato(StatoViaggio.valueOf(stato));
                     }
+
+                    //IMPORTANTE, imposto il ritardo SENZA chiamare aggiornaRitardo
+                    //perché aggiornaRitardo chiama notificaCambiamentoViaggio
+                    //ma gli observer non sono ancora stati attaccati
                     if (ritardo > 0)
                     {
-                        v.aggiornaRitardo(ritardo);
+                        v.setRitardoMinuti(ritardo);
+                        if (v.getStato() != StatoViaggio.IN_RITARDO &&
+                                v.getStato() != StatoViaggio.TERMINATO)
+                        {
+                            v.setStato(StatoViaggio.IN_RITARDO);
+                        }
                     }
+
                     v.setBinarioDiArrivo(binarioArrivo);
                     v.setBinarioDiPartenza(binarioPartenza);
                     viaggi.put(id, v);
 
-                    //registro il viaggio nel GestoreBiglietti
                     GestoreBiglietti.getInstance().aggiungiViaggio(id);
                 }
             }
-
         }
         catch (SQLException e)
         {
@@ -1119,5 +1125,74 @@ public final class GestoreViaggi {
         this.stazioni.clear();
         caricaStazioni();
         System.out.println("GestoreViaggi: stazioni ricaricate dal database");
+    }
+
+    private void riattaccaObserverAiViaggi()
+    {
+        System.out.println("Riattacco observer ai viaggi...");
+        int observerRiattaccati = 0;
+
+        for (Viaggio viaggio : viaggi.values())
+        {
+            String trenoId = viaggio.getTreno().getID();
+            String viaggioId = viaggio.getId();
+
+            if (clientiPerTreno.containsKey(trenoId))
+            {
+                for (String clienteId : clientiPerTreno.get(trenoId))
+                {
+                    Cliente cliente = GestoreClienti.getInstance().getClienteById(clienteId);
+
+                    if (cliente != null && cliente.isRiceviNotifiche())
+                    {
+                        if (viaggio.getStato() != StatoViaggio.TERMINATO)
+                        {
+                            ObserverViaggio notificatore = new NotificatoreClienteViaggio(cliente);
+                            viaggio.attach(notificatore);
+                            observerRiattaccati++;
+                            System.out.println("Observer riattaccato per cliente " + clienteId +
+                                    " sul viaggio " + viaggioId + " (segue il treno)");
+                        }
+                    }
+                }
+            }
+            try
+            {
+                List<Biglietto> biglietti = GestoreBiglietti.getInstance().getBigliettiPerViaggio(viaggioId);
+
+                for (Biglietto biglietto : biglietti)
+                {
+                    String clienteId = biglietto.getIDCliente();
+                    Cliente cliente = GestoreClienti.getInstance().getClienteById(clienteId);
+
+                    if (cliente != null && cliente.isRiceviNotifiche())
+                    {
+                        if (biglietto.getStato() != StatoBiglietto.ANNULLATO)
+                        {
+                            boolean giaRegistrato = false;
+                            if (clientiPerTreno.containsKey(trenoId) &&
+                                    clientiPerTreno.get(trenoId).contains(clienteId))
+                            {
+                                giaRegistrato = true;
+                            }
+
+                            if (!giaRegistrato)
+                            {
+                                ObserverViaggio notificatore = new NotificatoreClienteViaggio(cliente);
+                                viaggio.attach(notificatore);
+                                observerRiattaccati++;
+                                System.out.println("Observer riattaccato per cliente " + clienteId +
+                                        " sul viaggio " + viaggioId + " (ha biglietto)");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                System.out.println("Nessun biglietto trovato per il viaggio " + viaggioId);
+            }
+        }
+        System.out.println("Riattaccati " + observerRiattaccati + " observer ai viaggi");
     }
 }
