@@ -551,8 +551,12 @@ public class ServerProxy
 
     private static NotificaDTO convertiNotificaDettagliataToDTO(NotificaDettagliata info)
     {
+        Calendar timestamp = Calendar.getInstance();
+        timestamp.setTimeInMillis(info.getTimestamp());
+
         return new NotificaDTO(
-                info.getMessaggio()
+                info.getMessaggio(),
+                timestamp
         );
     }
 

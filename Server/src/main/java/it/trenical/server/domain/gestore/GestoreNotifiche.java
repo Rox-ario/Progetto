@@ -142,7 +142,7 @@ public class GestoreNotifiche
     {
         List<NotificaDTO> notifiche = new ArrayList<>();
 
-        // Ottieni timestamp ultima lettura (se esiste)
+        //Ottiengo il timestamp ultima lettura (se esiste)
         Timestamp ultimaLettura = ultimaLetturaPerCliente.get(idCliente);
 
         String sql;

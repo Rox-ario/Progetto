@@ -137,13 +137,11 @@ public class ProfiloController
             {
                 if(soloNonLette)
                 {
-                    String tipo = "nuove notifiche";
-                    System.out.println("Non hai " + tipo + " al momento");
+                    System.out.println("Non hai nuove notifiche al momento");
                 }
                 else
                 {
-                    String tipo =  "notifiche";
-                    System.out.println("Non hai " + tipo + " al momento");
+                    System.out.println("Non hai notifiche al momento");
                 }
             }
             else
@@ -339,7 +337,7 @@ public class ProfiloController
         System.out.println("\n" + titolo);
         System.out.println("-------------------------------");
 
-        for (int i = 0; i < notifiche.size()-1; i++)
+        for (int i = 0; i < notifiche.size(); i++)
         {
             NotificaDTO notifica = notifiche.get(i);
             System.out.println(notifica.getTempoStampato());

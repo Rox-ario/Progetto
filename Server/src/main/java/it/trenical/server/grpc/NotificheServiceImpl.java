@@ -19,8 +19,7 @@ public class NotificheServiceImpl extends NotificheServiceGrpc.NotificheServiceI
     public void getNotifiche(GetNotificheRequest request,
                              StreamObserver<GetNotificheResponse> responseObserver)
     {
-        System.out.println("Richiesta notifiche per cliente: " + request.getClienteId() +
-                " (parametro 'solo non lette' settato a : " + request.getSoloNonLette() + ")");
+        System.out.println("Richiesta notifiche per cliente: " + request.getClienteId());
 
         try
         {
