@@ -183,14 +183,14 @@ public class Viaggio extends SoggettoViaggio
 
     public NotificaDTO getNotificaViaggio()
     {
-        String messaggio = "Viaggio [ id = "+getId()+"\n"+ getTratta().getStazionePartenza().getCitta()+" -> " +
+        String messaggio = "Notifica Viaggio: [\nid = "+getId()+"\n"+ getTratta().getStazionePartenza().getCitta()+" -> " +
                 getTratta().getStazioneArrivo().getCitta() + "\nSTATO: "+ getStato()+"\n";
         if(Calendar.getInstance().before(getInizio()))
         {
-            messaggio += "PARTENZA: "+getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) + " "+getInizioReale().get(Calendar.HOUR_OF_DAY)+":"+getInizioReale().get(Calendar.MINUTE);
+            messaggio += "PARTENZA: "+getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) + " "+getInizioReale().get(Calendar.HOUR_OF_DAY)+":"+getInizioReale().get(Calendar.MINUTE)+getInizioReale().get(Calendar.SECOND);
 
         }
-        messaggio += "ARRIVO: "+getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +" "+getFineReale().get(Calendar.HOUR_OF_DAY)+":"+getFineReale().get(Calendar.MINUTE)
+        messaggio += "ARRIVO: "+getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +" "+getFineReale().get(Calendar.HOUR_OF_DAY)+":"+getFineReale().get(Calendar.MINUTE)+getFineReale().get(Calendar.SECOND)
             +"\nTRENO: "+getTreno().getID()+", TIPO: "+ getTreno().getTipo()+"\n]";
         return new NotificaDTO(messaggio);
     }
@@ -217,8 +217,8 @@ public class Viaggio extends SoggettoViaggio
     {
         return "[" +
                 "id= " + id +
-                ", inizio= " + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) + " "+getInizioReale().get(Calendar.HOUR_OF_DAY)+":"+getInizioReale().get(Calendar.MINUTE)+
-                ", fine= " + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +" "+getFineReale().get(Calendar.HOUR_OF_DAY)+":"+getFineReale().get(Calendar.MINUTE)+
+                ", inizio= " + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) + " "+getInizioReale().get(Calendar.HOUR_OF_DAY)+":"+getInizioReale().get(Calendar.MINUTE)+getInizioReale().get(Calendar.SECOND)+
+                ", fine= " + getInizioReale().get(Calendar.DAY_OF_MONTH) +"/"+(getInizioReale().get(Calendar.MONTH)+1)+"/"+getInizioReale().get(Calendar.YEAR) +" "+getFineReale().get(Calendar.HOUR_OF_DAY)+":"+getFineReale().get(Calendar.MINUTE)+getFineReale().get(Calendar.SECOND)+
                 ", stato= " + stato +
                 ", binario di Partenza= " + getBinario(TipoBinario.PARTENZA) +
                 ", binario di Arrivo= " + getBinario(TipoBinario.ARRIVO)+

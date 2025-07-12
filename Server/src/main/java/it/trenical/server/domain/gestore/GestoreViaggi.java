@@ -456,7 +456,7 @@ public final class GestoreViaggi {
         int binArr = scegliBinarioDisponibile(sArrivo,  inizio, fine, TipoBinario.ARRIVO);
         String idViaggio = UUID.randomUUID().toString();
         Viaggio v = new Viaggio(idViaggio, inizio, fine, treno, tratta);
-        v.setBinarioDiArrivo(binPar);
+        v.setBinarioDiPartenza(binPar);
         v.setBinarioDiArrivo(binArr);
 
         salvaViaggioInDB(v);
@@ -501,38 +501,40 @@ public final class GestoreViaggi {
     }
 
     //Restituisce un binario libero nella stazione 's', fra 'inizio' e 'fine'.
-    private int scegliBinarioDisponibile(Stazione s, Calendar inizio, Calendar fine, TipoBinario tipo)
+    private int scegliBinarioDisponibile(
+            Stazione s, Calendar inizio, Calendar fine, TipoBinario tipo)
     {
-        for (int binario : s.getBinari())
-        {
+        for (int binario : s.getBinari()) {
             boolean occupato = false;
-            // Scorro tutti i viaggi già programmati
-            for (Viaggio v : viaggi.values())
-            {
-                if(!v.getTratta().getStazionePartenza().equals(s) || !v.getTratta().getStazioneArrivo().equals(s))
-                    continue;
-                if (v.getBinario(tipo) != binario)
-                    continue;
-                Calendar vIn = v.getInizioReale();
-                Calendar vFi = v.getFineReale();
-                if (inizio.before(vFi) && fine.after(vIn))
-                {
-                    occupato = true;
-                    break;
+            for (Viaggio v : viaggi.values()) {
+                // filtro per stazione di partenza o di arrivo
+                if (tipo == TipoBinario.PARTENZA) {
+                    if (!v.getTratta().getStazionePartenza().equals(s))
+                        continue;
+                } else {
+                    if (!v.getTratta().getStazioneArrivo().equals(s))
+                        continue;
+                }
+                // se lo stesso binario è stato già assegnato in un intervallo sovrapposto
+                if (v.getBinario(tipo) == binario) {
+                    Calendar vIn = v.getInizioReale();
+                    Calendar vFi = v.getFineReale();
+                    if (inizio.before(vFi) && fine.after(vIn)) {
+                        occupato = true;
+                        break;
+                    }
                 }
             }
-
-            if (!occupato)
-            {
+            if (!occupato) {
                 return binario;
             }
         }
-
         throw new IllegalStateException(
                 "Nessun binario libero in stazione " + s.getId() +
                         " fra " + inizio.getTime() + " e " + fine.getTime()
         );
     }
+
 
 
     private void salvaViaggioInDB(Viaggio v) 

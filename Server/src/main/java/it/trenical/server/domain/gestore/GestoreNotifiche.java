@@ -182,10 +182,9 @@ public class GestoreNotifiche
                 String messaggio = rs.getString("messaggio");
                 Timestamp timestamp = rs.getTimestamp("timestamp");
 
-                NotificaDTO notifica = new NotificaDTO(messaggio);
                 Calendar cal = Calendar.getInstance();
                 cal.setTimeInMillis(timestamp.getTime());
-                notifica.setTimestamp(cal);
+                NotificaDTO notifica = new NotificaDTO(messaggio, cal);
 
                 notifiche.add(notifica);
             }
@@ -251,10 +250,9 @@ public class GestoreNotifiche
                 String messaggio = rs.getString("messaggio");
                 Timestamp timestamp = rs.getTimestamp("timestamp");
 
-                NotificaDTO notifica = new NotificaDTO(messaggio);
                 Calendar cal = Calendar.getInstance();
                 cal.setTimeInMillis(timestamp.getTime());
-                notifica.setTimestamp(cal);
+                NotificaDTO notifica = new NotificaDTO(messaggio, cal);
 
                 notifiche.add(notifica);
             }

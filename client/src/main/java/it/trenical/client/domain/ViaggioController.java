@@ -179,11 +179,6 @@ public class ViaggioController
 
         //Controllo che la data non sia nel passato
         Calendar oggi = Calendar.getInstance();
-        if (dataAndata.before(oggi))
-        {
-            System.err.println("Non puoi cercare viaggi nel passato");
-            return false;
-        }
 
         if (numeroPasseggeri <= 0)
         {
